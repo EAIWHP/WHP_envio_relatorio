@@ -1,0 +1,6674 @@
+{
+  "cadastro": {
+    "nome": "cadastro",
+    "arquivo": "/home/thamiresvieira/projetos/Programa_mais_top/bases/Tabelas/cadastro.xlsx",
+    "tamanho_mb": 2.95,
+    "abas": {
+      "cadastro_2026-06-03T12_14_16.01": {
+        "linhas": 21144,
+        "colunas": [
+          "nome",
+          "cpf/cnpj",
+          "matricula",
+          "cargo",
+          "status",
+          "regional",
+          "grupo",
+          "cnpj grupo",
+          "rua",
+          "bairro",
+          "cidade",
+          "uf",
+          "cep",
+          "telefone",
+          "celular",
+          "email",
+          "data de aceite",
+          "LGPD",
+          "data atualização"
+        ],
+        "tipos": {
+          "nome": "object",
+          "cpf/cnpj": "str",
+          "matricula": "str",
+          "cargo": "str",
+          "status": "str",
+          "regional": "str",
+          "grupo": "str",
+          "cnpj grupo": "str",
+          "rua": "object",
+          "bairro": "object",
+          "cidade": "object",
+          "uf": "object",
+          "cep": "float64",
+          "telefone": "float64",
+          "celular": "float64",
+          "email": "str",
+          "data de aceite": "datetime64[us]",
+          "LGPD": "datetime64[us]",
+          "data atualização": "object"
+        },
+        "amostra": [
+          {
+            "nome": "DIEGO SOUZA DOS SANTOS",
+            "cpf/cnpj": "'98470256068'",
+            "matricula": "-",
+            "cargo": "Vendedor",
+            "status": "Pré-Cadastrado",
+            "regional": "CONTA SUL",
+            "grupo": "Koerich",
+            "cnpj grupo": "'86184074000140'",
+            "rua": NaN,
+            "bairro": NaN,
+            "cidade": NaN,
+            "uf": NaN,
+            "cep": NaN,
+            "telefone": NaN,
+            "celular": NaN,
+            "email": NaN,
+            "data de aceite": "NaT",
+            "LGPD": "NaT",
+            "data atualização": "2026-02-06 12:09:10"
+          },
+          {
+            "nome": "Jocasta Lima E Souza",
+            "cpf/cnpj": "'01870811151'",
+            "matricula": "'null'",
+            "cargo": "Vendedor",
+            "status": "Ativo",
+            "regional": "CONTA CENTRO NORTE",
+            "grupo": "Gazin Varejo",
+            "cnpj grupo": "'83733337000135'",
+            "rua": "Ranulfo da Costa Leite fialho",
+            "bairro": "Cristo rei",
+            "cidade": "Anastácio",
+            "uf": "MS",
+            "cep": 79210000.0,
+            "telefone": 67992491326.0,
+            "celular": 67984594916.0,
+            "email": "jocastalima09@gmail.com",
+            "data de aceite": "2025-11-06 15:04:58",
+            "LGPD": "2025-11-06 00:00:00",
+            "data atualização": "10/14/2025 10:21:09"
+          },
+          {
+            "nome": "Felipe Castro Alves Lima",
+            "cpf/cnpj": "'05429674303'",
+            "matricula": "-",
+            "cargo": "Vendedor",
+            "status": "Indicado Moderado",
+            "regional": "CONTA NORDESTE",
+            "grupo": "Nosso Lar",
+            "cnpj grupo": "'09376561000164'",
+            "rua": NaN,
+            "bairro": NaN,
+            "cidade": NaN,
+            "uf": NaN,
+            "cep": NaN,
+            "telefone": NaN,
+            "celular": NaN,
+            "email": NaN,
+            "data de aceite": "NaT",
+            "LGPD": "NaT",
+            "data atualização": "10/14/2025 10:21:45"
+          }
+        ],
+        "categorias": {
+          "matricula": {
+            "unicos": 6,
+            "valores": [
+              "-",
+              "'null'",
+              "'matricula-fernando'",
+              "'71985623'",
+              "'982268'",
+              "'982139'"
+            ]
+          },
+          "cargo": {
+            "unicos": 6,
+            "valores": [
+              "Vendedor",
+              "Gerente de Loja",
+              "Gerente Regional",
+              "Master",
+              "Embaixador",
+              "Gestor da Informação"
+            ]
+          },
+          "status": {
+            "unicos": 7,
+            "valores": [
+              "Pré-Cadastrado",
+              "Ativo",
+              "Indicado Moderado",
+              "Reprovado",
+              "Inativo",
+              "Aguardando Aprovação",
+              "Em Moderação"
+            ]
+          },
+          "regional": {
+            "unicos": 6,
+            "valores": [
+              "CONTA SUL",
+              "CONTA CENTRO NORTE",
+              "CONTA NORDESTE",
+              "CONTA SUDESTE",
+              "COMPRA DIRETA",
+              "Regional padrão"
+            ]
+          }
+        },
+        "estatisticas_numericas": {
+          "cep": {
+            "count": 15703.0,
+            "mean": 71297386.5357575,
+            "min": 1001000.0,
+            "25%": 62812500.0,
+            "50%": 77023408.0,
+            "75%": 88064061.0,
+            "max": 99980000.0,
+            "std": 22061676.064570047
+          },
+          "telefone": {
+            "count": 15697.0,
+            "mean": 58842462694.29266,
+            "min": 0.0,
+            "25%": 44988430614.0,
+            "50%": 55991236356.0,
+            "75%": 75981931167.0,
+            "max": 99999999999.0,
+            "std": 23439090388.698257
+          },
+          "celular": {
+            "count": 15703.0,
+            "mean": 59631015159.144875,
+            "min": 1111111111.0,
+            "25%": 44998215130.5,
+            "50%": 55991989162.0,
+            "75%": 75991503837.0,
+            "max": 99999999999.0,
+            "std": 22477607515.552444
+          },
+          "data de aceite": {
+            "count": 13654,
+            "mean": "2025-12-07 07:36:57.367584",
+            "min": "2024-03-27 15:09:44",
+            "25%": "2025-10-23 11:00:23.750000",
+            "50%": "2025-11-08 00:22:29",
+            "75%": "2025-12-30 13:33:02.250000",
+            "max": "2026-06-03 08:38:47",
+            "std": NaN
+          },
+          "LGPD": {
+            "count": 13654,
+            "mean": "2025-12-06 17:13:07.285777",
+            "min": "2024-03-27 00:00:00",
+            "25%": "2025-10-23 00:00:00",
+            "50%": "2025-11-08 00:00:00",
+            "75%": "2025-12-30 00:00:00",
+            "max": "2026-06-03 00:00:00",
+            "std": NaN
+          }
+        },
+        "nulos": {
+          "nome": 0,
+          "cpf/cnpj": 0,
+          "matricula": 0,
+          "cargo": 0,
+          "status": 0,
+          "regional": 6,
+          "grupo": 6,
+          "cnpj grupo": 0,
+          "rua": 5441,
+          "bairro": 5441,
+          "cidade": 5441,
+          "uf": 5441,
+          "cep": 5441,
+          "telefone": 5447,
+          "celular": 5441,
+          "email": 5454,
+          "data de aceite": 7490,
+          "LGPD": 7490,
+          "data atualização": 0
+        },
+        "nulos_pct": {
+          "nome": 0.0,
+          "cpf/cnpj": 0.0,
+          "matricula": 0.0,
+          "cargo": 0.0,
+          "status": 0.0,
+          "regional": 0.03,
+          "grupo": 0.03,
+          "cnpj grupo": 0.0,
+          "rua": 25.73,
+          "bairro": 25.73,
+          "cidade": 25.73,
+          "uf": 25.73,
+          "cep": 25.73,
+          "telefone": 25.76,
+          "celular": 25.73,
+          "email": 25.79,
+          "data de aceite": 35.42,
+          "LGPD": 35.42,
+          "data atualização": 0.0
+        },
+        "colunas_data": {
+          "data de aceite": {
+            "min": "2024-03-27 15:09:44",
+            "max": "2026-06-03 08:38:47",
+            "nao_nulos": 13654
+          },
+          "data atualização": {
+            "min": "2025-01-11 07:34:27",
+            "max": "2026-12-05 23:59:42",
+            "nao_nulos": 21144
+          }
+        }
+      }
+    }
+  },
+  "acessos": {
+    "nome": "acessos",
+    "arquivo": "/home/thamiresvieira/projetos/Programa_mais_top/bases/Tabelas/acessos.xlsx",
+    "tamanho_mb": 34.66,
+    "abas": {
+      "acessos_2026-06-03T12_14_47.896": {
+        "linhas": 749858,
+        "colunas": [
+          "Data Acesso",
+          "Regional",
+          "Grupo Cluster",
+          "Nome",
+          "Cpf/Cnpj",
+          "Cargo",
+          "Status",
+          "Pagina"
+        ],
+        "tipos": {
+          "Data Acesso": "datetime64[us]",
+          "Regional": "str",
+          "Grupo Cluster": "str",
+          "Nome": "object",
+          "Cpf/Cnpj": "int64",
+          "Cargo": "str",
+          "Status": "str",
+          "Pagina": "str"
+        },
+        "amostra": [
+          {
+            "Data Acesso": "2026-01-07 11:15:21",
+            "Regional": "CONTA SUL",
+            "Grupo Cluster": "Becker",
+            "Nome": "Cleiton Molina Vargas",
+            "Cpf/Cnpj": 838347029,
+            "Cargo": "Vendedor",
+            "Status": "Ativo",
+            "Pagina": "Home"
+          },
+          {
+            "Data Acesso": "2026-01-07 11:15:42",
+            "Regional": "CONTA SUDESTE",
+            "Grupo Cluster": "Sipolatti",
+            "Nome": "Edilane Ribeiro Nascimento",
+            "Cpf/Cnpj": 9766509751,
+            "Cargo": "Vendedor",
+            "Status": "Ativo",
+            "Pagina": "Campanha Extra"
+          },
+          {
+            "Data Acesso": "2026-01-07 11:15:49",
+            "Regional": "CONTA SUL",
+            "Grupo Cluster": "MM Atacado",
+            "Nome": "Rudinei Cesar Mendes De Souza",
+            "Cpf/Cnpj": 66912296904,
+            "Cargo": "Vendedor",
+            "Status": "Ativo",
+            "Pagina": "Campanhas"
+          }
+        ],
+        "categorias": {
+          "Regional": {
+            "unicos": 6,
+            "valores": [
+              "CONTA SUL",
+              "CONTA SUDESTE",
+              "CONTA CENTRO NORTE",
+              "CONTA NORDESTE",
+              "Regional padrão",
+              "COMPRA DIRETA"
+            ]
+          },
+          "Cargo": {
+            "unicos": 6,
+            "valores": [
+              "Vendedor",
+              "Gerente de Loja",
+              "Gestor da Informação",
+              "Gerente Regional",
+              "Master",
+              "Embaixador"
+            ]
+          },
+          "Status": {
+            "unicos": 6,
+            "valores": [
+              "Ativo",
+              "Inativo",
+              "Indicado Moderado",
+              "Reprovado",
+              "Pré-Cadastrado",
+              "Aguardando Aprovação"
+            ]
+          },
+          "Pagina": {
+            "unicos": 20,
+            "valores": [
+              "Home",
+              "Campanha Extra",
+              "Campanhas",
+              "Resgatar",
+              "Meu Desempenho",
+              "Produtos participantes_Todas as Revendas",
+              "Dúvidas",
+              "Convide um Amigo",
+              "Cadastro",
+              "Treinamentos",
+              "Fale Conosco Logado",
+              "Fale Conosco Deslogado",
+              "Sobre a campanha",
+              "Produtos participantes_Gazin e MM Atacado",
+              "Relatórios",
+              "Produtos participantes_Gazin Online",
+              "Indicadores Detalhes",
+              "upload arquivos bases",
+              "teste saiba+",
+              "Resgatar (Bemol)"
+            ]
+          }
+        },
+        "estatisticas_numericas": {
+          "Data Acesso": {
+            "count": 749858,
+            "mean": "2026-01-30 13:42:19.685563",
+            "min": "2025-10-19 20:49:12",
+            "25%": "2025-12-01 13:05:11.250000",
+            "50%": "2026-01-24 16:19:51.500000",
+            "75%": "2026-03-26 22:31:56.500000",
+            "max": "2026-06-03 09:14:49",
+            "std": NaN
+          },
+          "Cpf/Cnpj": {
+            "count": 749858.0,
+            "mean": 25899888955.097103,
+            "min": 1187104.0,
+            "25%": 3266531981.0,
+            "50%": 8166004143.0,
+            "75%": 51812703015.0,
+            "max": 99982099949.0,
+            "std": 31562063659.55301
+          }
+        },
+        "nulos": {
+          "Data Acesso": 0,
+          "Regional": 0,
+          "Grupo Cluster": 0,
+          "Nome": 0,
+          "Cpf/Cnpj": 0,
+          "Cargo": 0,
+          "Status": 0,
+          "Pagina": 0
+        },
+        "nulos_pct": {
+          "Data Acesso": 0.0,
+          "Regional": 0.0,
+          "Grupo Cluster": 0.0,
+          "Nome": 0.0,
+          "Cpf/Cnpj": 0.0,
+          "Cargo": 0.0,
+          "Status": 0.0,
+          "Pagina": 0.0
+        },
+        "colunas_data": {
+          "Data Acesso": {
+            "min": "2025-10-19 20:49:12",
+            "max": "2026-06-03 09:14:49",
+            "nao_nulos": 749858
+          }
+        }
+      }
+    }
+  },
+  "pontos_por_cpf": {
+    "nome": "pontos_por_cpf",
+    "arquivo": "/home/thamiresvieira/projetos/Programa_mais_top/bases/Tabelas/pontos_por_cpf_.xlsx",
+    "tamanho_mb": 8.52,
+    "abas": {
+      "CONSOLIDADO_RESGATES": {
+        "linhas": 142882,
+        "colunas": [
+          "Nº RESGATE",
+          "PARTICIPANTE",
+          "CPF",
+          "VALOR",
+          "DATA RESGATE",
+          "Unnamed: 5",
+          "Unnamed: 6",
+          "Unnamed: 7",
+          "Unnamed: 8"
+        ],
+        "tipos": {
+          "Nº RESGATE": "int64",
+          "PARTICIPANTE": "object",
+          "CPF": "int64",
+          "VALOR": "float64",
+          "DATA RESGATE": "datetime64[us]",
+          "Unnamed: 5": "float64",
+          "Unnamed: 6": "str",
+          "Unnamed: 7": "object",
+          "Unnamed: 8": "float64"
+        },
+        "amostra": [
+          {
+            "Nº RESGATE": 5817,
+            "PARTICIPANTE": "CARLA ROBERTA MELO BRAGA",
+            "CPF": 7325265409,
+            "VALOR": 160.3,
+            "DATA RESGATE": "2024-03-12 12:45:50",
+            "Unnamed: 5": NaN,
+            "Unnamed: 6": NaN,
+            "Unnamed: 7": NaN,
+            "Unnamed: 8": NaN
+          },
+          {
+            "Nº RESGATE": 5818,
+            "PARTICIPANTE": "NATANI MILENA GUEDES DE SOUZA",
+            "CPF": 97845094234,
+            "VALOR": 74.2,
+            "DATA RESGATE": "2024-03-12 12:48:32",
+            "Unnamed: 5": NaN,
+            "Unnamed: 6": NaN,
+            "Unnamed: 7": NaN,
+            "Unnamed: 8": NaN
+          },
+          {
+            "Nº RESGATE": 5820,
+            "PARTICIPANTE": "WEDJA GABRIELE FERREIRA SOUZA ALVES",
+            "CPF": 71001616499,
+            "VALOR": 154.66,
+            "DATA RESGATE": "2024-03-12 12:54:30",
+            "Unnamed: 5": NaN,
+            "Unnamed: 6": NaN,
+            "Unnamed: 7": NaN,
+            "Unnamed: 8": NaN
+          }
+        ],
+        "categorias": {
+          "Unnamed: 5": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 6": {
+            "unicos": 4,
+            "valores": [
+              "BRUNA SANTANA MONTENEGRO",
+              "vanessa ferreira garcia",
+              "Daiane Silva Cavalcante de Melo",
+              "Barbara B Pereira Dos Santos"
+            ]
+          },
+          "Unnamed: 7": {
+            "unicos": 8,
+            "valores": [
+              "BRUNA SANTANA MONTENEGRO",
+              "vanessa ferreira garcia",
+              "Daiane Silva Cavalcante de Melo",
+              "Barbara B Pereira Dos Santos",
+              "2024-10-07 13:36:29",
+              "2024-10-31 14:49:08",
+              "2024-11-27 20:09:13",
+              "2024-11-30 11:38:56"
+            ]
+          },
+          "Unnamed: 8": {
+            "unicos": 4,
+            "valores": [
+              45572.56700231481,
+              45596.6174537037,
+              45623.839733796296,
+              45626.48537037037
+            ]
+          }
+        },
+        "estatisticas_numericas": {
+          "Nº RESGATE": {
+            "count": 142882.0,
+            "mean": 37678.59635223471,
+            "min": 2.0,
+            "25%": 11792.25,
+            "50%": 25032.5,
+            "75%": 59400.0,
+            "max": 129247.0,
+            "std": 33377.26098813417
+          },
+          "CPF": {
+            "count": 142882.0,
+            "mean": 25749736909.652622,
+            "min": 1187104.0,
+            "25%": 3217229142.0,
+            "50%": 7786329978.0,
+            "75%": 52247252249.0,
+            "max": 99996588068.0,
+            "std": 31972886830.481842
+          },
+          "VALOR": {
+            "count": 142882.0,
+            "mean": 144.63891322909814,
+            "min": 5.4,
+            "25%": 37.57,
+            "50%": 89.08,
+            "75%": 151.055,
+            "max": 9894.0,
+            "std": 293.1502585605747
+          },
+          "DATA RESGATE": {
+            "count": 142882,
+            "mean": "2025-01-03 18:06:08.047584",
+            "min": "2024-03-05 10:47:35",
+            "25%": "2024-06-18 17:25:39.250000",
+            "50%": "2024-11-22 16:11:46",
+            "75%": "2025-06-16 12:49:45",
+            "max": "2026-04-30 12:01:28",
+            "std": NaN
+          },
+          "Unnamed: 5": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 8": {
+            "count": 4.0,
+            "mean": 45604.87739004629,
+            "min": 45572.56700231481,
+            "25%": 45590.60484085648,
+            "50%": 45610.22859375,
+            "75%": 45624.501142939815,
+            "max": 45626.48537037037,
+            "std": 25.420877233232858
+          }
+        },
+        "nulos": {
+          "Nº RESGATE": 0,
+          "PARTICIPANTE": 0,
+          "CPF": 0,
+          "VALOR": 0,
+          "DATA RESGATE": 0,
+          "Unnamed: 5": 142882,
+          "Unnamed: 6": 142866,
+          "Unnamed: 7": 142874,
+          "Unnamed: 8": 142878
+        },
+        "nulos_pct": {
+          "Nº RESGATE": 0.0,
+          "PARTICIPANTE": 0.0,
+          "CPF": 0.0,
+          "VALOR": 0.0,
+          "DATA RESGATE": 0.0,
+          "Unnamed: 5": 100.0,
+          "Unnamed: 6": 99.99,
+          "Unnamed: 7": 99.99,
+          "Unnamed: 8": 100.0
+        },
+        "colunas_data": {
+          "DATA RESGATE": {
+            "min": "2024-03-05 10:47:35",
+            "max": "2026-04-30 12:01:28",
+            "nao_nulos": 142882
+          }
+        }
+      },
+      "PONTOS POR CPF": {
+        "linhas": 27388,
+        "colunas": [
+          "Nome",
+          "CPFCNPJ",
+          "Créditos",
+          "Resgates",
+          "EXPIRADO ",
+          "Saldo Atual"
+        ],
+        "tipos": {
+          "Nome": "object",
+          "CPFCNPJ": "int64",
+          "Créditos": "float64",
+          "Resgates": "float64",
+          "EXPIRADO ": "float64",
+          "Saldo Atual": "float64"
+        },
+        "amostra": [
+          {
+            "Nome": "ZULMIRA CORREIA LIMA NETA",
+            "CPFCNPJ": 6734583341,
+            "Créditos": 244.0,
+            "Resgates": 208.74,
+            "EXPIRADO ": 18.26,
+            "Saldo Atual": 17.0
+          },
+          {
+            "Nome": "ZULMARA REINERT",
+            "CPFCNPJ": 3060604932,
+            "Créditos": 107.0,
+            "Resgates": 0.0,
+            "EXPIRADO ": 107.0,
+            "Saldo Atual": 0.0
+          },
+          {
+            "Nome": "ZULEICA VANES FIDELES",
+            "CPFCNPJ": 372766030,
+            "Créditos": 1630.3,
+            "Resgates": 1595.97,
+            "EXPIRADO ": 0.0,
+            "Saldo Atual": 34.33
+          }
+        ],
+        "categorias": {},
+        "estatisticas_numericas": {
+          "CPFCNPJ": {
+            "count": 27388.0,
+            "mean": 23324957038.877647,
+            "std": 29851815068.11514,
+            "min": 513067.0,
+            "25%": 3563007976.25,
+            "50%": 7734668061.5,
+            "75%": 40147636881.0,
+            "max": 99996588068.0
+          },
+          "Créditos": {
+            "count": 27388.0,
+            "mean": 795.3066675186213,
+            "std": 2718.1589077572235,
+            "min": 0.01,
+            "25%": 56.76,
+            "50%": 248.0,
+            "75%": 764.5925,
+            "max": 94042.23
+          },
+          "Resgates": {
+            "count": 27388.0,
+            "mean": 754.5748941142107,
+            "std": 2703.3959547216486,
+            "min": 0.0,
+            "25%": 0.0,
+            "50%": 209.88,
+            "75%": 728.0074999999999,
+            "max": 94012.93
+          },
+          "EXPIRADO ": {
+            "count": 27388.0,
+            "mean": 16.886170950781363,
+            "std": 65.0689020244493,
+            "min": 0.0,
+            "25%": 0.0,
+            "50%": 0.0,
+            "75%": 10.522499999999999,
+            "max": 5420.0
+          },
+          "Saldo Atual": {
+            "count": 27388.0,
+            "mean": 23.845602453629326,
+            "std": 84.09904105365158,
+            "min": 0.0,
+            "25%": 0.0,
+            "50%": 3.78,
+            "75%": 25.67,
+            "max": 6508.1
+          }
+        },
+        "nulos": {
+          "Nome": 0,
+          "CPFCNPJ": 0,
+          "Créditos": 0,
+          "Resgates": 0,
+          "EXPIRADO ": 0,
+          "Saldo Atual": 0
+        },
+        "nulos_pct": {
+          "Nome": 0.0,
+          "CPFCNPJ": 0.0,
+          "Créditos": 0.0,
+          "Resgates": 0.0,
+          "EXPIRADO ": 0.0,
+          "Saldo Atual": 0.0
+        },
+        "colunas_data": {}
+      },
+      "VALES": {
+        "linhas": 68,
+        "colunas": [
+          "Nº RESGATE",
+          "CAMPANHA",
+          "PARTICIPANTE",
+          "DOCUMENTO",
+          "VALE",
+          "VALOR TOTAL",
+          "DATA RESGATE"
+        ],
+        "tipos": {
+          "Nº RESGATE": "float64",
+          "CAMPANHA": "str",
+          "PARTICIPANTE": "str",
+          "DOCUMENTO": "float64",
+          "VALE": "str",
+          "VALOR TOTAL": "float64",
+          "DATA RESGATE": "datetime64[us]"
+        },
+        "amostra": [
+          {
+            "Nº RESGATE": 5029.0,
+            "CAMPANHA": "TUDO AZUL",
+            "PARTICIPANTE": "MARIANA EPAMINONDAS FERREIRA",
+            "DOCUMENTO": 23039974882.0,
+            "VALE": "CARTÃO PRESENTE IFOOD VIRTUAL",
+            "VALOR TOTAL": 42.0,
+            "DATA RESGATE": "2022-02-22 13:21:06"
+          },
+          {
+            "Nº RESGATE": 5049.0,
+            "CAMPANHA": "TUDO AZUL",
+            "PARTICIPANTE": "GABRIELA FERNANDES BRITO",
+            "DOCUMENTO": 49552352800.0,
+            "VALE": "CARTÃO PRESENTE IFOOD VIRTUAL",
+            "VALOR TOTAL": 42.0,
+            "DATA RESGATE": "2022-02-24 21:45:04"
+          },
+          {
+            "Nº RESGATE": 5052.0,
+            "CAMPANHA": "TUDO AZUL",
+            "PARTICIPANTE": "ELLEN CAROLINE OLIVEIRA GORNICKI",
+            "DOCUMENTO": 3857285060.0,
+            "VALE": "CARTÃO PRESENTE IFOOD VIRTUAL",
+            "VALOR TOTAL": 42.0,
+            "DATA RESGATE": "2022-02-25 20:29:42"
+          }
+        ],
+        "categorias": {
+          "CAMPANHA": {
+            "unicos": 1,
+            "valores": [
+              "TUDO AZUL"
+            ]
+          },
+          "VALE": {
+            "unicos": 11,
+            "valores": [
+              "CARTÃO PRESENTE IFOOD VIRTUAL",
+              "CARTÃO PRESENTE IFOOD FÍSICO",
+              "CARTÃO PRESENTE C&A VIRTUAL",
+              "CARTÃO PRESENTE ASSAÍ",
+              "CARTÃO PRESENTE UBER VIRTUAL",
+              "CARTAO PRESENTE CENTAURO VIRTUAL",
+              "CARTÃO PRESENTE INGRESSO.COM VIRTUAL",
+              "CARTÃO PRESENTE MADERO VIRTUAL",
+              "CARTÃO PRESENTE RENNER VIRTUAL",
+              "CARTÃO PRESENTE SPOTIFY 1 MÊS VIRTUAL",
+              "CARTÃO PRESENTE BRASIL CACAU VIRTUAL"
+            ]
+          },
+          "VALOR TOTAL": {
+            "unicos": 20,
+            "valores": [
+              42.0,
+              45.6,
+              57.0,
+              44.8,
+              61.6,
+              112.0,
+              56.0,
+              91.28,
+              35.28,
+              89.6,
+              134.4,
+              236.88,
+              466.48,
+              28.0,
+              224.0,
+              280.0,
+              11.2,
+              19.04,
+              22.4,
+              5064.760000000002
+            ]
+          }
+        },
+        "estatisticas_numericas": {
+          "Nº RESGATE": {
+            "count": 67.0,
+            "mean": 6246.089552238806,
+            "min": 5029.0,
+            "25%": 5304.5,
+            "50%": 6079.0,
+            "75%": 7238.5,
+            "max": 7622.0,
+            "std": 911.6165583372457
+          },
+          "DOCUMENTO": {
+            "count": 67.0,
+            "mean": 23376326626.0,
+            "min": 539137286.0,
+            "25%": 9487418997.0,
+            "50%": 16554316760.0,
+            "75%": 38638723851.0,
+            "max": 85271748049.0,
+            "std": 17464713011.965717
+          },
+          "VALOR TOTAL": {
+            "count": 68.0,
+            "mean": 148.9635294117647,
+            "min": 11.2,
+            "25%": 44.8,
+            "50%": 44.8,
+            "75%": 89.6,
+            "max": 5064.760000000002,
+            "std": 609.3393649248825
+          },
+          "DATA RESGATE": {
+            "count": 67,
+            "mean": "2023-01-05 22:32:59.701492",
+            "min": "2022-02-22 13:21:06",
+            "25%": "2022-05-14 15:09:49.500000",
+            "50%": "2022-11-29 21:36:59",
+            "75%": "2023-09-15 00:06:04.500000",
+            "max": "2023-12-31 17:15:46",
+            "std": NaN
+          }
+        },
+        "nulos": {
+          "Nº RESGATE": 1,
+          "CAMPANHA": 1,
+          "PARTICIPANTE": 1,
+          "DOCUMENTO": 1,
+          "VALE": 1,
+          "VALOR TOTAL": 0,
+          "DATA RESGATE": 1
+        },
+        "nulos_pct": {
+          "Nº RESGATE": 1.47,
+          "CAMPANHA": 1.47,
+          "PARTICIPANTE": 1.47,
+          "DOCUMENTO": 1.47,
+          "VALE": 1.47,
+          "VALOR TOTAL": 0.0,
+          "DATA RESGATE": 1.47
+        },
+        "colunas_data": {
+          "DATA RESGATE": {
+            "min": "2022-02-22 13:21:06",
+            "max": "2023-12-31 17:15:46",
+            "nao_nulos": 67
+          }
+        }
+      },
+      "LOJA VIRTUAL": {
+        "linhas": 32,
+        "colunas": [
+          "Nº RESGATE",
+          "CAMPANHA",
+          "PARTICIPANTE",
+          "DOCUMENTO",
+          "LOJA",
+          "ITEM",
+          "VALOR TOTAL",
+          "DATA RESGATE"
+        ],
+        "tipos": {
+          "Nº RESGATE": "float64",
+          "CAMPANHA": "str",
+          "PARTICIPANTE": "str",
+          "DOCUMENTO": "float64",
+          "LOJA": "str",
+          "ITEM": "str",
+          "VALOR TOTAL": "float64",
+          "DATA RESGATE": "datetime64[us]"
+        },
+        "amostra": [
+          {
+            "Nº RESGATE": 12139.0,
+            "CAMPANHA": "TUDO AZUL",
+            "PARTICIPANTE": "NYRLA CORDEIRO SILVA",
+            "DOCUMENTO": 2050105398.0,
+            "LOJA": "Extra",
+            "ITEM": "Cafeteira Elétrica Mondial Dolce Arome Inox C-32I 32 Xcaras - Preta",
+            "VALOR TOTAL": 155.75,
+            "DATA RESGATE": "2022-03-15 20:53:17"
+          },
+          {
+            "Nº RESGATE": 12144.0,
+            "CAMPANHA": "TUDO AZUL",
+            "PARTICIPANTE": "BARBARA FAYLUM LIMA MARCOLINO",
+            "DOCUMENTO": 15456353741.0,
+            "LOJA": "Casas Bahia",
+            "ITEM": "Ventilador de Mesa 40cm Mondial Super Turbo VTX-40-8P 8 Ps 3 Velocidades Preto",
+            "VALOR TOTAL": 224.63,
+            "DATA RESGATE": "2022-03-16 21:48:53"
+          },
+          {
+            "Nº RESGATE": 12293.0,
+            "CAMPANHA": "TUDO AZUL",
+            "PARTICIPANTE": "ISIS ESPOSITO ESCOBAR CASTRO",
+            "DOCUMENTO": 3652304055.0,
+            "LOJA": "Casas Bahia",
+            "ITEM": "Modelador de Cabelo Mallory Style 2 em 1 Bivolt  Preto/Lils",
+            "VALOR TOTAL": 96.16,
+            "DATA RESGATE": "2022-04-05 18:46:58"
+          }
+        ],
+        "categorias": {
+          "CAMPANHA": {
+            "unicos": 1,
+            "valores": [
+              "TUDO AZUL"
+            ]
+          },
+          "LOJA": {
+            "unicos": 3,
+            "valores": [
+              "Extra",
+              "Casas Bahia",
+              "Ponto"
+            ]
+          }
+        },
+        "estatisticas_numericas": {
+          "Nº RESGATE": {
+            "count": 31.0,
+            "mean": 13203.58064516129,
+            "min": 12139.0,
+            "25%": 12560.0,
+            "50%": 13156.0,
+            "75%": 13608.0,
+            "max": 14516.0,
+            "std": 713.183042151805
+          },
+          "DOCUMENTO": {
+            "count": 31.0,
+            "mean": 9882021656.387096,
+            "min": 278225322.0,
+            "25%": 1127550799.5,
+            "50%": 5553080908.0,
+            "75%": 11352427708.5,
+            "max": 60225914301.0,
+            "std": 14697971886.313248
+          },
+          "VALOR TOTAL": {
+            "count": 32.0,
+            "mean": 713.2581250000001,
+            "min": 10.02,
+            "25%": 133.2725,
+            "50%": 216.64,
+            "75%": 401.2175,
+            "max": 11412.130000000001,
+            "std": 2014.539925529204
+          },
+          "DATA RESGATE": {
+            "count": 31,
+            "mean": "2022-10-30 17:03:12.419354",
+            "min": "2022-03-15 20:53:17",
+            "25%": "2022-06-04 16:14:09",
+            "50%": "2022-10-17 22:44:51",
+            "75%": "2022-12-29 16:01:51",
+            "max": "2023-12-03 22:04:06",
+            "std": NaN
+          }
+        },
+        "nulos": {
+          "Nº RESGATE": 1,
+          "CAMPANHA": 1,
+          "PARTICIPANTE": 1,
+          "DOCUMENTO": 1,
+          "LOJA": 1,
+          "ITEM": 1,
+          "VALOR TOTAL": 0,
+          "DATA RESGATE": 1
+        },
+        "nulos_pct": {
+          "Nº RESGATE": 3.12,
+          "CAMPANHA": 3.12,
+          "PARTICIPANTE": 3.12,
+          "DOCUMENTO": 3.12,
+          "LOJA": 3.12,
+          "ITEM": 3.12,
+          "VALOR TOTAL": 0.0,
+          "DATA RESGATE": 3.12
+        },
+        "colunas_data": {
+          "DATA RESGATE": {
+            "min": "2022-03-15 20:53:17",
+            "max": "2023-12-03 22:04:06",
+            "nao_nulos": 31
+          }
+        }
+      },
+      "PAGAMENTO DE CONTAS": {
+        "linhas": 5190,
+        "colunas": [
+          "Nº RESGATE",
+          "CAMPANHA",
+          "PARTICIPANTE",
+          "CPF",
+          "VALOR",
+          "DATA RESGATE"
+        ],
+        "tipos": {
+          "Nº RESGATE": "float64",
+          "CAMPANHA": "str",
+          "PARTICIPANTE": "str",
+          "CPF": "float64",
+          "VALOR": "float64",
+          "DATA RESGATE": "datetime64[us]"
+        },
+        "amostra": [
+          {
+            "Nº RESGATE": 47951.0,
+            "CAMPANHA": "TUDO AZUL",
+            "PARTICIPANTE": "KARINA MENDES DA SILVA",
+            "CPF": 4969258902.0,
+            "VALOR": 49.98,
+            "DATA RESGATE": "2022-02-22 10:55:22"
+          },
+          {
+            "Nº RESGATE": 47976.0,
+            "CAMPANHA": "TUDO AZUL",
+            "PARTICIPANTE": "TATIANA TRINDADE SANTOS",
+            "CPF": 661636500.0,
+            "VALOR": 47.25,
+            "DATA RESGATE": "2022-02-22 14:05:56"
+          },
+          {
+            "Nº RESGATE": 47985.0,
+            "CAMPANHA": "TUDO AZUL",
+            "PARTICIPANTE": "ANA PAULA SOUZA FARIA",
+            "CPF": 41533951888.0,
+            "VALOR": 49.88,
+            "DATA RESGATE": "2022-02-22 14:56:55"
+          }
+        ],
+        "categorias": {
+          "CAMPANHA": {
+            "unicos": 1,
+            "valores": [
+              "TUDO AZUL"
+            ]
+          }
+        },
+        "estatisticas_numericas": {
+          "Nº RESGATE": {
+            "count": 5189.0,
+            "mean": 65606.89150125266,
+            "min": 47951.0,
+            "25%": 54444.0,
+            "50%": 66633.0,
+            "75%": 74398.0,
+            "max": 87427.0,
+            "std": 11841.172821976146
+          },
+          "CPF": {
+            "count": 5189.0,
+            "mean": 21495050080.099056,
+            "min": 31424260.0,
+            "25%": 5162389145.0,
+            "50%": 10926809938.0,
+            "75%": 37285786810.0,
+            "max": 99851628204.0,
+            "std": 22909134757.705326
+          },
+          "VALOR": {
+            "count": 5190.0,
+            "mean": 636.2965472061665,
+            "min": 1.78,
+            "25%": 98.7,
+            "50%": 150.0,
+            "75%": 330.7725,
+            "max": 1651189.5400000033,
+            "std": 22923.303452112523
+          },
+          "DATA RESGATE": {
+            "count": 5189,
+            "mean": "2022-10-25 04:20:36.461167",
+            "min": "2022-02-22 10:55:22",
+            "25%": "2022-05-25 13:07:49",
+            "50%": "2022-10-04 16:24:58",
+            "75%": "2023-01-05 14:20:05",
+            "max": "2024-01-08 14:13:35",
+            "std": NaN
+          }
+        },
+        "nulos": {
+          "Nº RESGATE": 1,
+          "CAMPANHA": 1,
+          "PARTICIPANTE": 23,
+          "CPF": 1,
+          "VALOR": 0,
+          "DATA RESGATE": 1
+        },
+        "nulos_pct": {
+          "Nº RESGATE": 0.02,
+          "CAMPANHA": 0.02,
+          "PARTICIPANTE": 0.44,
+          "CPF": 0.02,
+          "VALOR": 0.0,
+          "DATA RESGATE": 0.02
+        },
+        "colunas_data": {
+          "DATA RESGATE": {
+            "min": "2022-02-22 10:55:22",
+            "max": "2024-01-08 14:13:35",
+            "nao_nulos": 5189
+          }
+        }
+      },
+      "RECARGA DE CELULAR": {
+        "linhas": 350,
+        "colunas": [
+          "Nº RESGATE",
+          "CAMPANHA",
+          "PARTICIPANTE",
+          "CPF",
+          "VALOR",
+          "DATA RESGATE"
+        ],
+        "tipos": {
+          "Nº RESGATE": "float64",
+          "CAMPANHA": "str",
+          "PARTICIPANTE": "str",
+          "CPF": "float64",
+          "VALOR": "float64",
+          "DATA RESGATE": "datetime64[us]"
+        },
+        "amostra": [
+          {
+            "Nº RESGATE": 60141.0,
+            "CAMPANHA": "TUDO AZUL",
+            "PARTICIPANTE": "LUANA DINIZ MACHADO",
+            "CPF": 11487210701.0,
+            "VALOR": 42.0,
+            "DATA RESGATE": "2022-02-22 11:46:46"
+          },
+          {
+            "Nº RESGATE": 60176.0,
+            "CAMPANHA": "TUDO AZUL",
+            "PARTICIPANTE": "CLARICE BARBOSA RODRIGUES",
+            "CPF": 263008266.0,
+            "VALOR": 21.0,
+            "DATA RESGATE": "2022-02-24 17:29:23"
+          },
+          {
+            "Nº RESGATE": 60371.0,
+            "CAMPANHA": "TUDO AZUL",
+            "PARTICIPANTE": "INGRID RAISSA DOS SANTOS MUNIZ ALMEIDA",
+            "CPF": 8041437575.0,
+            "VALOR": 21.0,
+            "DATA RESGATE": "2022-03-16 10:23:31"
+          }
+        ],
+        "categorias": {
+          "CAMPANHA": {
+            "unicos": 1,
+            "valores": [
+              "TUDO AZUL"
+            ]
+          },
+          "VALOR": {
+            "unicos": 13,
+            "valores": [
+              42.0,
+              21.0,
+              26.25,
+              10.5,
+              12.6,
+              15.75,
+              52.5,
+              31.5,
+              47.25,
+              36.75,
+              63.0,
+              48.2,
+              7820.300000000004
+            ]
+          }
+        },
+        "estatisticas_numericas": {
+          "Nº RESGATE": {
+            "count": 349.0,
+            "mean": 64612.96275071633,
+            "min": 60141.0,
+            "25%": 62792.0,
+            "50%": 65250.0,
+            "75%": 66509.0,
+            "max": 67276.0,
+            "std": 2182.9173407219514
+          },
+          "CPF": {
+            "count": 349.0,
+            "mean": 16549534490.558739,
+            "min": 139946110.0,
+            "25%": 2432518586.0,
+            "50%": 6987904642.0,
+            "75%": 16416173735.0,
+            "max": 96486236272.0,
+            "std": 21639891564.318127
+          },
+          "VALOR": {
+            "count": 350.0,
+            "mean": 44.68742857142859,
+            "min": 10.5,
+            "25%": 15.75,
+            "50%": 21.0,
+            "75%": 21.0,
+            "max": 7820.300000000004,
+            "std": 416.9661142797486
+          },
+          "DATA RESGATE": {
+            "count": 349,
+            "mean": "2022-12-14 05:00:03.982808",
+            "min": "2022-02-22 11:46:46",
+            "25%": "2022-07-20 18:20:49",
+            "50%": "2022-11-30 23:03:58",
+            "75%": "2023-03-14 06:19:44",
+            "max": "2024-01-04 07:48:40",
+            "std": NaN
+          }
+        },
+        "nulos": {
+          "Nº RESGATE": 1,
+          "CAMPANHA": 1,
+          "PARTICIPANTE": 3,
+          "CPF": 1,
+          "VALOR": 0,
+          "DATA RESGATE": 1
+        },
+        "nulos_pct": {
+          "Nº RESGATE": 0.29,
+          "CAMPANHA": 0.29,
+          "PARTICIPANTE": 0.86,
+          "CPF": 0.29,
+          "VALOR": 0.0,
+          "DATA RESGATE": 0.29
+        },
+        "colunas_data": {
+          "DATA RESGATE": {
+            "min": "2022-02-22 11:46:46",
+            "max": "2024-01-04 07:48:40",
+            "nao_nulos": 349
+          }
+        }
+      }
+    }
+  },
+  "resgates_detalhado": {
+    "nome": "resgates_detalhado",
+    "arquivo": "/home/thamiresvieira/projetos/Programa_mais_top/bases/Tabelas/resgates_detalhado.xlsx",
+    "tamanho_mb": 7.31,
+    "abas": {
+      "Plan1": {
+        "linhas": 142882,
+        "colunas": [
+          "Nº RESGATE",
+          "PARTICIPANTE",
+          "CPF",
+          "VALOR",
+          "DATA RESGATE",
+          "PRODUTO"
+        ],
+        "tipos": {
+          "Nº RESGATE": "int64",
+          "PARTICIPANTE": "object",
+          "CPF": "int64",
+          "VALOR": "float64",
+          "DATA RESGATE": "datetime64[us]",
+          "PRODUTO": "str"
+        },
+        "amostra": [
+          {
+            "Nº RESGATE": 5817,
+            "PARTICIPANTE": "CARLA ROBERTA MELO BRAGA",
+            "CPF": 7325265409,
+            "VALOR": 160.3,
+            "DATA RESGATE": "2024-03-12 12:45:50",
+            "PRODUTO": "TRANSFERÊNCIA"
+          },
+          {
+            "Nº RESGATE": 5818,
+            "PARTICIPANTE": "NATANI MILENA GUEDES DE SOUZA",
+            "CPF": 97845094234,
+            "VALOR": 74.2,
+            "DATA RESGATE": "2024-03-12 12:48:32",
+            "PRODUTO": "TRANSFERÊNCIA"
+          },
+          {
+            "Nº RESGATE": 5820,
+            "PARTICIPANTE": "WEDJA GABRIELE FERREIRA SOUZA ALVES",
+            "CPF": 71001616499,
+            "VALOR": 154.66,
+            "DATA RESGATE": "2024-03-12 12:54:30",
+            "PRODUTO": "TRANSFERÊNCIA"
+          }
+        ],
+        "categorias": {
+          "PRODUTO": {
+            "unicos": 7,
+            "valores": [
+              "TRANSFERÊNCIA",
+              "PIX",
+              "PAGTO DE CONTAS",
+              "VOUCHERS",
+              "RECARGAS DE CELULAR",
+              "LOJAS VIRTUAIS",
+              "CARTÕES"
+            ]
+          }
+        },
+        "estatisticas_numericas": {
+          "Nº RESGATE": {
+            "count": 142882.0,
+            "mean": 37678.59635223471,
+            "min": 2.0,
+            "25%": 11792.25,
+            "50%": 25032.5,
+            "75%": 59400.0,
+            "max": 129247.0,
+            "std": 33377.26098813417
+          },
+          "CPF": {
+            "count": 142882.0,
+            "mean": 25749736909.652622,
+            "min": 1187104.0,
+            "25%": 3217229142.0,
+            "50%": 7786329978.0,
+            "75%": 52247252249.0,
+            "max": 99996588068.0,
+            "std": 31972886830.481842
+          },
+          "VALOR": {
+            "count": 142882.0,
+            "mean": 144.63891322909814,
+            "min": 5.4,
+            "25%": 37.57,
+            "50%": 89.08,
+            "75%": 151.055,
+            "max": 9894.0,
+            "std": 293.1502585605747
+          },
+          "DATA RESGATE": {
+            "count": 142882,
+            "mean": "2025-01-03 18:06:08.047584",
+            "min": "2024-03-05 10:47:35",
+            "25%": "2024-06-18 17:25:39.250000",
+            "50%": "2024-11-22 16:11:46",
+            "75%": "2025-06-16 12:49:45",
+            "max": "2026-04-30 12:01:28",
+            "std": NaN
+          }
+        },
+        "nulos": {
+          "Nº RESGATE": 0,
+          "PARTICIPANTE": 0,
+          "CPF": 0,
+          "VALOR": 0,
+          "DATA RESGATE": 0,
+          "PRODUTO": 0
+        },
+        "nulos_pct": {
+          "Nº RESGATE": 0.0,
+          "PARTICIPANTE": 0.0,
+          "CPF": 0.0,
+          "VALOR": 0.0,
+          "DATA RESGATE": 0.0,
+          "PRODUTO": 0.0
+        },
+        "colunas_data": {
+          "DATA RESGATE": {
+            "min": "2024-03-05 10:47:35",
+            "max": "2026-04-30 12:01:28",
+            "nao_nulos": 142882
+          }
+        }
+      }
+    }
+  },
+  "treinamentos": {
+    "nome": "treinamentos",
+    "arquivo": "/home/thamiresvieira/projetos/Programa_mais_top/bases/Tabelas/Base_treinamentos.xlsx",
+    "tamanho_mb": 4.56,
+    "abas": {
+      "treinamentos_2026-06-01T16_32_0": {
+        "linhas": 65013,
+        "colunas": [
+          "Participante",
+          "CPF",
+          "UsuarioZoomId",
+          "Trilha",
+          "Curso",
+          "Inicio",
+          "Conclusão",
+          "Progresso",
+          "Estado",
+          "Distribuidor",
+          "Cnpj Distribuidor",
+          "PDV",
+          "Cnpj PDV"
+        ],
+        "tipos": {
+          "Participante": "object",
+          "CPF": "int64",
+          "UsuarioZoomId": "int64",
+          "Trilha": "str",
+          "Curso": "str",
+          "Inicio": "datetime64[us]",
+          "Conclusão": "datetime64[us]",
+          "Progresso": "int64",
+          "Estado": "str",
+          "Distribuidor": "str",
+          "Cnpj Distribuidor": "int64",
+          "PDV": "object",
+          "Cnpj PDV": "float64"
+        },
+        "amostra": [
+          {
+            "Participante": "Jonatan Gabriel Nunes",
+            "CPF": 33806501882,
+            "UsuarioZoomId": 14063,
+            "Trilha": "ECLIPSE COLLETION",
+            "Curso": "REFRIGERADOR",
+            "Inicio": "2026-04-10 11:06:09",
+            "Conclusão": "2026-04-10 11:16:52",
+            "Progresso": 100,
+            "Estado": "Concluido",
+            "Distribuidor": "Jmahfuz",
+            "Cnpj Distribuidor": 54289996000126,
+            "PDV": "032-AMERICANA",
+            "Cnpj PDV": 54289996003060.0
+          },
+          {
+            "Participante": "Jonatan Gabriel Nunes",
+            "CPF": 33806501882,
+            "UsuarioZoomId": 14063,
+            "Trilha": "CONTEÚDO OBRIGATÓRIO SAIBA+  ",
+            "Curso": "CONTEÚDO OBRIGATÓRIO I ABRIL 26 I BMC29",
+            "Inicio": "2026-04-10 10:33:56",
+            "Conclusão": "2026-04-10 10:38:57",
+            "Progresso": 100,
+            "Estado": "Concluido",
+            "Distribuidor": "Jmahfuz",
+            "Cnpj Distribuidor": 54289996000126,
+            "PDV": "032-AMERICANA",
+            "Cnpj PDV": 54289996003060.0
+          },
+          {
+            "Participante": "Jonatan Gabriel Nunes",
+            "CPF": 33806501882,
+            "UsuarioZoomId": 14063,
+            "Trilha": "CONTEÚDO OBRIGATÓRIO SAIBA+  ",
+            "Curso": "CONTEÚDO OBRIGATÓRIO I ABRIL 26 I CRM44M",
+            "Inicio": "2026-04-10 10:40:39",
+            "Conclusão": "2026-04-10 10:44:38",
+            "Progresso": 100,
+            "Estado": "Concluido",
+            "Distribuidor": "Jmahfuz",
+            "Cnpj Distribuidor": 54289996000126,
+            "PDV": "032-AMERICANA",
+            "Cnpj PDV": 54289996003060.0
+          }
+        ],
+        "categorias": {
+          "Trilha": {
+            "unicos": 14,
+            "valores": [
+              "ECLIPSE COLLETION",
+              "CONTEÚDO OBRIGATÓRIO SAIBA+  ",
+              "LAVANDERIA",
+              "MICRO-ONDAS",
+              "LAVA-LOUÇAS",
+              "FOGÕES",
+              "REFRIGERADORES",
+              "PURIFICADORES",
+              "COOKTOP",
+              "FRIGOBAR",
+              "TEMAS COMPLEMENTARES",
+              "CERVEJEIRA",
+              "SECADORA",
+              "W TV"
+            ]
+          },
+          "Progresso": {
+            "unicos": 1,
+            "valores": [
+              100
+            ]
+          },
+          "Estado": {
+            "unicos": 1,
+            "valores": [
+              "Concluido"
+            ]
+          }
+        },
+        "estatisticas_numericas": {
+          "CPF": {
+            "count": 65013.0,
+            "mean": 27018602218.432854,
+            "min": 7982232.0,
+            "25%": 3112044908.0,
+            "50%": 8438299903.0,
+            "75%": 57585733291.0,
+            "max": 99982099949.0,
+            "std": 32389667415.032913
+          },
+          "UsuarioZoomId": {
+            "count": 65013.0,
+            "mean": 13966.329134173166,
+            "min": 7882.0,
+            "25%": 9889.0,
+            "50%": 12763.0,
+            "75%": 18588.0,
+            "max": 22236.0,
+            "std": 4455.679662167006
+          },
+          "Inicio": {
+            "count": 65013,
+            "mean": "2026-02-07 12:40:23.820989",
+            "min": "2025-02-04 20:10:54",
+            "25%": "2025-12-18 23:13:47",
+            "50%": "2026-02-03 14:33:07",
+            "75%": "2026-04-02 09:55:42",
+            "max": "2026-05-31 23:42:24",
+            "std": NaN
+          },
+          "Conclusão": {
+            "count": 65013,
+            "mean": "2026-02-09 22:34:31.838955",
+            "min": "2025-11-01 12:31:08",
+            "25%": "2025-12-21 23:08:35",
+            "50%": "2026-02-04 10:00:00",
+            "75%": "2026-04-02 23:05:43",
+            "max": "2026-05-31 23:47:16",
+            "std": NaN
+          },
+          "Progresso": {
+            "count": 65013.0,
+            "mean": 100.0,
+            "min": 100.0,
+            "25%": 100.0,
+            "50%": 100.0,
+            "75%": 100.0,
+            "max": 100.0,
+            "std": 0.0
+          },
+          "Cnpj Distribuidor": {
+            "count": 65013.0,
+            "mean": 41445918840415.6,
+            "min": 34.0,
+            "25%": 4415928000198.0,
+            "50%": 33086695000125.0,
+            "75%": 79379491000183.0,
+            "max": 96662168000131.0,
+            "std": 35055993200469.035
+          },
+          "Cnpj PDV": {
+            "count": 44577.0,
+            "mean": 29196777446870.848,
+            "min": 607587000100.0,
+            "25%": 4415928007362.0,
+            "50%": 14939270010725.0,
+            "75%": 41426966006022.0,
+            "max": 99295696000198.0,
+            "std": 30952743684191.633
+          }
+        },
+        "nulos": {
+          "Participante": 0,
+          "CPF": 0,
+          "UsuarioZoomId": 0,
+          "Trilha": 0,
+          "Curso": 0,
+          "Inicio": 0,
+          "Conclusão": 0,
+          "Progresso": 0,
+          "Estado": 0,
+          "Distribuidor": 0,
+          "Cnpj Distribuidor": 0,
+          "PDV": 20436,
+          "Cnpj PDV": 20436
+        },
+        "nulos_pct": {
+          "Participante": 0.0,
+          "CPF": 0.0,
+          "UsuarioZoomId": 0.0,
+          "Trilha": 0.0,
+          "Curso": 0.0,
+          "Inicio": 0.0,
+          "Conclusão": 0.0,
+          "Progresso": 0.0,
+          "Estado": 0.0,
+          "Distribuidor": 0.0,
+          "Cnpj Distribuidor": 0.0,
+          "PDV": 31.43,
+          "Cnpj PDV": 31.43
+        },
+        "colunas_data": {}
+      }
+    }
+  },
+  "aceites": {
+    "nome": "aceites",
+    "arquivo": "/home/thamiresvieira/projetos/Programa_mais_top/bases/Tabelas/WHP_Aceite_Mensal_OUT_NOV_DEZ_2025_JAN_FEV_2026.xlsx",
+    "tamanho_mb": 2.01,
+    "abas": {
+      "OUT_2025": {
+        "linhas": 4889,
+        "colunas": [
+          "Nome",
+          "CPF",
+          "Revenda",
+          "DataAceite"
+        ],
+        "tipos": {
+          "Nome": "object",
+          "CPF": "int64",
+          "Revenda": "str",
+          "DataAceite": "str"
+        },
+        "amostra": [
+          {
+            "Nome": "Flávio Freitas",
+            "CPF": 31160109869,
+            "Revenda": "Nosso Lar",
+            "DataAceite": "2025-10-20 10:21:38.367"
+          },
+          {
+            "Nome": "Elaine Aparecida Cordeiro De Castro",
+            "CPF": 9436099924,
+            "Revenda": "Multiloja",
+            "DataAceite": "2025-10-20 10:24:48.653"
+          },
+          {
+            "Nome": "Carmen Luiza Radtke Jeske",
+            "CPF": 4312458006,
+            "Revenda": "Lebes",
+            "DataAceite": "2025-10-20 10:25:26.937"
+          }
+        ],
+        "categorias": {},
+        "estatisticas_numericas": {
+          "CPF": {
+            "count": 4889.0,
+            "mean": 25026868652.206997,
+            "std": 31368270904.97795,
+            "min": 6525202.0,
+            "25%": 3266531981.0,
+            "50%": 7860294397.0,
+            "75%": 46903475818.0,
+            "max": 99963396291.0
+          }
+        },
+        "nulos": {
+          "Nome": 0,
+          "CPF": 0,
+          "Revenda": 0,
+          "DataAceite": 0
+        },
+        "nulos_pct": {
+          "Nome": 0.0,
+          "CPF": 0.0,
+          "Revenda": 0.0,
+          "DataAceite": 0.0
+        },
+        "colunas_data": {
+          "DataAceite": {
+            "min": "2025-10-20 10:21:38.367000",
+            "max": "2025-10-31 23:57:04",
+            "nao_nulos": 4889
+          }
+        }
+      },
+      "NOV_2025": {
+        "linhas": 7687,
+        "colunas": [
+          "Nome",
+          "CPF",
+          "Revenda",
+          "DataAceite"
+        ],
+        "tipos": {
+          "Nome": "object",
+          "CPF": "int64",
+          "Revenda": "str",
+          "DataAceite": "str"
+        },
+        "amostra": [
+          {
+            "Nome": "Suzan M Oliveira Paim Ethur",
+            "CPF": 82047480000,
+            "Revenda": "Colombo",
+            "DataAceite": "2025-11-01 00:20:45.760"
+          },
+          {
+            "Nome": "ROSSANO DIAS CAPRIOLI",
+            "CPF": 3418830005,
+            "Revenda": "Taqi",
+            "DataAceite": "2025-11-01 00:21:36.230"
+          },
+          {
+            "Nome": "Katia Daiane De Moura Leiria",
+            "CPF": 95312250015,
+            "Revenda": "Taqi",
+            "DataAceite": "2025-11-01 00:39:15.633"
+          }
+        ],
+        "categorias": {},
+        "estatisticas_numericas": {
+          "CPF": {
+            "count": 7687.0,
+            "mean": 25137410175.97151,
+            "std": 31571178475.01847,
+            "min": 6525202.0,
+            "25%": 3168494121.5,
+            "50%": 7413838966.0,
+            "75%": 47996761970.5,
+            "max": 99963396291.0
+          }
+        },
+        "nulos": {
+          "Nome": 0,
+          "CPF": 0,
+          "Revenda": 0,
+          "DataAceite": 0
+        },
+        "nulos_pct": {
+          "Nome": 0.0,
+          "CPF": 0.0,
+          "Revenda": 0.0,
+          "DataAceite": 0.0
+        },
+        "colunas_data": {
+          "DataAceite": {
+            "min": "2025-11-01 00:20:45.760000",
+            "max": "2025-11-30 23:58:05.283000",
+            "nao_nulos": 7687
+          }
+        }
+      },
+      "DEZ_2025": {
+        "linhas": 7524,
+        "colunas": [
+          "Nome",
+          "CPF",
+          "Revenda",
+          "DataAceite"
+        ],
+        "tipos": {
+          "Nome": "object",
+          "CPF": "int64",
+          "Revenda": "str",
+          "DataAceite": "str"
+        },
+        "amostra": [
+          {
+            "Nome": "Glauciane Padilha Ferreira",
+            "CPF": 8892022903,
+            "Revenda": "Koerich",
+            "DataAceite": "2025-12-01 00:03:07.580"
+          },
+          {
+            "Nome": "Everson Adroaldo Pedroso Do Amarante",
+            "CPF": 63577151072,
+            "Revenda": "Becker",
+            "DataAceite": "2025-12-01 00:04:42.373"
+          },
+          {
+            "Nome": "Marlon Jayme Rego Sobrinho",
+            "CPF": 225255219,
+            "Revenda": "Formosa",
+            "DataAceite": "2025-12-01 00:05:51.800"
+          }
+        ],
+        "categorias": {},
+        "estatisticas_numericas": {
+          "CPF": {
+            "count": 7524.0,
+            "mean": 25032016051.939262,
+            "std": 31487162218.05244,
+            "min": 6525202.0,
+            "25%": 3190211586.25,
+            "50%": 7505668029.5,
+            "75%": 47435941672.5,
+            "max": 99963396291.0
+          }
+        },
+        "nulos": {
+          "Nome": 0,
+          "CPF": 0,
+          "Revenda": 0,
+          "DataAceite": 0
+        },
+        "nulos_pct": {
+          "Nome": 0.0,
+          "CPF": 0.0,
+          "Revenda": 0.0,
+          "DataAceite": 0.0
+        },
+        "colunas_data": {
+          "DataAceite": {
+            "min": "2025-12-01 00:03:07.580000",
+            "max": "2025-12-31 23:27:42.363000",
+            "nao_nulos": 7524
+          }
+        }
+      },
+      "JAN_2026": {
+        "linhas": 7631,
+        "colunas": [
+          "Nome",
+          "CPF",
+          "Revenda",
+          "DataAceite"
+        ],
+        "tipos": {
+          "Nome": "object",
+          "CPF": "int64",
+          "Revenda": "str",
+          "DataAceite": "str"
+        },
+        "amostra": [
+          {
+            "Nome": "MARCOS JURKO",
+            "CPF": 70251045900,
+            "Revenda": "MM Varejo",
+            "DataAceite": "2026-01-01 00:14:55.023"
+          },
+          {
+            "Nome": "João Maria C.Da Silva",
+            "CPF": 60877006253,
+            "Revenda": "Formosa",
+            "DataAceite": "2026-01-01 00:17:12.080"
+          },
+          {
+            "Nome": "Jose Ailton Ribeiro De Souza",
+            "CPF": 10435339400,
+            "Revenda": "Laser Eletro",
+            "DataAceite": "2026-01-01 00:27:30.323"
+          }
+        ],
+        "categorias": {},
+        "estatisticas_numericas": {
+          "CPF": {
+            "count": 7631.0,
+            "mean": 24826795812.956364,
+            "std": 31420588911.174984,
+            "min": 6525202.0,
+            "25%": 3217496221.0,
+            "50%": 7459631965.0,
+            "75%": 46567991017.0,
+            "max": 99961466004.0
+          }
+        },
+        "nulos": {
+          "Nome": 0,
+          "CPF": 0,
+          "Revenda": 0,
+          "DataAceite": 0
+        },
+        "nulos_pct": {
+          "Nome": 0.0,
+          "CPF": 0.0,
+          "Revenda": 0.0,
+          "DataAceite": 0.0
+        },
+        "colunas_data": {
+          "DataAceite": {
+            "min": "2026-01-01 00:14:55.023000",
+            "max": "2026-01-31 23:10:48.067000",
+            "nao_nulos": 7631
+          }
+        }
+      },
+      "FEV_2026": {
+        "linhas": 4664,
+        "colunas": [
+          "Nome",
+          "CPF",
+          "Revenda",
+          "DataAceite"
+        ],
+        "tipos": {
+          "Nome": "object",
+          "CPF": "int64",
+          "Revenda": "str",
+          "DataAceite": "str"
+        },
+        "amostra": [
+          {
+            "Nome": "Maiara Goveia Guterres",
+            "CPF": 1175880086,
+            "Revenda": "Becker",
+            "DataAceite": "2026-02-01 00:06:00.507"
+          },
+          {
+            "Nome": "LEANDRO PINTO DE ALMEIDA",
+            "CPF": 2306329206,
+            "Revenda": "Formosa",
+            "DataAceite": "2026-02-01 00:07:30.787"
+          },
+          {
+            "Nome": "Rodrigo Dominoni Vargas",
+            "CPF": 7116166980,
+            "Revenda": "Havan",
+            "DataAceite": "2026-02-01 00:09:38.523"
+          }
+        ],
+        "categorias": {},
+        "estatisticas_numericas": {
+          "CPF": {
+            "count": 4664.0,
+            "mean": 24546568901.40952,
+            "std": 31292490515.14732,
+            "min": 6525202.0,
+            "25%": 3259515386.25,
+            "50%": 7471514162.0,
+            "75%": 46073739840.0,
+            "max": 99982099949.0
+          }
+        },
+        "nulos": {
+          "Nome": 0,
+          "CPF": 0,
+          "Revenda": 0,
+          "DataAceite": 0
+        },
+        "nulos_pct": {
+          "Nome": 0.0,
+          "CPF": 0.0,
+          "Revenda": 0.0,
+          "DataAceite": 0.0
+        },
+        "colunas_data": {
+          "DataAceite": {
+            "min": "2026-02-01 00:06:00.507000",
+            "max": "2026-02-12 16:01:39.903000",
+            "nao_nulos": 4664
+          }
+        }
+      },
+      "MAR_2026": {
+        "linhas": 7987,
+        "colunas": [
+          "Nome",
+          "CPF",
+          "Revenda",
+          "DataAceite",
+          "DataNascimento"
+        ],
+        "tipos": {
+          "Nome": "object",
+          "CPF": "int64",
+          "Revenda": "str",
+          "DataAceite": "str",
+          "DataNascimento": "float64"
+        },
+        "amostra": [
+          {
+            "Nome": "Jorge Luiz Souza Lopes",
+            "CPF": 5831545300,
+            "Revenda": "Gazin Varejo",
+            "DataAceite": "2026-03-01 00:02:13.993",
+            "DataNascimento": NaN
+          },
+          {
+            "Nome": "greici da silva stein",
+            "CPF": 1021701009,
+            "Revenda": "Becker",
+            "DataAceite": "2026-03-01 00:14:46.583",
+            "DataNascimento": NaN
+          },
+          {
+            "Nome": "Renan Augusto Gemaque Dos Santos",
+            "CPF": 90688406220,
+            "Revenda": "Formosa",
+            "DataAceite": "2026-03-01 00:23:55.170",
+            "DataNascimento": NaN
+          }
+        ],
+        "categorias": {
+          "DataNascimento": {
+            "unicos": 0,
+            "valores": []
+          }
+        },
+        "estatisticas_numericas": {
+          "CPF": {
+            "count": 7987.0,
+            "mean": 25040855222.519844,
+            "std": 31389794464.7659,
+            "min": 6525202.0,
+            "25%": 3204999046.5,
+            "50%": 7571017394.0,
+            "75%": 47558906325.5,
+            "max": 99982099949.0
+          },
+          "DataNascimento": {
+            "count": 0.0,
+            "mean": NaN,
+            "std": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN
+          }
+        },
+        "nulos": {
+          "Nome": 0,
+          "CPF": 0,
+          "Revenda": 0,
+          "DataAceite": 0,
+          "DataNascimento": 7987
+        },
+        "nulos_pct": {
+          "Nome": 0.0,
+          "CPF": 0.0,
+          "Revenda": 0.0,
+          "DataAceite": 0.0,
+          "DataNascimento": 100.0
+        },
+        "colunas_data": {
+          "DataAceite": {
+            "min": "2026-03-01 00:02:13.993000",
+            "max": "2026-03-31 23:10:56.820000",
+            "nao_nulos": 7987
+          }
+        }
+      },
+      "ABR_2026": {
+        "linhas": 8021,
+        "colunas": [
+          "Nome",
+          "CPF",
+          "Revenda",
+          "DataAceite",
+          "DataNascimento"
+        ],
+        "tipos": {
+          "Nome": "object",
+          "CPF": "int64",
+          "Revenda": "str",
+          "DataAceite": "str",
+          "DataNascimento": "str"
+        },
+        "amostra": [
+          {
+            "Nome": "Humberto Ribeiro Damasceno Ramos",
+            "CPF": 10922419736,
+            "Revenda": "Sipolatti B",
+            "DataAceite": "2026-04-01 00:00:35.737",
+            "DataNascimento": "1984-06-04 06:00:00.000"
+          },
+          {
+            "Nome": "Rosalve Nunes Pinheiro",
+            "CPF": 881468126,
+            "Revenda": "Nosso Lar",
+            "DataAceite": "2026-04-01 00:04:22.623",
+            "DataNascimento": "1984-12-11 03:00:00.000"
+          },
+          {
+            "Nome": "Edson Herculano da Silva",
+            "CPF": 5434594460,
+            "Revenda": "Imperio",
+            "DataAceite": "2026-04-01 00:05:21.570",
+            "DataNascimento": "1983-03-28 03:00:00.000"
+          }
+        ],
+        "categorias": {},
+        "estatisticas_numericas": {
+          "CPF": {
+            "count": 8021.0,
+            "mean": 24711626666.744045,
+            "std": 31128425254.713467,
+            "min": 6525202.0,
+            "25%": 3242995082.0,
+            "50%": 7650550907.0,
+            "75%": 46156709827.0,
+            "max": 99982099949.0
+          }
+        },
+        "nulos": {
+          "Nome": 0,
+          "CPF": 0,
+          "Revenda": 0,
+          "DataAceite": 0,
+          "DataNascimento": 1
+        },
+        "nulos_pct": {
+          "Nome": 0.0,
+          "CPF": 0.0,
+          "Revenda": 0.0,
+          "DataAceite": 0.0,
+          "DataNascimento": 0.01
+        },
+        "colunas_data": {
+          "DataAceite": {
+            "min": "2026-04-01 00:00:35.737000",
+            "max": "2026-04-30 23:56:42.277000",
+            "nao_nulos": 8021
+          },
+          "DataNascimento": {
+            "min": "1881-11-14 06:11:32",
+            "max": "3003-11-29 06:00:00",
+            "nao_nulos": 8020
+          }
+        }
+      }
+    }
+  },
+  "chamados": {
+    "nome": "chamados",
+    "arquivo": "/home/thamiresvieira/projetos/Programa_mais_top/bases/Tabelas/Chamados_catalogo.xlsx",
+    "tamanho_mb": 1.15,
+    "abas": {
+      "RELATORIO DE CHAMADOS - MARÇO 2": {
+        "linhas": 19388,
+        "colunas": [
+          "NÚMERO",
+          "DATA",
+          "DOCUMENTO",
+          "PARTICIPANTE",
+          "CAMPANHA",
+          "ASSUNTO",
+          "Resolução",
+          "SLA - META",
+          "SLA - DIA",
+          "SLA - HORAS"
+        ],
+        "tipos": {
+          "NÚMERO": "int64",
+          "DATA": "datetime64[us]",
+          "DOCUMENTO": "object",
+          "PARTICIPANTE": "object",
+          "CAMPANHA": "str",
+          "ASSUNTO": "str",
+          "Resolução": "datetime64[us]",
+          "SLA - META": "float64",
+          "SLA - DIA": "int64",
+          "SLA - HORAS": "int64"
+        },
+        "amostra": [
+          {
+            "NÚMERO": 2299,
+            "DATA": "2024-03-01 00:00:00",
+            "DOCUMENTO": 44380726894,
+            "PARTICIPANTE": "KARINA ANDRADE",
+            "CAMPANHA": "TUDO AZUL",
+            "ASSUNTO": "Desbloqueio",
+            "Resolução": "2024-03-01 00:00:00",
+            "SLA - META": 48.0,
+            "SLA - DIA": 0,
+            "SLA - HORAS": 0
+          },
+          {
+            "NÚMERO": 2301,
+            "DATA": "2024-03-01 00:00:00",
+            "DOCUMENTO": 75253356487,
+            "PARTICIPANTE": "DOUGLAS FILETO MARINHO",
+            "CAMPANHA": "Aceleraí",
+            "ASSUNTO": "Desbloqueio",
+            "Resolução": "2024-03-01 00:00:00",
+            "SLA - META": 48.0,
+            "SLA - DIA": 0,
+            "SLA - HORAS": 0
+          },
+          {
+            "NÚMERO": 2303,
+            "DATA": "2024-03-01 00:00:00",
+            "DOCUMENTO": 9824923675,
+            "PARTICIPANTE": "rayanny",
+            "CAMPANHA": "TUDO AZUL",
+            "ASSUNTO": "Desbloqueio",
+            "Resolução": "2024-03-01 00:00:00",
+            "SLA - META": 48.0,
+            "SLA - DIA": 0,
+            "SLA - HORAS": 0
+          }
+        ],
+        "categorias": {},
+        "estatisticas_numericas": {
+          "NÚMERO": {
+            "count": 19388.0,
+            "mean": 14835.610738601197,
+            "min": 2299.0,
+            "25%": 8688.0,
+            "50%": 15141.0,
+            "75%": 21024.75,
+            "max": 26323.0,
+            "std": 7062.079855499461
+          },
+          "DATA": {
+            "count": 19388,
+            "mean": "2025-01-18 00:53:41.951722",
+            "min": "2024-03-01 00:00:00",
+            "25%": "2024-07-19 00:00:00",
+            "50%": "2024-12-23 00:00:00",
+            "75%": "2025-07-11 00:00:00",
+            "max": "2026-03-31 00:00:00",
+            "std": NaN
+          },
+          "Resolução": {
+            "count": 19388,
+            "mean": "2025-01-19 09:47:38.757994",
+            "min": "2024-03-01 00:00:00",
+            "25%": "2024-07-22 00:00:00",
+            "50%": "2024-12-27 00:00:00",
+            "75%": "2025-07-12 00:00:00",
+            "max": "2026-04-01 00:00:00",
+            "std": NaN
+          },
+          "SLA - META": {
+            "count": 19380.0,
+            "mean": 60.627141382868935,
+            "min": 48.0,
+            "25%": 48.0,
+            "50%": 48.0,
+            "75%": 48.0,
+            "max": 769.0,
+            "std": 77.61443753954106
+          },
+          "SLA - DIA": {
+            "count": 19388.0,
+            "mean": 1.3706932122962658,
+            "min": 0.0,
+            "25%": 0.0,
+            "50%": 1.0,
+            "75%": 2.0,
+            "max": 35.0,
+            "std": 1.8179203981059882
+          },
+          "SLA - HORAS": {
+            "count": 19388.0,
+            "mean": 32.89663709511038,
+            "min": 0.0,
+            "25%": 0.0,
+            "50%": 24.0,
+            "75%": 48.0,
+            "max": 840.0,
+            "std": 43.630089554543716
+          }
+        },
+        "nulos": {
+          "NÚMERO": 0,
+          "DATA": 0,
+          "DOCUMENTO": 0,
+          "PARTICIPANTE": 1,
+          "CAMPANHA": 0,
+          "ASSUNTO": 0,
+          "Resolução": 0,
+          "SLA - META": 8,
+          "SLA - DIA": 0,
+          "SLA - HORAS": 0
+        },
+        "nulos_pct": {
+          "NÚMERO": 0.0,
+          "DATA": 0.0,
+          "DOCUMENTO": 0.0,
+          "PARTICIPANTE": 0.01,
+          "CAMPANHA": 0.0,
+          "ASSUNTO": 0.0,
+          "Resolução": 0.0,
+          "SLA - META": 0.04,
+          "SLA - DIA": 0.0,
+          "SLA - HORAS": 0.0
+        },
+        "colunas_data": {
+          "DATA": {
+            "min": "2024-03-01 00:00:00",
+            "max": "2026-03-31 00:00:00",
+            "nao_nulos": 19388
+          }
+        }
+      }
+    }
+  },
+  "fale_conosco": {
+    "nome": "fale_conosco",
+    "arquivo": "/home/thamiresvieira/projetos/Programa_mais_top/bases/Tabelas/Fale_Conosco.xlsx",
+    "tamanho_mb": 0.59,
+    "abas": {
+      "aba_fale_conosco": {
+        "linhas": 5035,
+        "colunas": [
+          "Data",
+          "Regional",
+          "Grupo",
+          "Nome",
+          "CPF/CNPJ",
+          "E-mail",
+          "Assunto",
+          "Mensagem",
+          "Status",
+          "Logado",
+          "Origem",
+          "Última Resposta",
+          "Data Resposta",
+          "Unnamed: 13",
+          "Unnamed: 14",
+          "Unnamed: 15",
+          "Unnamed: 16",
+          "Unnamed: 17",
+          "Unnamed: 18",
+          "Unnamed: 19",
+          "Unnamed: 20",
+          "Unnamed: 21",
+          "Unnamed: 22",
+          "Unnamed: 23",
+          "Unnamed: 24",
+          "Unnamed: 25",
+          "Unnamed: 26",
+          "Unnamed: 27",
+          "Unnamed: 28",
+          "Unnamed: 29",
+          "Unnamed: 30",
+          "Unnamed: 31",
+          "Unnamed: 32",
+          "Unnamed: 33",
+          "Unnamed: 34",
+          "Unnamed: 35",
+          "Unnamed: 36",
+          "Unnamed: 37",
+          "Unnamed: 38",
+          "Unnamed: 39",
+          "Unnamed: 40",
+          "Unnamed: 41",
+          "Unnamed: 42",
+          "Unnamed: 43",
+          "Unnamed: 44",
+          "Unnamed: 45",
+          "Unnamed: 46",
+          "Unnamed: 47",
+          "Unnamed: 48",
+          "Unnamed: 49",
+          "Unnamed: 50",
+          "Unnamed: 51",
+          "Unnamed: 52",
+          "Unnamed: 53",
+          "Unnamed: 54",
+          "Unnamed: 55",
+          "Unnamed: 56",
+          "Unnamed: 57",
+          "Unnamed: 58",
+          "Unnamed: 59",
+          "Unnamed: 60",
+          "Unnamed: 61",
+          "Unnamed: 62",
+          "Unnamed: 63",
+          "Unnamed: 64",
+          "Unnamed: 65",
+          "Unnamed: 66",
+          "Unnamed: 67",
+          "Unnamed: 68",
+          "Unnamed: 69",
+          "Unnamed: 70",
+          "Unnamed: 71",
+          "Unnamed: 72",
+          "Unnamed: 73",
+          "Unnamed: 74",
+          "Unnamed: 75",
+          "Unnamed: 76",
+          "Unnamed: 77",
+          "Unnamed: 78",
+          "Unnamed: 79",
+          "Unnamed: 80",
+          "Unnamed: 81",
+          "Unnamed: 82",
+          "Unnamed: 83",
+          "Unnamed: 84",
+          "Unnamed: 85",
+          "Unnamed: 86",
+          "Unnamed: 87",
+          "Unnamed: 88",
+          "Unnamed: 89",
+          "Unnamed: 90",
+          "Unnamed: 91",
+          "Unnamed: 92",
+          "Unnamed: 93",
+          "Unnamed: 94",
+          "Unnamed: 95",
+          "Unnamed: 96",
+          "Unnamed: 97",
+          "Unnamed: 98",
+          "Unnamed: 99",
+          "Unnamed: 100",
+          "Unnamed: 101",
+          "Unnamed: 102",
+          "Unnamed: 103",
+          "Unnamed: 104",
+          "Unnamed: 105",
+          "Unnamed: 106",
+          "Unnamed: 107",
+          "Unnamed: 108",
+          "Unnamed: 109",
+          "Unnamed: 110",
+          "Unnamed: 111",
+          "Unnamed: 112",
+          "Unnamed: 113",
+          "Unnamed: 114",
+          "Unnamed: 115",
+          "Unnamed: 116",
+          "Unnamed: 117",
+          "Unnamed: 118",
+          "Unnamed: 119"
+        ],
+        "tipos": {
+          "Data": "datetime64[us]",
+          "Regional": "str",
+          "Grupo": "str",
+          "Nome": "object",
+          "CPF/CNPJ": "int64",
+          "E-mail": "str",
+          "Assunto": "str",
+          "Mensagem": "object",
+          "Status": "str",
+          "Logado": "str",
+          "Origem": "str",
+          "Última Resposta": "str",
+          "Data Resposta": "object",
+          "Unnamed: 13": "datetime64[us]",
+          "Unnamed: 14": "float64",
+          "Unnamed: 15": "float64",
+          "Unnamed: 16": "float64",
+          "Unnamed: 17": "float64",
+          "Unnamed: 18": "float64",
+          "Unnamed: 19": "float64",
+          "Unnamed: 20": "float64",
+          "Unnamed: 21": "float64",
+          "Unnamed: 22": "float64",
+          "Unnamed: 23": "float64",
+          "Unnamed: 24": "float64",
+          "Unnamed: 25": "float64",
+          "Unnamed: 26": "float64",
+          "Unnamed: 27": "float64",
+          "Unnamed: 28": "float64",
+          "Unnamed: 29": "float64",
+          "Unnamed: 30": "float64",
+          "Unnamed: 31": "float64",
+          "Unnamed: 32": "float64",
+          "Unnamed: 33": "float64",
+          "Unnamed: 34": "float64",
+          "Unnamed: 35": "float64",
+          "Unnamed: 36": "float64",
+          "Unnamed: 37": "float64",
+          "Unnamed: 38": "float64",
+          "Unnamed: 39": "float64",
+          "Unnamed: 40": "float64",
+          "Unnamed: 41": "float64",
+          "Unnamed: 42": "float64",
+          "Unnamed: 43": "float64",
+          "Unnamed: 44": "float64",
+          "Unnamed: 45": "float64",
+          "Unnamed: 46": "float64",
+          "Unnamed: 47": "float64",
+          "Unnamed: 48": "float64",
+          "Unnamed: 49": "float64",
+          "Unnamed: 50": "float64",
+          "Unnamed: 51": "float64",
+          "Unnamed: 52": "float64",
+          "Unnamed: 53": "float64",
+          "Unnamed: 54": "float64",
+          "Unnamed: 55": "float64",
+          "Unnamed: 56": "float64",
+          "Unnamed: 57": "float64",
+          "Unnamed: 58": "float64",
+          "Unnamed: 59": "float64",
+          "Unnamed: 60": "float64",
+          "Unnamed: 61": "float64",
+          "Unnamed: 62": "float64",
+          "Unnamed: 63": "float64",
+          "Unnamed: 64": "float64",
+          "Unnamed: 65": "float64",
+          "Unnamed: 66": "float64",
+          "Unnamed: 67": "float64",
+          "Unnamed: 68": "float64",
+          "Unnamed: 69": "float64",
+          "Unnamed: 70": "float64",
+          "Unnamed: 71": "float64",
+          "Unnamed: 72": "float64",
+          "Unnamed: 73": "float64",
+          "Unnamed: 74": "float64",
+          "Unnamed: 75": "float64",
+          "Unnamed: 76": "float64",
+          "Unnamed: 77": "float64",
+          "Unnamed: 78": "float64",
+          "Unnamed: 79": "float64",
+          "Unnamed: 80": "float64",
+          "Unnamed: 81": "float64",
+          "Unnamed: 82": "float64",
+          "Unnamed: 83": "float64",
+          "Unnamed: 84": "float64",
+          "Unnamed: 85": "float64",
+          "Unnamed: 86": "float64",
+          "Unnamed: 87": "float64",
+          "Unnamed: 88": "float64",
+          "Unnamed: 89": "float64",
+          "Unnamed: 90": "float64",
+          "Unnamed: 91": "float64",
+          "Unnamed: 92": "float64",
+          "Unnamed: 93": "float64",
+          "Unnamed: 94": "float64",
+          "Unnamed: 95": "float64",
+          "Unnamed: 96": "float64",
+          "Unnamed: 97": "float64",
+          "Unnamed: 98": "float64",
+          "Unnamed: 99": "float64",
+          "Unnamed: 100": "float64",
+          "Unnamed: 101": "float64",
+          "Unnamed: 102": "float64",
+          "Unnamed: 103": "float64",
+          "Unnamed: 104": "float64",
+          "Unnamed: 105": "float64",
+          "Unnamed: 106": "float64",
+          "Unnamed: 107": "float64",
+          "Unnamed: 108": "float64",
+          "Unnamed: 109": "float64",
+          "Unnamed: 110": "float64",
+          "Unnamed: 111": "float64",
+          "Unnamed: 112": "float64",
+          "Unnamed: 113": "float64",
+          "Unnamed: 114": "float64",
+          "Unnamed: 115": "str",
+          "Unnamed: 116": "str",
+          "Unnamed: 117": "str",
+          "Unnamed: 118": "str",
+          "Unnamed: 119": "datetime64[us]"
+        },
+        "amostra": [
+          {
+            "Data": "2025-10-21 16:32:45",
+            "Regional": NaN,
+            "Grupo": NaN,
+            "Nome": "Pedro Henrique Santos Pereira",
+            "CPF/CNPJ": 11138614955,
+            "E-mail": "pedropayne21@gmail.com",
+            "Assunto": "Acesso",
+            "Mensagem": "Está dizendo que meu usuário está inativo, porém o próprio aplicativo ficou vários dias sem funcionar.",
+            "Status": "Em Andamento",
+            "Logado": "Não",
+            "Origem": "-",
+            "Última Resposta": NaN,
+            "Data Resposta": NaN,
+            "Unnamed: 13": "NaT",
+            "Unnamed: 14": NaN,
+            "Unnamed: 15": NaN,
+            "Unnamed: 16": NaN,
+            "Unnamed: 17": NaN,
+            "Unnamed: 18": NaN,
+            "Unnamed: 19": NaN,
+            "Unnamed: 20": NaN,
+            "Unnamed: 21": NaN,
+            "Unnamed: 22": NaN,
+            "Unnamed: 23": NaN,
+            "Unnamed: 24": NaN,
+            "Unnamed: 25": NaN,
+            "Unnamed: 26": NaN,
+            "Unnamed: 27": NaN,
+            "Unnamed: 28": NaN,
+            "Unnamed: 29": NaN,
+            "Unnamed: 30": NaN,
+            "Unnamed: 31": NaN,
+            "Unnamed: 32": NaN,
+            "Unnamed: 33": NaN,
+            "Unnamed: 34": NaN,
+            "Unnamed: 35": NaN,
+            "Unnamed: 36": NaN,
+            "Unnamed: 37": NaN,
+            "Unnamed: 38": NaN,
+            "Unnamed: 39": NaN,
+            "Unnamed: 40": NaN,
+            "Unnamed: 41": NaN,
+            "Unnamed: 42": NaN,
+            "Unnamed: 43": NaN,
+            "Unnamed: 44": NaN,
+            "Unnamed: 45": NaN,
+            "Unnamed: 46": NaN,
+            "Unnamed: 47": NaN,
+            "Unnamed: 48": NaN,
+            "Unnamed: 49": NaN,
+            "Unnamed: 50": NaN,
+            "Unnamed: 51": NaN,
+            "Unnamed: 52": NaN,
+            "Unnamed: 53": NaN,
+            "Unnamed: 54": NaN,
+            "Unnamed: 55": NaN,
+            "Unnamed: 56": NaN,
+            "Unnamed: 57": NaN,
+            "Unnamed: 58": NaN,
+            "Unnamed: 59": NaN,
+            "Unnamed: 60": NaN,
+            "Unnamed: 61": NaN,
+            "Unnamed: 62": NaN,
+            "Unnamed: 63": NaN,
+            "Unnamed: 64": NaN,
+            "Unnamed: 65": NaN,
+            "Unnamed: 66": NaN,
+            "Unnamed: 67": NaN,
+            "Unnamed: 68": NaN,
+            "Unnamed: 69": NaN,
+            "Unnamed: 70": NaN,
+            "Unnamed: 71": NaN,
+            "Unnamed: 72": NaN,
+            "Unnamed: 73": NaN,
+            "Unnamed: 74": NaN,
+            "Unnamed: 75": NaN,
+            "Unnamed: 76": NaN,
+            "Unnamed: 77": NaN,
+            "Unnamed: 78": NaN,
+            "Unnamed: 79": NaN,
+            "Unnamed: 80": NaN,
+            "Unnamed: 81": NaN,
+            "Unnamed: 82": NaN,
+            "Unnamed: 83": NaN,
+            "Unnamed: 84": NaN,
+            "Unnamed: 85": NaN,
+            "Unnamed: 86": NaN,
+            "Unnamed: 87": NaN,
+            "Unnamed: 88": NaN,
+            "Unnamed: 89": NaN,
+            "Unnamed: 90": NaN,
+            "Unnamed: 91": NaN,
+            "Unnamed: 92": NaN,
+            "Unnamed: 93": NaN,
+            "Unnamed: 94": NaN,
+            "Unnamed: 95": NaN,
+            "Unnamed: 96": NaN,
+            "Unnamed: 97": NaN,
+            "Unnamed: 98": NaN,
+            "Unnamed: 99": NaN,
+            "Unnamed: 100": NaN,
+            "Unnamed: 101": NaN,
+            "Unnamed: 102": NaN,
+            "Unnamed: 103": NaN,
+            "Unnamed: 104": NaN,
+            "Unnamed: 105": NaN,
+            "Unnamed: 106": NaN,
+            "Unnamed: 107": NaN,
+            "Unnamed: 108": NaN,
+            "Unnamed: 109": NaN,
+            "Unnamed: 110": NaN,
+            "Unnamed: 111": NaN,
+            "Unnamed: 112": NaN,
+            "Unnamed: 113": NaN,
+            "Unnamed: 114": NaN,
+            "Unnamed: 115": NaN,
+            "Unnamed: 116": NaN,
+            "Unnamed: 117": NaN,
+            "Unnamed: 118": NaN,
+            "Unnamed: 119": "NaT"
+          },
+          {
+            "Data": "2025-10-21 08:44:22",
+            "Regional": NaN,
+            "Grupo": NaN,
+            "Nome": "MATEUS DUTRA DE SOUSA",
+            "CPF/CNPJ": 6014153101,
+            "E-mail": "mateusd.hqsb@gmail.com",
+            "Assunto": "-Outros-",
+            "Mensagem": "Consta como cadastro inativo sendo que estou atualizado",
+            "Status": "Resolvido",
+            "Logado": "Não",
+            "Origem": "Fale Conosco",
+            "Última Resposta": "Olá, Mateus! Espero que esteja bem! :)Verificamos que seu cadastro já está ativo na plataforma :DAcesse o site programamaistop.com.br *Esqueci a senha*. Depois, preencha todos os dados solicitados e crie uma nova senha diferente da antiga.A nova senha deve ter mais de 7 caracteres, contendo pelo menos: \"  1 letra maiúscula\"  3 letras minúsculas\"  4 números\"  1 caractere especial (@, #, %, !)Obs.: Mesmo que você já tenha cadastro, será necessário refazer esse processo.Sempre que precisar, entre em contato com a Central de Atendimento:\"  Telefone: das 10h às 16h\"  WhatsApp: das 9h às 18\"  De segunda a sexta-feira (exceto feriados)\"  Número: 0800 780 0606Estamos sempre à disposição para ajudar!Atenciosamente,Central de Atendimento +TOP",
+            "Data Resposta": "2025-11-07 12:25:51",
+            "Unnamed: 13": "NaT",
+            "Unnamed: 14": NaN,
+            "Unnamed: 15": NaN,
+            "Unnamed: 16": NaN,
+            "Unnamed: 17": NaN,
+            "Unnamed: 18": NaN,
+            "Unnamed: 19": NaN,
+            "Unnamed: 20": NaN,
+            "Unnamed: 21": NaN,
+            "Unnamed: 22": NaN,
+            "Unnamed: 23": NaN,
+            "Unnamed: 24": NaN,
+            "Unnamed: 25": NaN,
+            "Unnamed: 26": NaN,
+            "Unnamed: 27": NaN,
+            "Unnamed: 28": NaN,
+            "Unnamed: 29": NaN,
+            "Unnamed: 30": NaN,
+            "Unnamed: 31": NaN,
+            "Unnamed: 32": NaN,
+            "Unnamed: 33": NaN,
+            "Unnamed: 34": NaN,
+            "Unnamed: 35": NaN,
+            "Unnamed: 36": NaN,
+            "Unnamed: 37": NaN,
+            "Unnamed: 38": NaN,
+            "Unnamed: 39": NaN,
+            "Unnamed: 40": NaN,
+            "Unnamed: 41": NaN,
+            "Unnamed: 42": NaN,
+            "Unnamed: 43": NaN,
+            "Unnamed: 44": NaN,
+            "Unnamed: 45": NaN,
+            "Unnamed: 46": NaN,
+            "Unnamed: 47": NaN,
+            "Unnamed: 48": NaN,
+            "Unnamed: 49": NaN,
+            "Unnamed: 50": NaN,
+            "Unnamed: 51": NaN,
+            "Unnamed: 52": NaN,
+            "Unnamed: 53": NaN,
+            "Unnamed: 54": NaN,
+            "Unnamed: 55": NaN,
+            "Unnamed: 56": NaN,
+            "Unnamed: 57": NaN,
+            "Unnamed: 58": NaN,
+            "Unnamed: 59": NaN,
+            "Unnamed: 60": NaN,
+            "Unnamed: 61": NaN,
+            "Unnamed: 62": NaN,
+            "Unnamed: 63": NaN,
+            "Unnamed: 64": NaN,
+            "Unnamed: 65": NaN,
+            "Unnamed: 66": NaN,
+            "Unnamed: 67": NaN,
+            "Unnamed: 68": NaN,
+            "Unnamed: 69": NaN,
+            "Unnamed: 70": NaN,
+            "Unnamed: 71": NaN,
+            "Unnamed: 72": NaN,
+            "Unnamed: 73": NaN,
+            "Unnamed: 74": NaN,
+            "Unnamed: 75": NaN,
+            "Unnamed: 76": NaN,
+            "Unnamed: 77": NaN,
+            "Unnamed: 78": NaN,
+            "Unnamed: 79": NaN,
+            "Unnamed: 80": NaN,
+            "Unnamed: 81": NaN,
+            "Unnamed: 82": NaN,
+            "Unnamed: 83": NaN,
+            "Unnamed: 84": NaN,
+            "Unnamed: 85": NaN,
+            "Unnamed: 86": NaN,
+            "Unnamed: 87": NaN,
+            "Unnamed: 88": NaN,
+            "Unnamed: 89": NaN,
+            "Unnamed: 90": NaN,
+            "Unnamed: 91": NaN,
+            "Unnamed: 92": NaN,
+            "Unnamed: 93": NaN,
+            "Unnamed: 94": NaN,
+            "Unnamed: 95": NaN,
+            "Unnamed: 96": NaN,
+            "Unnamed: 97": NaN,
+            "Unnamed: 98": NaN,
+            "Unnamed: 99": NaN,
+            "Unnamed: 100": NaN,
+            "Unnamed: 101": NaN,
+            "Unnamed: 102": NaN,
+            "Unnamed: 103": NaN,
+            "Unnamed: 104": NaN,
+            "Unnamed: 105": NaN,
+            "Unnamed: 106": NaN,
+            "Unnamed: 107": NaN,
+            "Unnamed: 108": NaN,
+            "Unnamed: 109": NaN,
+            "Unnamed: 110": NaN,
+            "Unnamed: 111": NaN,
+            "Unnamed: 112": NaN,
+            "Unnamed: 113": NaN,
+            "Unnamed: 114": NaN,
+            "Unnamed: 115": NaN,
+            "Unnamed: 116": NaN,
+            "Unnamed: 117": NaN,
+            "Unnamed: 118": NaN,
+            "Unnamed: 119": "NaT"
+          },
+          {
+            "Data": "2025-10-23 14:59:04",
+            "Regional": NaN,
+            "Grupo": NaN,
+            "Nome": "WANDERLEY PEREIRA BATISTA",
+            "CPF/CNPJ": 95627685115,
+            "E-mail": "wanderleypereirabatista791@mail.com",
+            "Assunto": "Atualização de Cadastro",
+            "Mensagem": "Não estou conseguindo acesso na plataforma de pontos",
+            "Status": "Em Andamento",
+            "Logado": "Não",
+            "Origem": "-",
+            "Última Resposta": NaN,
+            "Data Resposta": NaN,
+            "Unnamed: 13": "NaT",
+            "Unnamed: 14": NaN,
+            "Unnamed: 15": NaN,
+            "Unnamed: 16": NaN,
+            "Unnamed: 17": NaN,
+            "Unnamed: 18": NaN,
+            "Unnamed: 19": NaN,
+            "Unnamed: 20": NaN,
+            "Unnamed: 21": NaN,
+            "Unnamed: 22": NaN,
+            "Unnamed: 23": NaN,
+            "Unnamed: 24": NaN,
+            "Unnamed: 25": NaN,
+            "Unnamed: 26": NaN,
+            "Unnamed: 27": NaN,
+            "Unnamed: 28": NaN,
+            "Unnamed: 29": NaN,
+            "Unnamed: 30": NaN,
+            "Unnamed: 31": NaN,
+            "Unnamed: 32": NaN,
+            "Unnamed: 33": NaN,
+            "Unnamed: 34": NaN,
+            "Unnamed: 35": NaN,
+            "Unnamed: 36": NaN,
+            "Unnamed: 37": NaN,
+            "Unnamed: 38": NaN,
+            "Unnamed: 39": NaN,
+            "Unnamed: 40": NaN,
+            "Unnamed: 41": NaN,
+            "Unnamed: 42": NaN,
+            "Unnamed: 43": NaN,
+            "Unnamed: 44": NaN,
+            "Unnamed: 45": NaN,
+            "Unnamed: 46": NaN,
+            "Unnamed: 47": NaN,
+            "Unnamed: 48": NaN,
+            "Unnamed: 49": NaN,
+            "Unnamed: 50": NaN,
+            "Unnamed: 51": NaN,
+            "Unnamed: 52": NaN,
+            "Unnamed: 53": NaN,
+            "Unnamed: 54": NaN,
+            "Unnamed: 55": NaN,
+            "Unnamed: 56": NaN,
+            "Unnamed: 57": NaN,
+            "Unnamed: 58": NaN,
+            "Unnamed: 59": NaN,
+            "Unnamed: 60": NaN,
+            "Unnamed: 61": NaN,
+            "Unnamed: 62": NaN,
+            "Unnamed: 63": NaN,
+            "Unnamed: 64": NaN,
+            "Unnamed: 65": NaN,
+            "Unnamed: 66": NaN,
+            "Unnamed: 67": NaN,
+            "Unnamed: 68": NaN,
+            "Unnamed: 69": NaN,
+            "Unnamed: 70": NaN,
+            "Unnamed: 71": NaN,
+            "Unnamed: 72": NaN,
+            "Unnamed: 73": NaN,
+            "Unnamed: 74": NaN,
+            "Unnamed: 75": NaN,
+            "Unnamed: 76": NaN,
+            "Unnamed: 77": NaN,
+            "Unnamed: 78": NaN,
+            "Unnamed: 79": NaN,
+            "Unnamed: 80": NaN,
+            "Unnamed: 81": NaN,
+            "Unnamed: 82": NaN,
+            "Unnamed: 83": NaN,
+            "Unnamed: 84": NaN,
+            "Unnamed: 85": NaN,
+            "Unnamed: 86": NaN,
+            "Unnamed: 87": NaN,
+            "Unnamed: 88": NaN,
+            "Unnamed: 89": NaN,
+            "Unnamed: 90": NaN,
+            "Unnamed: 91": NaN,
+            "Unnamed: 92": NaN,
+            "Unnamed: 93": NaN,
+            "Unnamed: 94": NaN,
+            "Unnamed: 95": NaN,
+            "Unnamed: 96": NaN,
+            "Unnamed: 97": NaN,
+            "Unnamed: 98": NaN,
+            "Unnamed: 99": NaN,
+            "Unnamed: 100": NaN,
+            "Unnamed: 101": NaN,
+            "Unnamed: 102": NaN,
+            "Unnamed: 103": NaN,
+            "Unnamed: 104": NaN,
+            "Unnamed: 105": NaN,
+            "Unnamed: 106": NaN,
+            "Unnamed: 107": NaN,
+            "Unnamed: 108": NaN,
+            "Unnamed: 109": NaN,
+            "Unnamed: 110": NaN,
+            "Unnamed: 111": NaN,
+            "Unnamed: 112": NaN,
+            "Unnamed: 113": NaN,
+            "Unnamed: 114": NaN,
+            "Unnamed: 115": NaN,
+            "Unnamed: 116": NaN,
+            "Unnamed: 117": NaN,
+            "Unnamed: 118": NaN,
+            "Unnamed: 119": "NaT"
+          }
+        ],
+        "categorias": {
+          "Regional": {
+            "unicos": 6,
+            "valores": [
+              "CONTA NORDESTE",
+              "CONTA SUL",
+              "CONTA CENTRO NORTE",
+              "CONTA SUDESTE",
+              "Regional padrão",
+              "COMPRA DIRETA"
+            ]
+          },
+          "Assunto": {
+            "unicos": 9,
+            "valores": [
+              "Acesso",
+              "-Outros-",
+              "Atualização de Cadastro",
+              "Pontuação",
+              "Treinamentos",
+              "Resgates",
+              "Atualização de Equipe",
+              "Dúvidas Campanhas",
+              "Mudança de Cargo"
+            ]
+          },
+          "Status": {
+            "unicos": 3,
+            "valores": [
+              "Em Andamento",
+              "Resolvido",
+              " MAS ESTA FALANDO QUE USUARIO ESTA DESATIVADO"
+            ]
+          },
+          "Logado": {
+            "unicos": 3,
+            "valores": [
+              "Não",
+              "Sim",
+              "Em Andamento"
+            ]
+          },
+          "Origem": {
+            "unicos": 5,
+            "valores": [
+              "-",
+              "Fale Conosco",
+              "Central",
+              "Não",
+              "WhatsApp"
+            ]
+          },
+          "Unnamed: 14": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 15": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 16": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 17": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 18": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 19": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 20": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 21": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 22": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 23": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 24": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 25": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 26": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 27": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 28": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 29": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 30": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 31": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 32": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 33": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 34": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 35": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 36": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 37": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 38": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 39": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 40": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 41": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 42": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 43": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 44": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 45": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 46": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 47": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 48": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 49": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 50": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 51": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 52": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 53": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 54": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 55": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 56": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 57": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 58": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 59": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 60": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 61": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 62": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 63": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 64": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 65": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 66": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 67": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 68": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 69": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 70": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 71": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 72": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 73": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 74": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 75": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 76": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 77": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 78": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 79": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 80": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 81": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 82": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 83": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 84": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 85": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 86": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 87": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 88": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 89": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 90": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 91": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 92": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 93": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 94": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 95": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 96": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 97": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 98": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 99": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 100": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 101": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 102": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 103": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 104": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 105": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 106": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 107": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 108": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 109": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 110": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 111": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 112": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 113": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 114": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Unnamed: 115": {
+            "unicos": 1,
+            "valores": [
+              "Resolvido"
+            ]
+          },
+          "Unnamed: 116": {
+            "unicos": 1,
+            "valores": [
+              "Não"
+            ]
+          },
+          "Unnamed: 117": {
+            "unicos": 1,
+            "valores": [
+              "Fale Conosco"
+            ]
+          },
+          "Unnamed: 118": {
+            "unicos": 1,
+            "valores": [
+              "Olá, Fernanda. Tudo bem?O site passou por algumas alterações sistêmicas e por isso apareceu o status de \"inativo\" temporariamente. Mas verificamos que seu cadastro já está ativo na plataforma!Acesse o site programamaistop.com.br *Esqueci a senha*. Depois, preencha todos os dados solicitados e crie uma nova senha diferente da antiga.A nova senha deve ter mais de 7 caracteres, contendo pelo menos: \"  1 letra maiúscula\"  3 letras minúsculas\"  4 números\"  1 caractere especial (@, #, %, !)Obs.: Mesmo que você já tenha cadastro, será necessário refazer esse processo.Sempre que precisar, entre em contato com a Central de Atendimento:\"  Telefone: das 10h às 16h\"  WhatsApp: das 9h às 18\"  De segunda a sexta-feira (exceto feriados)\"  Número: 0800 780 0606Estamos sempre à disposição para ajudar!Atenciosamente,Central de Atendimento +TOP"
+            ]
+          },
+          "Unnamed: 119": {
+            "unicos": 1,
+            "valores": [
+              "2025-11-04 13:35:25"
+            ]
+          }
+        },
+        "estatisticas_numericas": {
+          "Data": {
+            "count": 5035,
+            "mean": "2025-10-25 03:05:36.282621",
+            "min": "2025-10-20 02:42:32",
+            "25%": "2025-10-20 16:34:25",
+            "50%": "2025-10-22 17:02:24",
+            "75%": "2025-10-28 14:27:08.500000",
+            "max": "2025-11-07 15:45:04",
+            "std": NaN
+          },
+          "CPF/CNPJ": {
+            "count": 5035.0,
+            "mean": 26192676295.68977,
+            "min": 6525202.0,
+            "25%": 3082392024.0,
+            "50%": 7503384158.0,
+            "75%": 52690865904.0,
+            "max": 99963396291.0,
+            "std": 31782056511.91411
+          },
+          "Unnamed: 13": {
+            "count": 162,
+            "mean": "2025-11-03 00:16:31.395061",
+            "min": "2025-10-23 10:00:46",
+            "25%": "2025-10-31 17:03:21.500000",
+            "50%": "2025-11-03 16:35:28",
+            "75%": "2025-11-05 11:17:52.750000",
+            "max": "2025-11-07 15:34:38",
+            "std": NaN
+          },
+          "Unnamed: 14": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 15": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 16": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 17": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 18": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 19": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 20": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 21": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 22": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 23": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 24": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 25": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 26": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 27": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 28": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 29": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 30": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 31": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 32": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 33": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 34": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 35": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 36": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 37": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 38": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 39": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 40": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 41": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 42": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 43": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 44": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 45": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 46": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 47": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 48": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 49": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 50": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 51": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 52": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 53": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 54": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 55": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 56": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 57": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 58": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 59": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 60": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 61": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 62": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 63": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 64": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 65": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 66": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 67": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 68": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 69": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 70": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 71": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 72": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 73": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 74": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 75": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 76": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 77": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 78": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 79": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 80": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 81": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 82": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 83": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 84": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 85": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 86": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 87": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 88": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 89": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 90": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 91": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 92": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 93": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 94": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 95": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 96": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 97": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 98": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 99": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 100": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 101": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 102": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 103": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 104": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 105": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 106": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 107": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 108": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 109": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 110": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 111": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 112": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 113": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 114": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "Unnamed: 119": {
+            "count": 1,
+            "mean": "2025-11-04 13:35:25",
+            "min": "2025-11-04 13:35:25",
+            "25%": "2025-11-04 13:35:25",
+            "50%": "2025-11-04 13:35:25",
+            "75%": "2025-11-04 13:35:25",
+            "max": "2025-11-04 13:35:25",
+            "std": NaN
+          }
+        },
+        "nulos": {
+          "Data": 0,
+          "Regional": 4887,
+          "Grupo": 4887,
+          "Nome": 0,
+          "CPF/CNPJ": 0,
+          "E-mail": 0,
+          "Assunto": 0,
+          "Mensagem": 3,
+          "Status": 1,
+          "Logado": 1,
+          "Origem": 1,
+          "Última Resposta": 2140,
+          "Data Resposta": 2141,
+          "Unnamed: 13": 4873,
+          "Unnamed: 14": 5035,
+          "Unnamed: 15": 5035,
+          "Unnamed: 16": 5035,
+          "Unnamed: 17": 5035,
+          "Unnamed: 18": 5035,
+          "Unnamed: 19": 5035,
+          "Unnamed: 20": 5035,
+          "Unnamed: 21": 5035,
+          "Unnamed: 22": 5035,
+          "Unnamed: 23": 5035,
+          "Unnamed: 24": 5035,
+          "Unnamed: 25": 5035,
+          "Unnamed: 26": 5035,
+          "Unnamed: 27": 5035,
+          "Unnamed: 28": 5035,
+          "Unnamed: 29": 5035,
+          "Unnamed: 30": 5035,
+          "Unnamed: 31": 5035,
+          "Unnamed: 32": 5035,
+          "Unnamed: 33": 5035,
+          "Unnamed: 34": 5035,
+          "Unnamed: 35": 5035,
+          "Unnamed: 36": 5035,
+          "Unnamed: 37": 5035,
+          "Unnamed: 38": 5035,
+          "Unnamed: 39": 5035,
+          "Unnamed: 40": 5035,
+          "Unnamed: 41": 5035,
+          "Unnamed: 42": 5035,
+          "Unnamed: 43": 5035,
+          "Unnamed: 44": 5035,
+          "Unnamed: 45": 5035,
+          "Unnamed: 46": 5035,
+          "Unnamed: 47": 5035,
+          "Unnamed: 48": 5035,
+          "Unnamed: 49": 5035,
+          "Unnamed: 50": 5035,
+          "Unnamed: 51": 5035,
+          "Unnamed: 52": 5035,
+          "Unnamed: 53": 5035,
+          "Unnamed: 54": 5035,
+          "Unnamed: 55": 5035,
+          "Unnamed: 56": 5035,
+          "Unnamed: 57": 5035,
+          "Unnamed: 58": 5035,
+          "Unnamed: 59": 5035,
+          "Unnamed: 60": 5035,
+          "Unnamed: 61": 5035,
+          "Unnamed: 62": 5035,
+          "Unnamed: 63": 5035,
+          "Unnamed: 64": 5035,
+          "Unnamed: 65": 5035,
+          "Unnamed: 66": 5035,
+          "Unnamed: 67": 5035,
+          "Unnamed: 68": 5035,
+          "Unnamed: 69": 5035,
+          "Unnamed: 70": 5035,
+          "Unnamed: 71": 5035,
+          "Unnamed: 72": 5035,
+          "Unnamed: 73": 5035,
+          "Unnamed: 74": 5035,
+          "Unnamed: 75": 5035,
+          "Unnamed: 76": 5035,
+          "Unnamed: 77": 5035,
+          "Unnamed: 78": 5035,
+          "Unnamed: 79": 5035,
+          "Unnamed: 80": 5035,
+          "Unnamed: 81": 5035,
+          "Unnamed: 82": 5035,
+          "Unnamed: 83": 5035,
+          "Unnamed: 84": 5035,
+          "Unnamed: 85": 5035,
+          "Unnamed: 86": 5035,
+          "Unnamed: 87": 5035,
+          "Unnamed: 88": 5035,
+          "Unnamed: 89": 5035,
+          "Unnamed: 90": 5035,
+          "Unnamed: 91": 5035,
+          "Unnamed: 92": 5035,
+          "Unnamed: 93": 5035,
+          "Unnamed: 94": 5035,
+          "Unnamed: 95": 5035,
+          "Unnamed: 96": 5035,
+          "Unnamed: 97": 5035,
+          "Unnamed: 98": 5035,
+          "Unnamed: 99": 5035,
+          "Unnamed: 100": 5035,
+          "Unnamed: 101": 5035,
+          "Unnamed: 102": 5035,
+          "Unnamed: 103": 5035,
+          "Unnamed: 104": 5035,
+          "Unnamed: 105": 5035,
+          "Unnamed: 106": 5035,
+          "Unnamed: 107": 5035,
+          "Unnamed: 108": 5035,
+          "Unnamed: 109": 5035,
+          "Unnamed: 110": 5035,
+          "Unnamed: 111": 5035,
+          "Unnamed: 112": 5035,
+          "Unnamed: 113": 5035,
+          "Unnamed: 114": 5035,
+          "Unnamed: 115": 5034,
+          "Unnamed: 116": 5034,
+          "Unnamed: 117": 5034,
+          "Unnamed: 118": 5034,
+          "Unnamed: 119": 5034
+        },
+        "nulos_pct": {
+          "Data": 0.0,
+          "Regional": 97.06,
+          "Grupo": 97.06,
+          "Nome": 0.0,
+          "CPF/CNPJ": 0.0,
+          "E-mail": 0.0,
+          "Assunto": 0.0,
+          "Mensagem": 0.06,
+          "Status": 0.02,
+          "Logado": 0.02,
+          "Origem": 0.02,
+          "Última Resposta": 42.5,
+          "Data Resposta": 42.52,
+          "Unnamed: 13": 96.78,
+          "Unnamed: 14": 100.0,
+          "Unnamed: 15": 100.0,
+          "Unnamed: 16": 100.0,
+          "Unnamed: 17": 100.0,
+          "Unnamed: 18": 100.0,
+          "Unnamed: 19": 100.0,
+          "Unnamed: 20": 100.0,
+          "Unnamed: 21": 100.0,
+          "Unnamed: 22": 100.0,
+          "Unnamed: 23": 100.0,
+          "Unnamed: 24": 100.0,
+          "Unnamed: 25": 100.0,
+          "Unnamed: 26": 100.0,
+          "Unnamed: 27": 100.0,
+          "Unnamed: 28": 100.0,
+          "Unnamed: 29": 100.0,
+          "Unnamed: 30": 100.0,
+          "Unnamed: 31": 100.0,
+          "Unnamed: 32": 100.0,
+          "Unnamed: 33": 100.0,
+          "Unnamed: 34": 100.0,
+          "Unnamed: 35": 100.0,
+          "Unnamed: 36": 100.0,
+          "Unnamed: 37": 100.0,
+          "Unnamed: 38": 100.0,
+          "Unnamed: 39": 100.0,
+          "Unnamed: 40": 100.0,
+          "Unnamed: 41": 100.0,
+          "Unnamed: 42": 100.0,
+          "Unnamed: 43": 100.0,
+          "Unnamed: 44": 100.0,
+          "Unnamed: 45": 100.0,
+          "Unnamed: 46": 100.0,
+          "Unnamed: 47": 100.0,
+          "Unnamed: 48": 100.0,
+          "Unnamed: 49": 100.0,
+          "Unnamed: 50": 100.0,
+          "Unnamed: 51": 100.0,
+          "Unnamed: 52": 100.0,
+          "Unnamed: 53": 100.0,
+          "Unnamed: 54": 100.0,
+          "Unnamed: 55": 100.0,
+          "Unnamed: 56": 100.0,
+          "Unnamed: 57": 100.0,
+          "Unnamed: 58": 100.0,
+          "Unnamed: 59": 100.0,
+          "Unnamed: 60": 100.0,
+          "Unnamed: 61": 100.0,
+          "Unnamed: 62": 100.0,
+          "Unnamed: 63": 100.0,
+          "Unnamed: 64": 100.0,
+          "Unnamed: 65": 100.0,
+          "Unnamed: 66": 100.0,
+          "Unnamed: 67": 100.0,
+          "Unnamed: 68": 100.0,
+          "Unnamed: 69": 100.0,
+          "Unnamed: 70": 100.0,
+          "Unnamed: 71": 100.0,
+          "Unnamed: 72": 100.0,
+          "Unnamed: 73": 100.0,
+          "Unnamed: 74": 100.0,
+          "Unnamed: 75": 100.0,
+          "Unnamed: 76": 100.0,
+          "Unnamed: 77": 100.0,
+          "Unnamed: 78": 100.0,
+          "Unnamed: 79": 100.0,
+          "Unnamed: 80": 100.0,
+          "Unnamed: 81": 100.0,
+          "Unnamed: 82": 100.0,
+          "Unnamed: 83": 100.0,
+          "Unnamed: 84": 100.0,
+          "Unnamed: 85": 100.0,
+          "Unnamed: 86": 100.0,
+          "Unnamed: 87": 100.0,
+          "Unnamed: 88": 100.0,
+          "Unnamed: 89": 100.0,
+          "Unnamed: 90": 100.0,
+          "Unnamed: 91": 100.0,
+          "Unnamed: 92": 100.0,
+          "Unnamed: 93": 100.0,
+          "Unnamed: 94": 100.0,
+          "Unnamed: 95": 100.0,
+          "Unnamed: 96": 100.0,
+          "Unnamed: 97": 100.0,
+          "Unnamed: 98": 100.0,
+          "Unnamed: 99": 100.0,
+          "Unnamed: 100": 100.0,
+          "Unnamed: 101": 100.0,
+          "Unnamed: 102": 100.0,
+          "Unnamed: 103": 100.0,
+          "Unnamed: 104": 100.0,
+          "Unnamed: 105": 100.0,
+          "Unnamed: 106": 100.0,
+          "Unnamed: 107": 100.0,
+          "Unnamed: 108": 100.0,
+          "Unnamed: 109": 100.0,
+          "Unnamed: 110": 100.0,
+          "Unnamed: 111": 100.0,
+          "Unnamed: 112": 100.0,
+          "Unnamed: 113": 100.0,
+          "Unnamed: 114": 100.0,
+          "Unnamed: 115": 99.98,
+          "Unnamed: 116": 99.98,
+          "Unnamed: 117": 99.98,
+          "Unnamed: 118": 99.98,
+          "Unnamed: 119": 99.98
+        },
+        "colunas_data": {
+          "Data": {
+            "min": "2025-10-20 02:42:32",
+            "max": "2025-11-07 15:45:04",
+            "nao_nulos": 5035
+          },
+          "Data Resposta": {
+            "min": "2025-10-22 17:12:27",
+            "max": "2025-11-07 15:49:03",
+            "nao_nulos": 2732
+          }
+        }
+      }
+    }
+  },
+  "enquete": {
+    "nome": "enquete",
+    "arquivo": "/home/thamiresvieira/projetos/Programa_mais_top/bases/Tabelas/enquete.xlsx",
+    "tamanho_mb": 0.1,
+    "abas": {
+      "enquete_2026-06-01T16_31_43.183": {
+        "linhas": 1454,
+        "colunas": [
+          "nome",
+          "participante",
+          "cpf",
+          "cargo",
+          "tipo",
+          "pergunta",
+          "resposta",
+          "dataInclusao"
+        ],
+        "tipos": {
+          "nome": "str",
+          "participante": "str",
+          "cpf": "int64",
+          "cargo": "str",
+          "tipo": "str",
+          "pergunta": "str",
+          "resposta": "str",
+          "dataInclusao": "datetime64[us]"
+        },
+        "amostra": [
+          {
+            "nome": "Nova Plataforma do +TOP",
+            "participante": "Igor Ferraz Lima",
+            "cpf": 14839395705,
+            "cargo": "Master",
+            "tipo": "Enquete",
+            "pergunta": "O que você está achando do novo site do +TOP?",
+            "resposta": "Excelente",
+            "dataInclusao": "2025-10-17 18:07:20"
+          },
+          {
+            "nome": "Nova Plataforma do +TOP",
+            "participante": "Flávio Freitas",
+            "cpf": 31160109869,
+            "cargo": "Master",
+            "tipo": "Enquete",
+            "pergunta": "O que você está achando do novo site do +TOP?",
+            "resposta": "Excelente",
+            "dataInclusao": "2025-10-17 19:09:10"
+          },
+          {
+            "nome": "Nova Plataforma do +TOP",
+            "participante": "Roberta Julia Rockenbach",
+            "cpf": 98189239015,
+            "cargo": "Vendedor",
+            "tipo": "Enquete",
+            "pergunta": "O que você está achando do novo site do +TOP?",
+            "resposta": "Excelente",
+            "dataInclusao": "2025-10-20 10:33:58"
+          }
+        ],
+        "categorias": {
+          "nome": {
+            "unicos": 1,
+            "valores": [
+              "Nova Plataforma do +TOP"
+            ]
+          },
+          "cargo": {
+            "unicos": 6,
+            "valores": [
+              "Master",
+              "Vendedor",
+              "Gerente de Loja",
+              "Gerente Regional",
+              "Gestor da Informação",
+              "Embaixador"
+            ]
+          },
+          "tipo": {
+            "unicos": 1,
+            "valores": [
+              "Enquete"
+            ]
+          },
+          "pergunta": {
+            "unicos": 1,
+            "valores": [
+              "O que você está achando do novo site do +TOP?"
+            ]
+          },
+          "resposta": {
+            "unicos": 5,
+            "valores": [
+              "Excelente",
+              "Ruim",
+              "Bom",
+              "Ótimo",
+              "Regular"
+            ]
+          }
+        },
+        "estatisticas_numericas": {
+          "cpf": {
+            "count": 1454.0,
+            "mean": 25527055953.48487,
+            "min": 7982232.0,
+            "25%": 3307993091.0,
+            "50%": 8149587426.0,
+            "75%": 50067868714.5,
+            "max": 99961466004.0,
+            "std": 31066515059.753853
+          },
+          "dataInclusao": {
+            "count": 1454,
+            "mean": "2025-12-02 14:10:29.296423",
+            "min": "2025-10-17 18:07:20",
+            "25%": "2025-10-28 14:35:06.750000",
+            "50%": "2025-11-11 13:22:55.500000",
+            "75%": "2025-11-28 09:54:32",
+            "max": "2026-03-30 21:31:14",
+            "std": NaN
+          }
+        },
+        "nulos": {
+          "nome": 0,
+          "participante": 0,
+          "cpf": 0,
+          "cargo": 0,
+          "tipo": 0,
+          "pergunta": 0,
+          "resposta": 0,
+          "dataInclusao": 0
+        },
+        "nulos_pct": {
+          "nome": 0.0,
+          "participante": 0.0,
+          "cpf": 0.0,
+          "cargo": 0.0,
+          "tipo": 0.0,
+          "pergunta": 0.0,
+          "resposta": 0.0,
+          "dataInclusao": 0.0
+        },
+        "colunas_data": {
+          "dataInclusao": {
+            "min": "2025-10-17 18:07:20",
+            "max": "2026-03-30 21:31:14",
+            "nao_nulos": 1454
+          }
+        }
+      }
+    }
+  },
+  "ocorrencias": {
+    "nome": "ocorrencias",
+    "arquivo": "/home/thamiresvieira/projetos/Programa_mais_top/bases/Tabelas/OcorrênciasTOPSAC.xlsx",
+    "tamanho_mb": 1.92,
+    "abas": {
+      "Consulta de Ocorrências": {
+        "linhas": 7240,
+        "colunas": [
+          "N.º",
+          "Data/Hora abertura",
+          "Data/hora de encerramento",
+          "Clientes : +TOP - MÊS DA PONTUAÇÃO",
+          "Cliente",
+          "+TOP - CARGO",
+          "CPF / CNPJ sem pontuação",
+          "Cliente : Telefone Residencial : DDD junto com Número",
+          "Cliente : Telefone Celular : DDD junto com Número",
+          "Cliente : Telefone Extra : DDD junto com Número",
+          "Cliente : E-mail 1",
+          "Cliente : E-mail 2",
+          "Cliente : E-mail 3",
+          "+TOP - SOLICITAÇÃO",
+          "+TOP - MOTIVO",
+          "+TOP - SUBMOTIVO",
+          "+TOP - NOME DA REDE",
+          "+TOP - TIPO DE ATENDIMENTO",
+          "NÚMERO DO PEDIDO",
+          "PRODUTO",
+          "CPF OU CNPJ",
+          "DATA DO PEDIDO",
+          "PARCEIRO",
+          "OPERADOR",
+          "+TOP - QUANTIDADE DE PRODUTOS",
+          "+TOP - PRODUTO 01",
+          "+TOP - PRODUTO 02",
+          "+TOP - PRODUTO 03",
+          "+TOP - PRODUTO 04",
+          "+TOP - PRODUTO 05",
+          "+TOP - PRODUTO 06",
+          "+TOP - PRODUTO 07",
+          "+TOP - PRODUTO 08",
+          "+TOP - PRODUTO 09",
+          "+TOP - PRODUTO 10",
+          "Status (sem tempo decorrido)",
+          "Ultima narrativa sem status",
+          "Descrição",
+          "Aberto por"
+        ],
+        "tipos": {
+          "N.º": "int64",
+          "Data/Hora abertura": "str",
+          "Data/hora de encerramento": "str",
+          "Clientes : +TOP - MÊS DA PONTUAÇÃO": "str",
+          "Cliente": "str",
+          "+TOP - CARGO": "str",
+          "CPF / CNPJ sem pontuação": "float64",
+          "Cliente : Telefone Residencial : DDD junto com Número": "str",
+          "Cliente : Telefone Celular : DDD junto com Número": "str",
+          "Cliente : Telefone Extra : DDD junto com Número": "str",
+          "Cliente : E-mail 1": "str",
+          "Cliente : E-mail 2": "str",
+          "Cliente : E-mail 3": "float64",
+          "+TOP - SOLICITAÇÃO": "str",
+          "+TOP - MOTIVO": "str",
+          "+TOP - SUBMOTIVO": "str",
+          "+TOP - NOME DA REDE": "str",
+          "+TOP - TIPO DE ATENDIMENTO": "str",
+          "NÚMERO DO PEDIDO": "str",
+          "PRODUTO": "str",
+          "CPF OU CNPJ": "float64",
+          "DATA DO PEDIDO": "str",
+          "PARCEIRO": "str",
+          "OPERADOR": "float64",
+          "+TOP - QUANTIDADE DE PRODUTOS": "float64",
+          "+TOP - PRODUTO 01": "float64",
+          "+TOP - PRODUTO 02": "float64",
+          "+TOP - PRODUTO 03": "float64",
+          "+TOP - PRODUTO 04": "float64",
+          "+TOP - PRODUTO 05": "float64",
+          "+TOP - PRODUTO 06": "float64",
+          "+TOP - PRODUTO 07": "float64",
+          "+TOP - PRODUTO 08": "float64",
+          "+TOP - PRODUTO 09": "float64",
+          "+TOP - PRODUTO 10": "float64",
+          "Status (sem tempo decorrido)": "str",
+          "Ultima narrativa sem status": "str",
+          "Descrição": "str",
+          "Aberto por": "str"
+        },
+        "amostra": [
+          {
+            "N.º": 308009,
+            "Data/Hora abertura": "22/05/2026 15:54:56",
+            "Data/hora de encerramento": "25/05/2026 10:43:20",
+            "Clientes : +TOP - MÊS DA PONTUAÇÃO": NaN,
+            "Cliente": "Davi Pereira Castro",
+            "+TOP - CARGO": "VENDEDOR",
+            "CPF / CNPJ sem pontuação": 7482395539.0,
+            "Cliente : Telefone Residencial : DDD junto com Número": NaN,
+            "Cliente : Telefone Celular : DDD junto com Número": "(84)9 8632-2973",
+            "Cliente : Telefone Extra : DDD junto com Número": NaN,
+            "Cliente : E-mail 1": "davismcastro@gmail.com",
+            "Cliente : E-mail 2": NaN,
+            "Cliente : E-mail 3": NaN,
+            "+TOP - SOLICITAÇÃO": "CADASTRO",
+            "+TOP - MOTIVO": "ALTERAÇÃO CADASTRAL",
+            "+TOP - SUBMOTIVO": "ALTERAÇÃO DE TELEFONE",
+            "+TOP - NOME DA REDE": "MASTER ELETRÔNICA DE BRINQ LTDA",
+            "+TOP - TIPO DE ATENDIMENTO": "WHATSAPP",
+            "NÚMERO DO PEDIDO": NaN,
+            "PRODUTO": NaN,
+            "CPF OU CNPJ": NaN,
+            "DATA DO PEDIDO": NaN,
+            "PARCEIRO": NaN,
+            "OPERADOR": NaN,
+            "+TOP - QUANTIDADE DE PRODUTOS": NaN,
+            "+TOP - PRODUTO 01": NaN,
+            "+TOP - PRODUTO 02": NaN,
+            "+TOP - PRODUTO 03": NaN,
+            "+TOP - PRODUTO 04": NaN,
+            "+TOP - PRODUTO 05": NaN,
+            "+TOP - PRODUTO 06": NaN,
+            "+TOP - PRODUTO 07": NaN,
+            "+TOP - PRODUTO 08": NaN,
+            "+TOP - PRODUTO 09": NaN,
+            "+TOP - PRODUTO 10": NaN,
+            "Status (sem tempo decorrido)": "CONCLUÍDO - OCORRÊNCIA",
+            "Ultima narrativa sem status": NaN,
+            "Descrição": "Participante deseja alterar o telefone 84 986322973 para 84 991540979",
+            "Aberto por": "Andrey Silva"
+          },
+          {
+            "N.º": 307993,
+            "Data/Hora abertura": "22/05/2026 15:01:15",
+            "Data/hora de encerramento": "25/05/2026 10:34:56",
+            "Clientes : +TOP - MÊS DA PONTUAÇÃO": NaN,
+            "Cliente": "Raissa Narjara Trifiates Albuquerque",
+            "+TOP - CARGO": "VENDEDOR",
+            "CPF / CNPJ sem pontuação": 1018971203.0,
+            "Cliente : Telefone Residencial : DDD junto com Número": NaN,
+            "Cliente : Telefone Celular : DDD junto com Número": "(69)9 9941-0613",
+            "Cliente : Telefone Extra : DDD junto com Número": NaN,
+            "Cliente : E-mail 1": "raissanarjara571@gmail.com",
+            "Cliente : E-mail 2": NaN,
+            "Cliente : E-mail 3": NaN,
+            "+TOP - SOLICITAÇÃO": "CADASTRO",
+            "+TOP - MOTIVO": "PARTICIPANTE NÃO CADASTRADO NO PROGRAMA",
+            "+TOP - SUBMOTIVO": NaN,
+            "+TOP - NOME DA REDE": "GAZIN IND E COM DE MOV E ELETR LTDA",
+            "+TOP - TIPO DE ATENDIMENTO": "FALE CONOSCO",
+            "NÚMERO DO PEDIDO": NaN,
+            "PRODUTO": NaN,
+            "CPF OU CNPJ": NaN,
+            "DATA DO PEDIDO": NaN,
+            "PARCEIRO": NaN,
+            "OPERADOR": NaN,
+            "+TOP - QUANTIDADE DE PRODUTOS": NaN,
+            "+TOP - PRODUTO 01": NaN,
+            "+TOP - PRODUTO 02": NaN,
+            "+TOP - PRODUTO 03": NaN,
+            "+TOP - PRODUTO 04": NaN,
+            "+TOP - PRODUTO 05": NaN,
+            "+TOP - PRODUTO 06": NaN,
+            "+TOP - PRODUTO 07": NaN,
+            "+TOP - PRODUTO 08": NaN,
+            "+TOP - PRODUTO 09": NaN,
+            "+TOP - PRODUTO 10": NaN,
+            "Status (sem tempo decorrido)": "CONCLUÍDO - OCORRÊNCIA",
+            "Ultima narrativa sem status": NaN,
+            "Descrição": "Participante não consegue se cadastrar, aparece a msg: Não foi possível prosseguir: não há lojas ativas vinculadas ao seu pré-cadastro. (segue print)",
+            "Aberto por": "Ana Monique"
+          },
+          {
+            "N.º": 308018,
+            "Data/Hora abertura": "22/05/2026 17:22:24",
+            "Data/hora de encerramento": "25/05/2026 10:33:50",
+            "Clientes : +TOP - MÊS DA PONTUAÇÃO": NaN,
+            "Cliente": "José Eudes Oliveira da Silva",
+            "+TOP - CARGO": "VENDEDOR",
+            "CPF / CNPJ sem pontuação": 14382019400.0,
+            "Cliente : Telefone Residencial : DDD junto com Número": NaN,
+            "Cliente : Telefone Celular : DDD junto com Número": "(81)9 8479-3136",
+            "Cliente : Telefone Extra : DDD junto com Número": NaN,
+            "Cliente : E-mail 1": "Joseeudesze08@gmail.com",
+            "Cliente : E-mail 2": NaN,
+            "Cliente : E-mail 3": NaN,
+            "+TOP - SOLICITAÇÃO": "CADASTRO",
+            "+TOP - MOTIVO": "ALTERAÇÃO CADASTRAL",
+            "+TOP - SUBMOTIVO": "ALTERAÇÃO DE TELEFONE",
+            "+TOP - NOME DA REDE": "IMPÉRIO MOVEIS E ELETRO S/A",
+            "+TOP - TIPO DE ATENDIMENTO": "WHATSAPP",
+            "NÚMERO DO PEDIDO": NaN,
+            "PRODUTO": NaN,
+            "CPF OU CNPJ": NaN,
+            "DATA DO PEDIDO": NaN,
+            "PARCEIRO": NaN,
+            "OPERADOR": NaN,
+            "+TOP - QUANTIDADE DE PRODUTOS": NaN,
+            "+TOP - PRODUTO 01": NaN,
+            "+TOP - PRODUTO 02": NaN,
+            "+TOP - PRODUTO 03": NaN,
+            "+TOP - PRODUTO 04": NaN,
+            "+TOP - PRODUTO 05": NaN,
+            "+TOP - PRODUTO 06": NaN,
+            "+TOP - PRODUTO 07": NaN,
+            "+TOP - PRODUTO 08": NaN,
+            "+TOP - PRODUTO 09": NaN,
+            "+TOP - PRODUTO 10": NaN,
+            "Status (sem tempo decorrido)": "CONCLUÍDO - OCORRÊNCIA",
+            "Ultima narrativa sem status": NaN,
+            "Descrição": "Participante deseja alterar o celular de 81 984793136 para 81 995664198",
+            "Aberto por": "Ana Monique"
+          }
+        ],
+        "categorias": {
+          "Clientes : +TOP - MÊS DA PONTUAÇÃO": {
+            "unicos": 3,
+            "valores": [
+              "DEZEMBRO",
+              "FEVEREIRO",
+              "MARÇO"
+            ]
+          },
+          "+TOP - CARGO": {
+            "unicos": 6,
+            "valores": [
+              "VENDEDOR",
+              "GERENTE DE LOJA",
+              "PROMOTOR",
+              "GERENTE REGIONAL",
+              "GESTOR DE INFORMAÇÃO",
+              "ABANDONOU A CONVERSA"
+            ]
+          },
+          "Cliente : E-mail 2": {
+            "unicos": 11,
+            "valores": [
+              "AdrianaALeandro6@gmail.com",
+              "Bandacaliforniaaraxa@gmail.com",
+              "gomesjacilene0@gmail.com",
+              "Jeverson.kanars@email.lojasmm.com.br",
+              "michellevoigt.cris@gmail.com",
+              "cruzweberton@gmail.com",
+              "evandro1.vendas@hotmail.com",
+              "Grasieledornelles4@gmail.com",
+              "Filipenivaldoo@icloud.com",
+              "evanildoantonio1963@gmail.com",
+              "lorraynemoveisestrela@outlook.com"
+            ]
+          },
+          "Cliente : E-mail 3": {
+            "unicos": 0,
+            "valores": []
+          },
+          "+TOP - SOLICITAÇÃO": {
+            "unicos": 12,
+            "valores": [
+              "CADASTRO",
+              "CAMPANHAS",
+              "PONTUAÇÃO E EXTRATO",
+              "ACESSO",
+              "TREINAMENTOS",
+              "DÚVIDAS E ORIENTAÇÕES SOBRE O PROGRAMA/CAMPANHA",
+              "CATÁLOGO",
+              "PROBLEMAS TÉCNICOS",
+              "TESTE/QUEDA/TERCEIROS",
+              "ELOGIOS",
+              "RECLAMAÇÕES",
+              "CARTÃO"
+            ]
+          },
+          "+TOP - TIPO DE ATENDIMENTO": {
+            "unicos": 5,
+            "valores": [
+              "WHATSAPP",
+              "FALE CONOSCO",
+              "RECEPTIVO",
+              "CATÁLOGO",
+              "ATIVO"
+            ]
+          },
+          "NÚMERO DO PEDIDO": {
+            "unicos": 1,
+            "valores": [
+              "Não há"
+            ]
+          },
+          "PRODUTO": {
+            "unicos": 1,
+            "valores": [
+              "Pix"
+            ]
+          },
+          "CPF OU CNPJ": {
+            "unicos": 1,
+            "valores": [
+              76165035.0
+            ]
+          },
+          "DATA DO PEDIDO": {
+            "unicos": 1,
+            "valores": [
+              "28/01/2026"
+            ]
+          },
+          "PARCEIRO": {
+            "unicos": 1,
+            "valores": [
+              "Catálogo"
+            ]
+          },
+          "OPERADOR": {
+            "unicos": 0,
+            "valores": []
+          },
+          "+TOP - QUANTIDADE DE PRODUTOS": {
+            "unicos": 0,
+            "valores": []
+          },
+          "+TOP - PRODUTO 01": {
+            "unicos": 0,
+            "valores": []
+          },
+          "+TOP - PRODUTO 02": {
+            "unicos": 0,
+            "valores": []
+          },
+          "+TOP - PRODUTO 03": {
+            "unicos": 0,
+            "valores": []
+          },
+          "+TOP - PRODUTO 04": {
+            "unicos": 0,
+            "valores": []
+          },
+          "+TOP - PRODUTO 05": {
+            "unicos": 0,
+            "valores": []
+          },
+          "+TOP - PRODUTO 06": {
+            "unicos": 0,
+            "valores": []
+          },
+          "+TOP - PRODUTO 07": {
+            "unicos": 0,
+            "valores": []
+          },
+          "+TOP - PRODUTO 08": {
+            "unicos": 0,
+            "valores": []
+          },
+          "+TOP - PRODUTO 09": {
+            "unicos": 0,
+            "valores": []
+          },
+          "+TOP - PRODUTO 10": {
+            "unicos": 0,
+            "valores": []
+          },
+          "Status (sem tempo decorrido)": {
+            "unicos": 7,
+            "valores": [
+              "CONCLUÍDO - OCORRÊNCIA",
+              "+TOP - PENDENTE DIALLINK",
+              "+TOP - PENDENTE CAMPANHA",
+              "CONCLUÍDO - DÚVIDA",
+              "CONCLUÍDO - OUTROS",
+              "CONCLUÍDO - ELOGIO",
+              "CONCLUÍDO - SUGESTÃO"
+            ]
+          },
+          "Ultima narrativa sem status": {
+            "unicos": 3,
+            "valores": [
+              "ALTERADO!\n\nDados do Cliente alterados:\nCliente : Empresa trabalha : de Colombo para -nenhum-",
+              "Dados do Cliente alterados:\nCliente\n : de -nenhum- para Joao Vitor Andrade Brasil",
+              "Olá! ?\n\nO telefone foi atualizado com sucesso.\n\nPor favor, entre em contato com o participante e, após o atendimento, realize o fechamento da ocorrência.\n\nObrigada!"
+            ]
+          },
+          "Aberto por": {
+            "unicos": 3,
+            "valores": [
+              "Andrey Silva",
+              "Ana Monique",
+              "Claudia Cilene"
+            ]
+          }
+        },
+        "estatisticas_numericas": {
+          "N.º": {
+            "count": 7240.0,
+            "mean": 303956.7705801105,
+            "std": 2376.1706360921794,
+            "min": 299807.0,
+            "25%": 301917.75,
+            "50%": 303966.5,
+            "75%": 306014.25,
+            "max": 308029.0
+          },
+          "CPF / CNPJ sem pontuação": {
+            "count": 6707.0,
+            "mean": 25836226560.51364,
+            "std": 31437833757.557293,
+            "min": 9545352.0,
+            "25%": 3626382419.0,
+            "50%": 8487485650.0,
+            "75%": 51676980317.0,
+            "max": 99937883172.0
+          },
+          "Cliente : E-mail 3": {
+            "count": 0.0,
+            "mean": NaN,
+            "std": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN
+          },
+          "CPF OU CNPJ": {
+            "count": 1.0,
+            "mean": 76165035.0,
+            "std": NaN,
+            "min": 76165035.0,
+            "25%": 76165035.0,
+            "50%": 76165035.0,
+            "75%": 76165035.0,
+            "max": 76165035.0
+          },
+          "OPERADOR": {
+            "count": 0.0,
+            "mean": NaN,
+            "std": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN
+          },
+          "+TOP - QUANTIDADE DE PRODUTOS": {
+            "count": 0.0,
+            "mean": NaN,
+            "std": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN
+          },
+          "+TOP - PRODUTO 01": {
+            "count": 0.0,
+            "mean": NaN,
+            "std": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN
+          },
+          "+TOP - PRODUTO 02": {
+            "count": 0.0,
+            "mean": NaN,
+            "std": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN
+          },
+          "+TOP - PRODUTO 03": {
+            "count": 0.0,
+            "mean": NaN,
+            "std": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN
+          },
+          "+TOP - PRODUTO 04": {
+            "count": 0.0,
+            "mean": NaN,
+            "std": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN
+          },
+          "+TOP - PRODUTO 05": {
+            "count": 0.0,
+            "mean": NaN,
+            "std": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN
+          },
+          "+TOP - PRODUTO 06": {
+            "count": 0.0,
+            "mean": NaN,
+            "std": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN
+          },
+          "+TOP - PRODUTO 07": {
+            "count": 0.0,
+            "mean": NaN,
+            "std": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN
+          },
+          "+TOP - PRODUTO 08": {
+            "count": 0.0,
+            "mean": NaN,
+            "std": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN
+          },
+          "+TOP - PRODUTO 09": {
+            "count": 0.0,
+            "mean": NaN,
+            "std": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN
+          },
+          "+TOP - PRODUTO 10": {
+            "count": 0.0,
+            "mean": NaN,
+            "std": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN
+          }
+        },
+        "nulos": {
+          "N.º": 0,
+          "Data/Hora abertura": 0,
+          "Data/hora de encerramento": 2,
+          "Clientes : +TOP - MÊS DA PONTUAÇÃO": 7116,
+          "Cliente": 12,
+          "+TOP - CARGO": 3930,
+          "CPF / CNPJ sem pontuação": 533,
+          "Cliente : Telefone Residencial : DDD junto com Número": 7136,
+          "Cliente : Telefone Celular : DDD junto com Número": 299,
+          "Cliente : Telefone Extra : DDD junto com Número": 6998,
+          "Cliente : E-mail 1": 1192,
+          "Cliente : E-mail 2": 7184,
+          "Cliente : E-mail 3": 7240,
+          "+TOP - SOLICITAÇÃO": 0,
+          "+TOP - MOTIVO": 19,
+          "+TOP - SUBMOTIVO": 5479,
+          "+TOP - NOME DA REDE": 119,
+          "+TOP - TIPO DE ATENDIMENTO": 0,
+          "NÚMERO DO PEDIDO": 7239,
+          "PRODUTO": 7239,
+          "CPF OU CNPJ": 7239,
+          "DATA DO PEDIDO": 7239,
+          "PARCEIRO": 7239,
+          "OPERADOR": 7240,
+          "+TOP - QUANTIDADE DE PRODUTOS": 7240,
+          "+TOP - PRODUTO 01": 7240,
+          "+TOP - PRODUTO 02": 7240,
+          "+TOP - PRODUTO 03": 7240,
+          "+TOP - PRODUTO 04": 7240,
+          "+TOP - PRODUTO 05": 7240,
+          "+TOP - PRODUTO 06": 7240,
+          "+TOP - PRODUTO 07": 7240,
+          "+TOP - PRODUTO 08": 7240,
+          "+TOP - PRODUTO 09": 7240,
+          "+TOP - PRODUTO 10": 7240,
+          "Status (sem tempo decorrido)": 0,
+          "Ultima narrativa sem status": 7237,
+          "Descrição": 3,
+          "Aberto por": 0
+        },
+        "nulos_pct": {
+          "N.º": 0.0,
+          "Data/Hora abertura": 0.0,
+          "Data/hora de encerramento": 0.03,
+          "Clientes : +TOP - MÊS DA PONTUAÇÃO": 98.29,
+          "Cliente": 0.17,
+          "+TOP - CARGO": 54.28,
+          "CPF / CNPJ sem pontuação": 7.36,
+          "Cliente : Telefone Residencial : DDD junto com Número": 98.56,
+          "Cliente : Telefone Celular : DDD junto com Número": 4.13,
+          "Cliente : Telefone Extra : DDD junto com Número": 96.66,
+          "Cliente : E-mail 1": 16.46,
+          "Cliente : E-mail 2": 99.23,
+          "Cliente : E-mail 3": 100.0,
+          "+TOP - SOLICITAÇÃO": 0.0,
+          "+TOP - MOTIVO": 0.26,
+          "+TOP - SUBMOTIVO": 75.68,
+          "+TOP - NOME DA REDE": 1.64,
+          "+TOP - TIPO DE ATENDIMENTO": 0.0,
+          "NÚMERO DO PEDIDO": 99.99,
+          "PRODUTO": 99.99,
+          "CPF OU CNPJ": 99.99,
+          "DATA DO PEDIDO": 99.99,
+          "PARCEIRO": 99.99,
+          "OPERADOR": 100.0,
+          "+TOP - QUANTIDADE DE PRODUTOS": 100.0,
+          "+TOP - PRODUTO 01": 100.0,
+          "+TOP - PRODUTO 02": 100.0,
+          "+TOP - PRODUTO 03": 100.0,
+          "+TOP - PRODUTO 04": 100.0,
+          "+TOP - PRODUTO 05": 100.0,
+          "+TOP - PRODUTO 06": 100.0,
+          "+TOP - PRODUTO 07": 100.0,
+          "+TOP - PRODUTO 08": 100.0,
+          "+TOP - PRODUTO 09": 100.0,
+          "+TOP - PRODUTO 10": 100.0,
+          "Status (sem tempo decorrido)": 0.0,
+          "Ultima narrativa sem status": 99.96,
+          "Descrição": 0.04,
+          "Aberto por": 0.0
+        },
+        "colunas_data": {
+          "Data/Hora abertura": {
+            "min": "2026-02-02 09:55:11",
+            "max": "2026-05-22 18:07:52",
+            "nao_nulos": 7240
+          },
+          "Data/hora de encerramento": {
+            "min": "2026-02-02 10:41:04",
+            "max": "2026-05-25 10:43:20",
+            "nao_nulos": 7238
+          },
+          "DATA DO PEDIDO": {
+            "min": "2026-01-28 00:00:00",
+            "max": "2026-01-28 00:00:00",
+            "nao_nulos": 1
+          }
+        }
+      }
+    }
+  },
+  "tab_nome_revendas": {
+    "nome": "tab_nome_revendas",
+    "arquivo": "/home/thamiresvieira/projetos/Programa_mais_top/bases/Tabelas/tab_nome_revendas.xlsx",
+    "tamanho_mb": 0.02,
+    "abas": {
+      "Plan1": {
+        "linhas": 82,
+        "colunas": [
+          "REVENDAS_NAME_RAW",
+          "REVENDA_TRATADO"
+        ],
+        "tipos": {
+          "REVENDAS_NAME_RAW": "str",
+          "REVENDA_TRATADO": "str"
+        },
+        "amostra": [
+          {
+            "REVENDAS_NAME_RAW": "Gazin Varejo",
+            "REVENDA_TRATADO": "GAZIN VAREJO"
+          },
+          {
+            "REVENDAS_NAME_RAW": "Nosso Lar",
+            "REVENDA_TRATADO": "NOSSO LAR"
+          },
+          {
+            "REVENDAS_NAME_RAW": "Estrela",
+            "REVENDA_TRATADO": "ESTRELA"
+          }
+        ],
+        "categorias": {},
+        "estatisticas_numericas": {},
+        "nulos": {
+          "REVENDAS_NAME_RAW": 0,
+          "REVENDA_TRATADO": 0
+        },
+        "nulos_pct": {
+          "REVENDAS_NAME_RAW": 0.0,
+          "REVENDA_TRATADO": 0.0
+        },
+        "colunas_data": {}
+      }
+    }
+  },
+  "distribuidor_pdv": {
+    "nome": "distribuidor_pdv",
+    "arquivo": "/home/thamiresvieira/projetos/Programa_mais_top/bases/Tabelas/WHP_Distribuidor_x_PDV.xlsx",
+    "tamanho_mb": 0.12,
+    "abas": {
+      "Planilha1": {
+        "linhas": 3039,
+        "colunas": [
+          "CNPJ_REVENDA",
+          "NOME_REVENDA",
+          "CNPJ_LOJA",
+          "NOME_LOJA"
+        ],
+        "tipos": {
+          "CNPJ_REVENDA": "int64",
+          "NOME_REVENDA": "str",
+          "CNPJ_LOJA": "int64",
+          "NOME_LOJA": "object"
+        },
+        "amostra": [
+          {
+            "CNPJ_REVENDA": 15065786000100,
+            "NOME_REVENDA": "Estrela",
+            "CNPJ_LOJA": 15065786003207,
+            "NOME_LOJA": "MINAÇU I"
+          },
+          {
+            "CNPJ_REVENDA": 83733337000135,
+            "NOME_REVENDA": "Gazin Varejo",
+            "CNPJ_LOJA": 77941490006510,
+            "NOME_LOJA": "JUARA - MT"
+          },
+          {
+            "CNPJ_REVENDA": 83733337000135,
+            "NOME_REVENDA": "Gazin Varejo",
+            "CNPJ_LOJA": 77941490031549,
+            "NOME_LOJA": "VÁRZEA GRANDE II - MT"
+          }
+        ],
+        "categorias": {},
+        "estatisticas_numericas": {
+          "CNPJ_REVENDA": {
+            "count": 3039.0,
+            "mean": 45700154862404.016,
+            "std": 35422858816308.8,
+            "min": 296549000175.0,
+            "25%": 15065786000100.0,
+            "50%": 27936211000197.0,
+            "75%": 83733337000135.0,
+            "max": 96662168000131.0
+          },
+          "CNPJ_LOJA": {
+            "count": 3039.0,
+            "mean": 44822053991823.266,
+            "std": 34842306979077.13,
+            "min": 0.0,
+            "25%": 14939270003475.5,
+            "50%": 26404731065646.0,
+            "75%": 77941490029600.5,
+            "max": 99295696000198.0
+          }
+        },
+        "nulos": {
+          "CNPJ_REVENDA": 0,
+          "NOME_REVENDA": 0,
+          "CNPJ_LOJA": 0,
+          "NOME_LOJA": 0
+        },
+        "nulos_pct": {
+          "CNPJ_REVENDA": 0.0,
+          "NOME_REVENDA": 0.0,
+          "CNPJ_LOJA": 0.0,
+          "NOME_LOJA": 0.0
+        },
+        "colunas_data": {}
+      }
+    }
+  },
+  "cadastro_revenda": {
+    "nome": "cadastro_revenda",
+    "arquivo": "/home/thamiresvieira/projetos/Programa_mais_top/bases/Tabelas/WHP_PROD_Cadastro_Revenda_x_Loja_x_Regional.xlsx",
+    "tamanho_mb": 1.82,
+    "abas": {
+      "cadastro_x_revenda_x_loja_2026-": {
+        "linhas": 20558,
+        "colunas": [
+          "Cpf",
+          "Nome",
+          "Cargo",
+          "Celular",
+          "Email",
+          "Status",
+          "CNPJ_Revenda",
+          "Revenda",
+          "Regional_da_Revenda",
+          "CNPJ_Loja",
+          "Loja",
+          "Regional_da_Loja"
+        ],
+        "tipos": {
+          "Cpf": "int64",
+          "Nome": "object",
+          "Cargo": "str",
+          "Celular": "float64",
+          "Email": "str",
+          "Status": "str",
+          "CNPJ_Revenda": "float64",
+          "Revenda": "str",
+          "Regional_da_Revenda": "str",
+          "CNPJ_Loja": "float64",
+          "Loja": "object",
+          "Regional_da_Loja": "str"
+        },
+        "amostra": [
+          {
+            "Cpf": 98470256068,
+            "Nome": "DIEGO SOUZA DOS SANTOS",
+            "Cargo": "Vendedor",
+            "Celular": NaN,
+            "Email": NaN,
+            "Status": "Pré-Cadastrado",
+            "CNPJ_Revenda": 86184074000140.0,
+            "Revenda": "Koerich",
+            "Regional_da_Revenda": "CONTA SUL",
+            "CNPJ_Loja": 86184074001899.0,
+            "Loja": "Super Loja",
+            "Regional_da_Loja": "CONTA NORDESTE"
+          },
+          {
+            "Cpf": 1870811151,
+            "Nome": "Jocasta Lima E Souza",
+            "Cargo": "Vendedor",
+            "Celular": 67984594916.0,
+            "Email": "jocastalima09@gmail.com",
+            "Status": "Ativo",
+            "CNPJ_Revenda": 83733337000135.0,
+            "Revenda": "Gazin Varejo",
+            "Regional_da_Revenda": "CONTA CENTRO NORTE",
+            "CNPJ_Loja": 77941490004576.0,
+            "Loja": "AQUIDAUANA - MS",
+            "Regional_da_Loja": "CONTA NORDESTE"
+          },
+          {
+            "Cpf": 5429674303,
+            "Nome": "Felipe Castro Alves Lima",
+            "Cargo": "Vendedor",
+            "Celular": NaN,
+            "Email": NaN,
+            "Status": "Indicado Moderado",
+            "CNPJ_Revenda": 9376561000164.0,
+            "Revenda": "Nosso Lar",
+            "Regional_da_Revenda": "CONTA NORDESTE",
+            "CNPJ_Loja": 607587003702.0,
+            "Loja": "BACABAL",
+            "Regional_da_Loja": "CONTA NORDESTE"
+          }
+        ],
+        "categorias": {
+          "Cargo": {
+            "unicos": 6,
+            "valores": [
+              "Vendedor",
+              "Gerente de Loja",
+              "Gerente Regional",
+              "Master",
+              "Embaixador",
+              "Gestor da Informação"
+            ]
+          },
+          "Status": {
+            "unicos": 7,
+            "valores": [
+              "Pré-Cadastrado",
+              "Ativo",
+              "Indicado Moderado",
+              "Reprovado",
+              "Inativo",
+              "Aguardando Aprovação",
+              "Em Moderação"
+            ]
+          },
+          "Regional_da_Revenda": {
+            "unicos": 6,
+            "valores": [
+              "CONTA SUL",
+              "CONTA CENTRO NORTE",
+              "CONTA NORDESTE",
+              "CONTA SUDESTE",
+              "COMPRA DIRETA",
+              "Regional padrão"
+            ]
+          },
+          "Regional_da_Loja": {
+            "unicos": 6,
+            "valores": [
+              "CONTA NORDESTE",
+              "CONTA SUL",
+              "COMPRA DIRETA",
+              "CONTA CENTRO NORTE",
+              "Regional padrão",
+              "CONTA SUDESTE"
+            ]
+          }
+        },
+        "estatisticas_numericas": {
+          "Cpf": {
+            "count": 20558.0,
+            "mean": 25815245126.454082,
+            "std": 232339034031.85123,
+            "min": 1187104.0,
+            "25%": 3631726280.0,
+            "50%": 8278918955.5,
+            "75%": 42789607603.0,
+            "max": 33041260208741.0
+          },
+          "Celular": {
+            "count": 15688.0,
+            "mean": 59631367910.883415,
+            "std": 22477205447.75373,
+            "min": 1111111111.0,
+            "25%": 44998231937.5,
+            "50%": 55991983622.5,
+            "75%": 75991351691.5,
+            "max": 99999999999.0
+          },
+          "CNPJ_Revenda": {
+            "count": 20552.0,
+            "mean": 50201711726479.67,
+            "std": 34589203964541.96,
+            "min": 32.0,
+            "25%": 15065786000100.0,
+            "50%": 41426966000172.0,
+            "75%": 83733337000135.0,
+            "max": 96662168000131.0
+          },
+          "CNPJ_Loja": {
+            "count": 12093.0,
+            "mean": 39972566387136.19,
+            "std": 33148001230508.336,
+            "min": 607587000100.0,
+            "25%": 4565289008202.0,
+            "50%": 26404731056817.0,
+            "75%": 77941490014881.0,
+            "max": 99295696000198.0
+          }
+        },
+        "nulos": {
+          "Cpf": 0,
+          "Nome": 0,
+          "Cargo": 0,
+          "Celular": 4870,
+          "Email": 4883,
+          "Status": 0,
+          "CNPJ_Revenda": 6,
+          "Revenda": 6,
+          "Regional_da_Revenda": 6,
+          "CNPJ_Loja": 8465,
+          "Loja": 8465,
+          "Regional_da_Loja": 8465
+        },
+        "nulos_pct": {
+          "Cpf": 0.0,
+          "Nome": 0.0,
+          "Cargo": 0.0,
+          "Celular": 23.69,
+          "Email": 23.75,
+          "Status": 0.0,
+          "CNPJ_Revenda": 0.03,
+          "Revenda": 0.03,
+          "Regional_da_Revenda": 0.03,
+          "CNPJ_Loja": 41.18,
+          "Loja": 41.18,
+          "Regional_da_Loja": 41.18
+        },
+        "colunas_data": {}
+      }
+    }
+  },
+  "aptos": {
+    "nome": "aptos",
+    "arquivo": "/home/thamiresvieira/projetos/Programa_mais_top/bases/Tabelas/Aptos_Abril_2026_v4.xlsx",
+    "tamanho_mb": 5.06,
+    "abas": {
+      "Sheet1": {
+        "linhas": 64296,
+        "colunas": [
+          "ano",
+          "mes",
+          "revenda",
+          "cnpj",
+          "participante",
+          "cpf",
+          "gi",
+          "cpf_gi",
+          "kpi",
+          "produto",
+          "quantidade",
+          "pontos",
+          "treinamento"
+        ],
+        "tipos": {
+          "ano": "int64",
+          "mes": "str",
+          "revenda": "str",
+          "cnpj": "float64",
+          "participante": "str",
+          "cpf": "int64",
+          "gi": "str",
+          "cpf_gi": "float64",
+          "kpi": "str",
+          "produto": "str",
+          "quantidade": "float64",
+          "pontos": "float64",
+          "treinamento": "str"
+        },
+        "amostra": [
+          {
+            "ano": 2026,
+            "mes": "Abril",
+            "revenda": "MM VAREJO",
+            "cnpj": 77500049029462.0,
+            "participante": "PAMELA MAYARA DA SILVA LIMA",
+            "cpf": 7982232,
+            "gi": NaN,
+            "cpf_gi": NaN,
+            "kpi": "SITE",
+            "produto": "CWN13AB",
+            "quantidade": 1.0,
+            "pontos": 5.0,
+            "treinamento": "sim"
+          },
+          {
+            "ano": 2026,
+            "mes": "Abril",
+            "revenda": "MM VAREJO",
+            "cnpj": 77500049029462.0,
+            "participante": "PAMELA MAYARA DA SILVA LIMA",
+            "cpf": 7982232,
+            "gi": NaN,
+            "cpf_gi": NaN,
+            "kpi": "SITE",
+            "produto": "BFS5NDB",
+            "quantidade": 1.0,
+            "pontos": 5.0,
+            "treinamento": "sim"
+          },
+          {
+            "ano": 2026,
+            "mes": "Abril",
+            "revenda": "MM VAREJO",
+            "cnpj": 77500049029462.0,
+            "participante": "PAMELA MAYARA DA SILVA LIMA",
+            "cpf": 7982232,
+            "gi": NaN,
+            "cpf_gi": NaN,
+            "kpi": "SITE",
+            "produto": "BWJ14AB",
+            "quantidade": 1.0,
+            "pontos": 5.0,
+            "treinamento": "sim"
+          }
+        ],
+        "categorias": {
+          "ano": {
+            "unicos": 1,
+            "valores": [
+              2026
+            ]
+          },
+          "mes": {
+            "unicos": 1,
+            "valores": [
+              "Abril"
+            ]
+          },
+          "kpi": {
+            "unicos": 2,
+            "valores": [
+              "SITE",
+              "GI"
+            ]
+          },
+          "treinamento": {
+            "unicos": 2,
+            "valores": [
+              "sim",
+              "não"
+            ]
+          }
+        },
+        "estatisticas_numericas": {
+          "ano": {
+            "count": 64296.0,
+            "mean": 2026.0,
+            "std": 0.0,
+            "min": 2026.0,
+            "25%": 2026.0,
+            "50%": 2026.0,
+            "75%": 2026.0,
+            "max": 2026.0
+          },
+          "cnpj": {
+            "count": 64266.0,
+            "mean": 48819262728570.74,
+            "std": 36081011924211.77,
+            "min": 296549000256.0,
+            "25%": 4565289006005.0,
+            "50%": 41426966006456.0,
+            "75%": 86184074003832.0,
+            "max": 99295696000198.0
+          },
+          "cpf": {
+            "count": 64296.0,
+            "mean": 25711690177.385746,
+            "std": 31765597221.528694,
+            "min": 7982232.0,
+            "25%": 3302984294.0,
+            "50%": 8307022967.0,
+            "75%": 51998378268.0,
+            "max": 99961466004.0
+          },
+          "cpf_gi": {
+            "count": 30.0,
+            "mean": 20859516077.933334,
+            "std": 30999886957.567863,
+            "min": 49675265.0,
+            "25%": 2842957470.0,
+            "50%": 5538338731.0,
+            "75%": 16514141082.75,
+            "max": 92199763587.0
+          },
+          "quantidade": {
+            "count": 64266.0,
+            "mean": 1.2111692030000312,
+            "std": 1.9925138925523471,
+            "min": 0.0,
+            "25%": 1.0,
+            "50%": 1.0,
+            "75%": 1.0,
+            "max": 245.0
+          },
+          "pontos": {
+            "count": 64296.0,
+            "mean": 4.523041868856539,
+            "std": 10.34441468671329,
+            "min": 0.0,
+            "25%": 3.0,
+            "50%": 4.0,
+            "75%": 5.0,
+            "max": 980.0
+          }
+        },
+        "nulos": {
+          "ano": 0,
+          "mes": 0,
+          "revenda": 0,
+          "cnpj": 30,
+          "participante": 0,
+          "cpf": 0,
+          "gi": 64266,
+          "cpf_gi": 64266,
+          "kpi": 0,
+          "produto": 30,
+          "quantidade": 30,
+          "pontos": 0,
+          "treinamento": 30
+        },
+        "nulos_pct": {
+          "ano": 0.0,
+          "mes": 0.0,
+          "revenda": 0.0,
+          "cnpj": 0.05,
+          "participante": 0.0,
+          "cpf": 0.0,
+          "gi": 99.95,
+          "cpf_gi": 99.95,
+          "kpi": 0.0,
+          "produto": 0.05,
+          "quantidade": 0.05,
+          "pontos": 0.0,
+          "treinamento": 0.05
+        },
+        "colunas_data": {}
+      }
+    }
+  },
+  "lideranca_aptos": {
+    "nome": "lideranca_aptos",
+    "arquivo": "/home/thamiresvieira/projetos/Programa_mais_top/bases/Tabelas/Lideranca_Aptos_Abril_2026_v4.xlsx",
+    "tamanho_mb": 0.08,
+    "abas": {
+      "APTOS": {
+        "linhas": 1089,
+        "colunas": [
+          "ano",
+          "mes",
+          "revenda",
+          "cnpj",
+          "participante",
+          "cpf",
+          "kpi",
+          "pontos_final"
+        ],
+        "tipos": {
+          "ano": "int64",
+          "mes": "str",
+          "revenda": "str",
+          "cnpj": "float64",
+          "participante": "str",
+          "cpf": "int64",
+          "kpi": "str",
+          "pontos_final": "float64"
+        },
+        "amostra": [
+          {
+            "ano": 2026,
+            "mes": "Abril",
+            "revenda": "ANGELONI",
+            "cnpj": 83646984000886.0,
+            "participante": "Adriana Serafim Martins ",
+            "cpf": 1684977940,
+            "kpi": "GERENTE",
+            "pontos_final": 10.0
+          },
+          {
+            "ano": 2026,
+            "mes": "Abril",
+            "revenda": "ANGELONI",
+            "cnpj": 83646984001696.0,
+            "participante": "GABRIEL PACHECO INÁCIO",
+            "cpf": 9289176903,
+            "kpi": "GERENTE",
+            "pontos_final": 16.3
+          },
+          {
+            "ano": 2026,
+            "mes": "Abril",
+            "revenda": "BECKER",
+            "cnpj": 4415928000279.0,
+            "participante": "Michael Roque Bastian",
+            "cpf": 361343094,
+            "kpi": "GERENTE",
+            "pontos_final": 4.5
+          }
+        ],
+        "categorias": {
+          "ano": {
+            "unicos": 1,
+            "valores": [
+              2026
+            ]
+          },
+          "mes": {
+            "unicos": 1,
+            "valores": [
+              "Abril"
+            ]
+          },
+          "kpi": {
+            "unicos": 3,
+            "valores": [
+              "GERENTE",
+              "REGIONAL",
+              "DIRETOR"
+            ]
+          }
+        },
+        "estatisticas_numericas": {
+          "ano": {
+            "count": 1089.0,
+            "mean": 2026.0,
+            "std": 0.0,
+            "min": 2026.0,
+            "25%": 2026.0,
+            "50%": 2026.0,
+            "75%": 2026.0,
+            "max": 2026.0
+          },
+          "cnpj": {
+            "count": 1021.0,
+            "mean": 51437800558528.15,
+            "std": 34133465022588.473,
+            "min": 296549000760.0,
+            "25%": 15065786003894.0,
+            "50%": 63864771000732.0,
+            "75%": 79379491014052.0,
+            "max": 99295696000198.0
+          },
+          "cpf": {
+            "count": 1089.0,
+            "mean": 25444695643.105602,
+            "std": 31586219818.124687,
+            "min": 6525202.0,
+            "25%": 3021185274.0,
+            "50%": 7650501450.0,
+            "75%": 46022864291.0,
+            "max": 99846810091.0
+          },
+          "pontos_final": {
+            "count": 1089.0,
+            "mean": 37.65910009182736,
+            "std": 211.30674744096348,
+            "min": 0.0,
+            "25%": 3.0,
+            "50%": 7.5,
+            "75%": 16.5,
+            "max": 2540.7
+          }
+        },
+        "nulos": {
+          "ano": 0,
+          "mes": 0,
+          "revenda": 0,
+          "cnpj": 68,
+          "participante": 0,
+          "cpf": 0,
+          "kpi": 0,
+          "pontos_final": 0
+        },
+        "nulos_pct": {
+          "ano": 0.0,
+          "mes": 0.0,
+          "revenda": 0.0,
+          "cnpj": 6.24,
+          "participante": 0.0,
+          "cpf": 0.0,
+          "kpi": 0.0,
+          "pontos_final": 0.0
+        },
+        "colunas_data": {}
+      }
+    }
+  },
+  "vendas_amostra": {
+    "nome": "vendas_amostra",
+    "arquivo": "/home/thamiresvieira/projetos/Programa_mais_top/bases/Vendas Processadas/2026_04.xlsx",
+    "tamanho_mb": 2.44,
+    "abas": {
+      "Export": {
+        "linhas": 61152,
+        "colunas": [
+          "Regional",
+          "Revenda",
+          "CNPJ",
+          "CPF",
+          "Nome",
+          "CATEGORIA",
+          "SUBCATEGORIA",
+          "SKU + produto",
+          "data venda",
+          "Vendas",
+          "Pontuação",
+          "Mês",
+          "SUPERTOP",
+          "SKU"
+        ],
+        "tipos": {
+          "Regional": "float64",
+          "Revenda": "str",
+          "CNPJ": "float64",
+          "CPF": "int64",
+          "Nome": "str",
+          "CATEGORIA": "float64",
+          "SUBCATEGORIA": "float64",
+          "SKU + produto": "str",
+          "data venda": "datetime64[us]",
+          "Vendas": "float64",
+          "Pontuação": "float64",
+          "Mês": "str",
+          "SUPERTOP": "float64",
+          "SKU": "float64"
+        },
+        "amostra": [
+          {
+            "Regional": NaN,
+            "Revenda": "MM VAREJO",
+            "CNPJ": 77500049029462.0,
+            "CPF": 7982232,
+            "Nome": "PAMELA MAYARA DA SILVA LIMA",
+            "CATEGORIA": NaN,
+            "SUBCATEGORIA": NaN,
+            "SKU + produto": "CWN13AB",
+            "data venda": "2026-04-01 00:00:00",
+            "Vendas": 1.0,
+            "Pontuação": 5.0,
+            "Mês": "ABR",
+            "SUPERTOP": NaN,
+            "SKU": NaN
+          },
+          {
+            "Regional": NaN,
+            "Revenda": "MM VAREJO",
+            "CNPJ": 77500049029462.0,
+            "CPF": 7982232,
+            "Nome": "PAMELA MAYARA DA SILVA LIMA",
+            "CATEGORIA": NaN,
+            "SUBCATEGORIA": NaN,
+            "SKU + produto": "BFS5NDB",
+            "data venda": "2026-04-01 00:00:00",
+            "Vendas": 1.0,
+            "Pontuação": 5.0,
+            "Mês": "ABR",
+            "SUPERTOP": NaN,
+            "SKU": NaN
+          },
+          {
+            "Regional": NaN,
+            "Revenda": "MM VAREJO",
+            "CNPJ": 77500049029462.0,
+            "CPF": 7982232,
+            "Nome": "PAMELA MAYARA DA SILVA LIMA",
+            "CATEGORIA": NaN,
+            "SUBCATEGORIA": NaN,
+            "SKU + produto": "BWJ14AB",
+            "data venda": "2026-04-01 00:00:00",
+            "Vendas": 1.0,
+            "Pontuação": 5.0,
+            "Mês": "ABR",
+            "SUPERTOP": NaN,
+            "SKU": NaN
+          }
+        ],
+        "categorias": {
+          "Regional": {
+            "unicos": 0,
+            "valores": []
+          },
+          "CATEGORIA": {
+            "unicos": 0,
+            "valores": []
+          },
+          "SUBCATEGORIA": {
+            "unicos": 0,
+            "valores": []
+          },
+          "data venda": {
+            "unicos": 1,
+            "valores": [
+              "2026-04-01 00:00:00"
+            ]
+          },
+          "Mês": {
+            "unicos": 1,
+            "valores": [
+              "ABR"
+            ]
+          },
+          "SUPERTOP": {
+            "unicos": 0,
+            "valores": []
+          },
+          "SKU": {
+            "unicos": 0,
+            "valores": []
+          }
+        },
+        "estatisticas_numericas": {
+          "Regional": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "CNPJ": {
+            "count": 61122.0,
+            "mean": 51119185377587.586,
+            "min": 296549000256.0,
+            "25%": 15065786005595.0,
+            "50%": 67837410000162.0,
+            "75%": 86184074011185.0,
+            "max": 99295696000198.0,
+            "std": 35504470603234.91
+          },
+          "CPF": {
+            "count": 61152.0,
+            "mean": 25279910335.695415,
+            "min": 7982232.0,
+            "25%": 3295668060.0,
+            "50%": 8296422425.0,
+            "75%": 49068865900.0,
+            "max": 99961466004.0,
+            "std": 31563519698.79023
+          },
+          "CATEGORIA": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "SUBCATEGORIA": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "data venda": {
+            "count": 61152,
+            "mean": "2026-04-01 00:00:00",
+            "min": "2026-04-01 00:00:00",
+            "25%": "2026-04-01 00:00:00",
+            "50%": "2026-04-01 00:00:00",
+            "75%": "2026-04-01 00:00:00",
+            "max": "2026-04-01 00:00:00",
+            "std": NaN
+          },
+          "Vendas": {
+            "count": 61122.0,
+            "mean": 1.2186283171362193,
+            "min": 0.0,
+            "25%": 1.0,
+            "50%": 1.0,
+            "75%": 1.0,
+            "max": 245.0,
+            "std": 2.0340416578448473
+          },
+          "Pontuação": {
+            "count": 61152.0,
+            "mean": 4.55881246729461,
+            "min": 0.0,
+            "25%": 3.0,
+            "50%": 4.0,
+            "75%": 5.0,
+            "max": 980.0,
+            "std": 10.436387780564692
+          },
+          "SUPERTOP": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          },
+          "SKU": {
+            "count": 0.0,
+            "mean": NaN,
+            "min": NaN,
+            "25%": NaN,
+            "50%": NaN,
+            "75%": NaN,
+            "max": NaN,
+            "std": NaN
+          }
+        },
+        "nulos": {
+          "Regional": 61152,
+          "Revenda": 0,
+          "CNPJ": 30,
+          "CPF": 0,
+          "Nome": 0,
+          "CATEGORIA": 61152,
+          "SUBCATEGORIA": 61152,
+          "SKU + produto": 30,
+          "data venda": 0,
+          "Vendas": 30,
+          "Pontuação": 0,
+          "Mês": 0,
+          "SUPERTOP": 61152,
+          "SKU": 61152
+        },
+        "nulos_pct": {
+          "Regional": 100.0,
+          "Revenda": 0.0,
+          "CNPJ": 0.05,
+          "CPF": 0.0,
+          "Nome": 0.0,
+          "CATEGORIA": 100.0,
+          "SUBCATEGORIA": 100.0,
+          "SKU + produto": 0.05,
+          "data venda": 0.0,
+          "Vendas": 0.05,
+          "Pontuação": 0.0,
+          "Mês": 0.0,
+          "SUPERTOP": 100.0,
+          "SKU": 100.0
+        },
+        "colunas_data": {
+          "data venda": {
+            "min": "2026-04-01 00:00:00",
+            "max": "2026-04-01 00:00:00",
+            "nao_nulos": 61152
+          }
+        }
+      }
+    }
+  },
+  "base_tratada": {
+    "nome": "base_tratada",
+    "arquivo": "/home/thamiresvieira/projetos/Programa_mais_top/bases/Tabelas/base_tratada.xlsx",
+    "tamanho_mb": 0.63,
+    "abas": {
+      "Sheet1": {
+        "linhas": 7667,
+        "colunas": [
+          "data",
+          "nome",
+          "cpf",
+          "assunto",
+          "assunto_original",
+          "mensagem",
+          "origem",
+          "status",
+          "id_chamado"
+        ],
+        "tipos": {
+          "data": "datetime64[us]",
+          "nome": "str",
+          "cpf": "int64",
+          "assunto": "str",
+          "assunto_original": "str",
+          "mensagem": "str",
+          "origem": "str",
+          "status": "str",
+          "id_chamado": "str"
+        },
+        "amostra": [
+          {
+            "data": "2025-10-20 18:02:58",
+            "nome": "Pedro Henrique Santos Pereira",
+            "cpf": 11138614955,
+            "assunto": "Acesso",
+            "assunto_original": "Acesso",
+            "mensagem": "Está dizendo que meu usuário está inativo",
+            "origem": "plataforma",
+            "status": "Resolvido",
+            "id_chamado": "CH-000001"
+          },
+          {
+            "data": "2025-10-20 18:04:30",
+            "nome": "Pedro Henrique Santos Pereira",
+            "cpf": 11138614955,
+            "assunto": "Acesso",
+            "assunto_original": "Acesso",
+            "mensagem": "Está dizendo que meu usuário está inativo. Porém foi o site que ficou inativo por bastante tempo",
+            "origem": "plataforma",
+            "status": "Resolvido",
+            "id_chamado": "CH-000001"
+          },
+          {
+            "data": "2025-10-20 18:08:54",
+            "nome": "Pedro Henrique Santos Pereira",
+            "cpf": 11138614955,
+            "assunto": "Acesso",
+            "assunto_original": "Acesso",
+            "mensagem": "Está dizendo que meu usuário está inativo.",
+            "origem": "plataforma",
+            "status": "Resolvido",
+            "id_chamado": "CH-000001"
+          }
+        ],
+        "categorias": {
+          "assunto": {
+            "unicos": 8,
+            "valores": [
+              "Acesso",
+              "Outros",
+              "Atualizacao de Cadastro",
+              "Resgates",
+              "Pontuacao",
+              "Treinamentos",
+              "Equipe e Cargo",
+              "Campanhas"
+            ]
+          },
+          "assunto_original": {
+            "unicos": 15,
+            "valores": [
+              "Acesso",
+              "-Outros-",
+              "Atualização de Cadastro",
+              "Resgates",
+              "Pontuação",
+              "Treinamentos",
+              "Atualização de Equipe",
+              "Mudança de Cargo",
+              "Dúvidas Campanhas",
+              "Cadastro",
+              "Inativo",
+              "Inativo ",
+              "Alteração Cadastral",
+              "Alteração cadastral",
+              "Alteração Cadastral "
+            ]
+          },
+          "origem": {
+            "unicos": 2,
+            "valores": [
+              "plataforma",
+              "central"
+            ]
+          },
+          "status": {
+            "unicos": 2,
+            "valores": [
+              "Resolvido",
+              "Em Andamento"
+            ]
+          }
+        },
+        "estatisticas_numericas": {
+          "data": {
+            "count": 7190,
+            "mean": "2025-11-11 03:35:26.194436",
+            "min": "2025-10-20 02:42:32",
+            "25%": "2025-10-21 12:07:43.250000",
+            "50%": "2025-10-28 08:41:08",
+            "75%": "2025-11-19 17:33:31",
+            "max": "2026-01-25 18:15:02",
+            "std": NaN
+          },
+          "cpf": {
+            "count": 7667.0,
+            "mean": 26038561839.886265,
+            "min": 6525202.0,
+            "25%": 3123419037.0,
+            "50%": 7510396409.0,
+            "75%": 52690865904.0,
+            "max": 99963396291.0,
+            "std": 31917262831.841724
+          }
+        },
+        "nulos": {
+          "data": 477,
+          "nome": 0,
+          "cpf": 0,
+          "assunto": 0,
+          "assunto_original": 0,
+          "mensagem": 0,
+          "origem": 0,
+          "status": 0,
+          "id_chamado": 0
+        },
+        "nulos_pct": {
+          "data": 6.22,
+          "nome": 0.0,
+          "cpf": 0.0,
+          "assunto": 0.0,
+          "assunto_original": 0.0,
+          "mensagem": 0.0,
+          "origem": 0.0,
+          "status": 0.0,
+          "id_chamado": 0.0
+        },
+        "colunas_data": {
+          "data": {
+            "min": "2025-10-20 02:42:32",
+            "max": "2026-01-25 18:15:02",
+            "nao_nulos": 7190
+          }
+        }
+      }
+    }
+  }
+}

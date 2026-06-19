@@ -1,0 +1,77 @@
+# Dados sensíveis e configurações locais
+config_email.json
+.env
+*.env
+
+# Bases de dados (dados pessoais/sensíveis)
+*.xlsx
+*.csv
+*.xls
+!requirements.txt
+
+# Relatórios, logs e outputs gerados
+relatorios_gerados/
+logs/
+snapshots/
+output/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+
+# IDEs e sistema
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Arquivos do Windows/WSL
+*:Zone.Identifier
+Zone.Identifier
+*.Zone.Identifier
+desktop.ini
+
+# Documentos Office (se não forem parte do código)
+*.docx
+*.doc
+*.pptx
+*.pdf
+
+# Bases antigas e arquivos grandes (não versionar)
+bases/Old/
+bases/Tabelas/Bases_antigas/
+bases/Tabelas/historico_bases/
+bases/**/desktop.ini
+
+# Arquivos binários/executáveis
+*.exe
+*.msi
+*.zip
+*.gz
+*.rar
+*.7z
+
+# Power BI
+*.pbix
+*.pbit
+
+# XMLs de dados
+*.xml
+
+# Arquivos temporários/backup/erro
+PYEOF
+*.tmp
+*.bak
+*.bak*
+~$*

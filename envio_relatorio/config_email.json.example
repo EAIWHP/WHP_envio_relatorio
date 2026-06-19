@@ -1,0 +1,14 @@
+{
+  "smtp_host": "smtp.office365.com",
+  "smtp_port": 587,
+  "remetente_email": "thamires.vieira@eaimkt.com.br",
+  "remetente_nome": "Relatório Semanal +TOP",
+  "senha_app": "SUA_SENHA_DE_APP_AQUI",
+  "destinatarios": [
+    "cliente@exemplo.com"
+  ],
+  "cc": [],
+  "destinatarios_regionais": true,
+  "assunto": "Relatório Semanal Programa +TOP",
+  "link_drive": "https://drive.google.com/drive/folders/SEU_LINK_DO_DRIVE_AQUI"
+}
