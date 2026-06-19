@@ -1,0 +1,39 @@
+name: Teste de Download Programa +TOP
+
+on:
+  workflow_dispatch:  # permite executar manualmente no GitHub
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependências
+        working-directory: ./automacao_download_mais_top
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium
+
+      - name: Executar automação de download
+        working-directory: ./automacao_download_mais_top
+        env:
+          MAIS_TOP_USUARIO: ${{ secrets.MAIS_TOP_USUARIO }}
+          MAIS_TOP_SENHA: ${{ secrets.MAIS_TOP_SENHA }}
+          HEADLESS: "true"
+        run: python3 download_bases.py
+
+      - name: Upload dos screenshots e downloads
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots-e-downloads
+          path: |
+            automacao_download_mais_top/downloads/*.png
+            automacao_download_mais_top/downloads/*
