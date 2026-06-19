@@ -81,6 +81,16 @@ Executar toda segunda-feira às 11:00 via cron:
 0 11 * * 1 cd /caminho/do/projeto/Programa_mais_top/envio_relatorio && python3 gerar_relatorio_semanal.py >> cron.log 2>&1
 ```
 
+## 🔒 Proteção da branch `main`
+
+A branch `main` está protegida no GitHub. Isso significa que:
+
+- Não é possível fazer push direto na `main`
+- Toda alteração deve passar por uma Pull Request
+- O desenvolvimento acontece na branch `develop` ou em branches `feature/*`
+
+Isso garante que o código em produção seja sempre revisado e estável.
+
 ## 📧 Contato
 
 Relatório desenvolvido e mantido por Thamires Vieira.
