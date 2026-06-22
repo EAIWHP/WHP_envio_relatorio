@@ -2327,7 +2327,7 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   {_secao_html("CADASTROS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:20px; margin:0 0 10px 0; line-height:1.4;'><strong>Nosso objetivo ideal para a base de cadastros do Programa +TOP é de <span style='font-size:28px; color:#ef4e22;'>{META_CADASTRO:.0f}%</span></strong></p>"
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo ideal para a base de cadastros do Programa +TOP <span style='font-size:26px; color:#ef4e22;'>é de {META_CADASTRO:.0f}%</span>.</strong></p>"
                       f"<p style='font-size:17px; margin:0; line-height:1.4;'>Até o momento, estamos com <strong>{pct_geral}% da base ativa</strong>.</p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
