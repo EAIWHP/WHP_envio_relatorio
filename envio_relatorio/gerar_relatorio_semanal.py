@@ -2327,8 +2327,8 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   {_secao_html("CADASTROS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo ideal para a base de cadastros do Programa +TOP <span style='font-size:26px; color:#ef4e22;'>é de {META_CADASTRO:.0f}%</span>.</strong></p>"
-                      f"<p style='font-size:17px; margin:0; line-height:1.4;'>Até o momento, estamos com <strong>{pct_geral}% da base ativa</strong>.</p>",
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo ideal para a base de cadastros do Programa +TOP <span style='font-size:26px; color:#00a651;'>é de {META_CADASTRO:.0f}%</span>.</strong></p>"
+                      f"<p style='font-size:17px; margin:0; line-height:1.4;'>Até o momento, estamos com <strong><span style='color:#ef4e22;'>{pct_geral}% da base ativa</span></strong>.</p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
                   {subsecao_titulo("Por Regional")}
@@ -2347,12 +2347,12 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   {_secao_html("TREINAMENTOS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:20px; margin:0 0 10px 0; line-height:1.4;'><strong>Nosso objetivo ideal para os treinamentos do Programa +TOP é de <span style='font-size:28px; color:#ef4e22;'>{META_TREINAMENTOS:.0f}%</span></strong>.</p>"
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo ideal para os treinamentos do Programa +TOP <span style='font-size:26px; color:#00a651;'>é de {META_TREINAMENTOS:.0f}%</span></strong>.</p>"
                       f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'>Os dois conteúdos de <strong>{nome_mes_pt_br().lower()}</strong> estão disponíveis até <strong>{date.today().replace(day=30):%d/%m/%Y}</strong></p>"
                       f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong>Conteúdos:</strong><br>"
                       f"1. <strong>{nome_curso1}</strong> (SKU {dados['cursos_info'][4]})<br>"
                       f"2. <strong>{nome_curso2}</strong> (SKU {dados['cursos_info'][5]}).</p>"
-                      f"<p style='font-size:17px; margin:0; line-height:1.4;'>Até o momento, estamos em <strong>{pct_trein}% da base ativa</strong>.</p>",
+                      f"<p style='font-size:17px; margin:0; line-height:1.4;'>Até o momento, estamos em <strong><span style='color:#ef4e22;'>{pct_trein}% da base ativa</span></strong>.</p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
                   {subsecao_titulo("Por Regional")}
@@ -2375,8 +2375,8 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   {_secao_html("ACEITES MENSAIS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo ideal para os aceites mensais de {nome_mes_pt_br(ano_mes=str(dados['mes_aceite']))} <span style='font-size:26px; color:#ef4e22;'>é de {META_ACEITES:.0f}%</span>.</strong></p>"
-                      f"<p style='font-size:17px; margin:0; line-height:1.4;'>Até o momento, <strong>{pct_aceite}% dos participantes ativos deram aceite</strong>.</p>",
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo ideal para os aceites mensais de {nome_mes_pt_br(ano_mes=str(dados['mes_aceite']))} <span style='font-size:26px; color:#00a651;'>é de {META_ACEITES:.0f}%</span>.</strong></p>"
+                      f"<p style='font-size:17px; margin:0; line-height:1.4;'>Até o momento, <strong><span style='color:#ef4e22;'>{pct_aceite}% dos participantes ativos deram aceite</span></strong>.</p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
                   {subsecao_titulo("Por Regional")}
