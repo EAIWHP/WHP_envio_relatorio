@@ -9,6 +9,9 @@ config_email.json
 *.xls
 !requirements.txt
 
+# Base consolidada de cadastros versionada (fonte correta dos cálculos)
+!envio_relatorio/bases/bases_cadastro_hierarquia/consolidado_hierarquia_com_cadastro_site.xlsx
+
 # Relatórios, logs e outputs gerados
 relatorios_gerados/
 logs/
