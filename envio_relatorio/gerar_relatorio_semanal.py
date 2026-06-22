@@ -1353,11 +1353,11 @@ def gerar_graficos(cad_reg, trein_reg, aceite_reg):
             graficos["cadastros"] = fig_to_base64(fig)
 
     if trein_reg is not None and not trein_reg.empty:
-        media_trein = trein_reg["pct_realizaram"].mean()
+        media_trein = round(trein_reg["realizaram"].sum() / trein_reg["total_ativos"].sum() * 100, 1)
         fig = gerar_grafico_barras(
             trein_reg,
             "regional_curta", "pct_realizaram",
-            f"Treinamentos Obrigatórios Realizados por Regional (média: {media_trein:.1f}%)",
+            f"Treinamentos Obrigatórios Realizados por Regional (média geral: {media_trein:.1f}%)",
             meta=META_TREINAMENTOS,
         )
         if fig:
@@ -1763,11 +1763,11 @@ def preparar_tabela_treinamentos_combinada(trein_por_curso, trein_ambos=None, ni
 
     df = df.sort_values("% Ambos", ascending=False).fillna(0)
 
-    # Reordena colunas: regional/revenda, % Ambos, curso1, curso2
+    # Reordena colunas: regional/revenda, curso1, curso2, % Ambos (semaforo sempre por ultimo)
     cols_exibicao = ["Regional"]
     if nivel == "revenda":
         cols_exibicao.append("Revenda")
-    cols_exibicao.extend(["% Ambos", f"% {nome1}", f"% {nome2}"])
+    cols_exibicao.extend([f"% {nome1}", f"% {nome2}", "% Ambos"])
 
     # Renomeia chaves para exibição
     rename = {"regional_curta": "Regional"}
