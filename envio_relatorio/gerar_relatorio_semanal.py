@@ -1136,7 +1136,9 @@ def inferir_mes_da_aba(aba):
 
 
 def calcular_aceites(df_aceite, df_cad, ano_mes, aba_aceite, usou_ultima_aba=False):
-    """Calcula aceites mensais por regional e por revenda (base = ativos)."""
+    """Calcula aceites mensais por regional e por revenda (base = ativos).
+    A coluna 'Aceitaram' usa a revenda informada na propria base de aceites,
+    enquanto a 'Base Ativa' mantem a revenda do cadastro consolidado."""
     if usou_ultima_aba:
         mes_ref = inferir_mes_da_aba(aba_aceite)
         if mes_ref is None:
@@ -1144,41 +1146,76 @@ def calcular_aceites(df_aceite, df_cad, ano_mes, aba_aceite, usou_ultima_aba=Fal
     else:
         mes_ref = pd.Period(ano_mes, freq="M")
 
-    aceite_mes = df_aceite[df_aceite["mes_aceite"] == mes_ref]
+    aceite_mes = df_aceite[df_aceite["mes_aceite"] == mes_ref].copy()
     cpfs_aceitaram = set(aceite_mes["cpf_limp"].unique())
     logger.info(f"Aceites em {mes_ref}: {len(cpfs_aceitaram):,} CPFs únicos")
 
     ativos = df_cad[df_cad["status"] == "Ativo"].copy()
 
-    def calcular_grupo(grupo_df):
-        cpfs = set(grupo_df["cpf_limp"].unique())
-        aceitaram = cpfs & cpfs_aceitaram
-        nao_aceitaram = cpfs - cpfs_aceitaram
-        total = len(cpfs)
-        pct = round(len(aceitaram) / total * 100, 1) if total else 0
-        return pd.Series({
-            "total_ativos": int(total),
-            "aceitaram": int(len(aceitaram)),
-            "nao_aceitaram": int(len(nao_aceitaram)),
-            "pct_aceite": pct,
-        })
-
-    aceite_reg = (
-        ativos.groupby("regional_curta")
-        .apply(calcular_grupo)
-        .reset_index()
+    # Base ativa por regional/revenda do cadastro
+    base_reg = (
+        ativos.groupby("regional_curta")["cpf_limp"]
+        .nunique()
+        .reset_index(name="total_ativos")
         .rename(columns={"regional_curta": "regional"})
-        .sort_values("pct_aceite", ascending=False)
     )
+    base_rev = (
+        ativos.groupby(["regional_curta", "revenda"])["cpf_limp"]
+        .nunique()
+        .reset_index(name="total_ativos")
+        .rename(columns={"regional_curta": "regional"})
+    )
+
+    # Aceitaram: cruza ativos com aceites e usa a revenda da propria base de aceites
+    aceite_ativos = aceite_mes.merge(
+        ativos[["cpf_limp", "regional_curta"]].drop_duplicates("cpf_limp"),
+        on="cpf_limp",
+        how="inner",
+    )
+    # Normaliza nome da revenda vinda da base de aceites
+    if "Revenda" in aceite_ativos.columns:
+        aceite_ativos["revenda_aceite"] = aceite_ativos["Revenda"].apply(normalizar_revenda_hierarquia)
+        aceite_ativos["revenda_aceite"] = aceite_ativos["revenda_aceite"].apply(nome_revenda_exibicao)
+    else:
+        aceite_ativos["revenda_aceite"] = None
+
+    aceite_reg_counts = (
+        aceite_ativos.groupby("regional_curta")["cpf_limp"]
+        .nunique()
+        .reset_index(name="aceitaram")
+        .rename(columns={"regional_curta": "regional"})
+    )
+    aceite_rev_counts = (
+        aceite_ativos.groupby(["regional_curta", "revenda_aceite"])["cpf_limp"]
+        .nunique()
+        .reset_index(name="aceitaram")
+        .rename(columns={"regional_curta": "regional", "revenda_aceite": "revenda"})
+    )
+
+    # Merge base + aceite (regional)
+    aceite_reg = base_reg.merge(aceite_reg_counts, on="regional", how="left")
+    aceite_reg["aceitaram"] = aceite_reg["aceitaram"].fillna(0).astype(int)
+    aceite_reg["nao_aceitaram"] = (aceite_reg["total_ativos"] - aceite_reg["aceitaram"]).clip(lower=0)
+    aceite_reg["pct_aceite"] = (aceite_reg["aceitaram"] / aceite_reg["total_ativos"] * 100).round(1)
+    aceite_reg = aceite_reg.sort_values("pct_aceite", ascending=False)
     aceite_reg["regional"] = aceite_reg["regional"].apply(regional_title_case)
 
-    aceite_rev = (
-        ativos.groupby(["regional_curta", "revenda"])
-        .apply(calcular_grupo)
-        .reset_index()
-        .rename(columns={"regional_curta": "regional"})
-        .sort_values("pct_aceite", ascending=False)
+    # Merge base + aceite (revenda)
+    aceite_rev = base_rev.merge(aceite_rev_counts, on=["regional", "revenda"], how="outer")
+    aceite_rev["total_ativos"] = aceite_rev["total_ativos"].fillna(0).astype(int)
+    aceite_rev["aceitaram"] = aceite_rev["aceitaram"].fillna(0).astype(int)
+    # Garante regional para revendas que so aparecem na base de aceites
+    mapa_regional_rev = dict(zip(df_cad["revenda"], df_cad["regional_curta"]))
+    aceite_rev["regional"] = aceite_rev.apply(
+        lambda r: r["regional"] if pd.notna(r["regional"]) else mapa_regional_rev.get(r["revenda"]),
+        axis=1,
     )
+    aceite_rev["nao_aceitaram"] = (aceite_rev["total_ativos"] - aceite_rev["aceitaram"]).clip(lower=0)
+    aceite_rev["pct_aceite"] = aceite_rev.apply(
+        lambda r: round(r["aceitaram"] / r["total_ativos"] * 100, 1) if r["total_ativos"] > 0 else 0,
+        axis=1,
+    )
+    aceite_rev = aceite_rev.sort_values("pct_aceite", ascending=False)
     aceite_rev["regional"] = aceite_rev["regional"].apply(regional_title_case)
 
     return aceite_reg, aceite_rev, mes_ref
