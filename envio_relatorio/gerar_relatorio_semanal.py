@@ -2375,7 +2375,7 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   {_secao_html("ACEITES MENSAIS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:20px; margin:0 0 10px 0; line-height:1.4;'><strong>Nosso objetivo ideal para os aceites mensais de {nome_mes_pt_br(ano_mes=str(dados['mes_aceite']))} é de <span style='font-size:28px; color:#ef4e22;'>{META_ACEITES:.0f}%</span>.</strong></p>"
+                      f"<p style='font-size:20px; margin:0 0 10px 0; line-height:1.4;'><strong>Nosso objetivo ideal para os aceites mensais de {nome_mes_pt_br(ano_mes=str(dados['mes_aceite']))} <span style='white-space: nowrap;'>é de <span style='font-size:28px; color:#ef4e22;'>{META_ACEITES:.0f}%</span>.</span></strong></p>"
                       f"<p style='font-size:17px; margin:0; line-height:1.4;'>Até o momento, <strong>{pct_aceite}% dos participantes ativos deram aceite</strong>.</p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
