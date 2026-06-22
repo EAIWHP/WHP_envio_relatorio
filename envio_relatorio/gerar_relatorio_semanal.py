@@ -1342,11 +1342,11 @@ def gerar_graficos(cad_reg, trein_reg, aceite_reg):
     graficos = {}
 
     if not cad_reg.empty:
-        media_cad = cad_reg["pct_ativos"].mean()
+        media_cad = round(cad_reg["ativos"].sum() / cad_reg["total"].sum() * 100, 1)
         fig = gerar_grafico_barras(
             cad_reg,
             "regional_curta", "pct_ativos",
-            f"Cadastros Ativos por Regional (média: {media_cad:.1f}%)",
+            f"Cadastros Ativos por Regional (média geral: {media_cad:.1f}%)",
             meta=META_CADASTRO,
         )
         if fig:
