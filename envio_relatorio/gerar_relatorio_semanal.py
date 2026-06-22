@@ -556,10 +556,16 @@ def descobrir_aba_aceites(xl, ano_mes):
         1: "JAN", 2: "FEV", 3: "MAR", 4: "ABR", 5: "MAI", 6: "JUN",
         7: "JUL", 8: "AGO", 9: "SET", 10: "OUT", 11: "NOV", 12: "DEZ",
     }[mes_int]
+    mes_nome_completo = {
+        1: "JANEIRO", 2: "FEVEREIRO", 3: "MARCO", 4: "ABRIL", 5: "MAIO", 6: "JUNHO",
+        7: "JULHO", 8: "AGOSTO", 9: "SETEMBRO", 10: "OUTUBRO", 11: "NOVEMBRO", 12: "DEZEMBRO",
+    }[mes_int]
 
     candidatos = [
         f"{mes_nome}_{ano}",
         f"{mes_nome.lower()}_{ano}",
+        f"{mes_nome_completo}_{ano}",
+        f"{mes_nome_completo.lower()}_{ano}",
         f"{ano}_{mes.zfill(2)}",
         f"{mes.zfill(2)}_{ano}",
         ano_mes,
@@ -1358,11 +1364,11 @@ def gerar_graficos(cad_reg, trein_reg, aceite_reg):
             graficos["treinamentos"] = fig_to_base64(fig)
 
     if not aceite_reg.empty:
-        media_aceite = aceite_reg["pct_aceite"].mean()
+        media_aceite = round(aceite_reg["aceitaram"].sum() / aceite_reg["total_ativos"].sum() * 100, 1)
         fig = gerar_grafico_barras(
             aceite_reg,
             "regional", "pct_aceite",
-            f"Aceite Mensal por Regional (média: {media_aceite:.1f}%)",
+            f"Aceite Mensal por Regional (média geral: {media_aceite:.1f}%)",
             meta=META_ACEITES,
         )
         if fig:
@@ -1426,20 +1432,22 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
             f"Até o momento, estamos em <strong>{pct_geral}%</strong> da base ativa."
         )
 
-        abaixo_media = garantir_n_itens(
+        piores_cad = garantir_n_itens(
             cad_rev, "pct_ativos",
-            mascara_filtro=cad_rev["pct_ativos"] < media_reg,
-            limite=10, maior_melhor=True
+            mascara_filtro=None,
+            limite=10, maior_melhor=False
         )
-        if not abaixo_media.empty:
-            itens_df = abaixo_media[["regional_curta", "revenda", "pct_ativos"]].copy()
+        if not piores_cad.empty:
+            itens_df = piores_cad[["regional_curta", "revenda", "total", "ativos", "pct_ativos"]].copy()
             itens_df["revenda"] = itens_df["revenda"].str.title()
             itens_df = itens_df.rename(columns={
                 "regional_curta": "Regional",
                 "revenda": "Revenda",
+                "total": "Total de Participantes",
+                "ativos": "Usuários com +TOP",
                 "pct_ativos": "% Ativos",
             })
-            resultado["cadastros"]["alerta_titulo"] = "Ponto de atenção: revendas com % de base menor do que a média do programa"
+            resultado["cadastros"]["alerta_titulo"] = "Top 10 revendas com menor % de base ativa"
             resultado["cadastros"]["alerta_subtitulo"] = ""
             resultado["cadastros"]["alerta_itens"] = itens_df
 
@@ -1482,22 +1490,23 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
             f"Conteúdo 1: {nome1} (SKU {sku1})<br>Conteúdo 2: {nome2} (SKU {sku2})"
         )
 
-        media_trein = trein_reg["pct_realizaram"].mean()
         piores_rev = garantir_n_itens(
-            trein_rev, "pct_realizaram",
-            mascara_filtro=trein_rev["pct_realizaram"] < media_trein,
-            limite=10, maior_melhor=True
+            trein_rev[trein_rev["total_ativos"] > 0], "pct_realizaram",
+            mascara_filtro=None,
+            limite=10, maior_melhor=False
         )
         if not piores_rev.empty:
-            itens_df = piores_rev[["regional_curta", "revenda", "pct_realizaram"]].copy()
+            itens_df = piores_rev[["regional_curta", "revenda", "total_ativos", "realizaram", "pct_realizaram"]].copy()
             itens_df["revenda"] = itens_df["revenda"].str.title()
             itens_df = itens_df.rename(columns={
                 "regional_curta": "Regional",
                 "revenda": "Revenda",
+                "total_ativos": "Base Ativa",
+                "realizaram": "Realizado",
                 "pct_realizaram": "% Realizado",
             })
-            resultado["treinamentos"]["alerta_titulo"] = "Alerta de treinamentos: revendas abaixo da média precisam de reforço"
-            resultado["treinamentos"]["alerta_subtitulo"] = f"A média geral do programa é de {media_trein:.1f}%."
+            resultado["treinamentos"]["alerta_titulo"] = "Top 10 revendas com menor % de treinamentos concluídos"
+            resultado["treinamentos"]["alerta_subtitulo"] = ""
             resultado["treinamentos"]["alerta_itens"] = itens_df
 
         # Apenas 1 destaque geral
@@ -1509,34 +1518,33 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
 
     # --- Aceites ---
     if not aceite_reg.empty:
-        pct_aceite_geral = round(aceite_reg["aceitaram"].sum() / aceite_reg["total_ativos"].sum() * 100, 1)
-        farol_aceite = farol_html(pct_aceite_geral, META_ACEITES)
+        media_aceite = round(aceite_reg["aceitaram"].sum() / aceite_reg["total_ativos"].sum() * 100, 1)
+        farol_aceite = farol_html(media_aceite, META_ACEITES)
         resultado["aceites"]["intro"] = (
             f"{farol_aceite} Sobre os aceites mensais de <strong>{mes_aceite_nome}</strong>.<br>"
             f"Nosso objetivo ideal é de <strong>{META_ACEITES:.0f}%</strong>. "
-            f"Ate o momento, <strong>{pct_aceite_geral}%</strong> dos participantes ativos deram aceite na campanha base."
+            f"Ate o momento, <strong>{media_aceite}%</strong> dos participantes ativos deram aceite na campanha base."
         )
-
-        media_aceite = aceite_reg["pct_aceite"].mean()
         if aceite_rev is not None and not aceite_rev.empty:
-            abaixo_aceite = garantir_n_itens(
-                aceite_rev, "pct_aceite",
-                mascara_filtro=aceite_rev["pct_aceite"] < media_aceite,
-                limite=10, maior_melhor=True
+            piores_aceite = garantir_n_itens(
+                aceite_rev[aceite_rev["total_ativos"] > 0], "pct_aceite",
+                mascara_filtro=None,
+                limite=10, maior_melhor=False
             )
-            if not abaixo_aceite.empty:
-                itens_df = abaixo_aceite[["regional", "revenda", "pct_aceite"]].copy()
+            if not piores_aceite.empty:
+                itens_df = piores_aceite[["regional", "revenda", "total_ativos", "aceitaram", "pct_aceite"]].copy()
                 itens_df = itens_df.rename(columns={
                     "regional": "Regional",
                     "revenda": "Revenda",
+                    "total_ativos": "Total Ativos",
+                    "aceitaram": "Aceitaram",
                     "pct_aceite": "% Aceite",
                 })
-                resultado["aceites"]["alerta_titulo"] = "Revendas com aceite abaixo da média e que precisam de atenção"
-                resultado["aceites"]["alerta_subtitulo"] = f"A média geral do programa é de {media_aceite:.1f}%."
+                resultado["aceites"]["alerta_titulo"] = "Top 10 revendas com menor % de aceite"
+                resultado["aceites"]["alerta_subtitulo"] = ""
                 resultado["aceites"]["alerta_itens"] = itens_df
 
-        # Apenas 1 destaque geral
-        if aceite_rev is not None and not aceite_rev.empty:
+            # Apenas 1 destaque geral
             dest = identificar_destaque(aceite_rev, "pct_aceite", "revenda", maior_melhor=True, min_base=0, meta=META_ACEITES)
             if dest:
                 resultado["aceites"]["destaque"] = html_destaque(
@@ -1635,7 +1643,7 @@ def gerar_insights_regional(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, 
 
     if not aceite_reg_f.empty:
         r = aceite_reg_f.iloc[0]
-        media_aceite = aceite_reg["pct_aceite"].mean()
+        media_aceite = round(aceite_reg["aceitaram"].sum() / aceite_reg["total_ativos"].sum() * 100, 1)
         farol_aceite_reg = farol_html(r['pct_aceite'], META_ACEITES)
         resultado["aceites"]["intro"] = (
             f"{farol_aceite_reg} Aceite mensal de {mes_aceite_nome}: <strong>{r['pct_aceite']:.1f}%</strong> dos ativos da regional deram aceite.<br>"
