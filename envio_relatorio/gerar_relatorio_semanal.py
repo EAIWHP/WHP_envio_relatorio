@@ -898,14 +898,14 @@ def carregar_bases():
         df_cad = df_cad.merge(banco_clean, on="cpf_limp", how="left")
         dias_desde_inclusao = (pd.Timestamp("today").normalize() - df_cad["DataInclusao_dt"]).dt.days
         mask_pre_inativo = (
-            (df_cad["status"] == "Pré-Cadastrado")
+            (df_cad["status"].isin(["Pré-Cadastrado", "Indicado Moderado"]))
             & (df_cad["DataInclusao_dt"].notna())
             & (dias_desde_inclusao >= PRAZO_PRE_CADASTRO_INATIVO)
         )
         qtd_pre_inativo = mask_pre_inativo.sum()
         if qtd_pre_inativo > 0:
             df_cad.loc[mask_pre_inativo, "status"] = "Inativo"
-            logger.info(f"{qtd_pre_inativo:,} registros 'Pré-Cadastrado' com 90+ dias de DataInclusao na base do banco convertidos para 'Inativo'")
+            logger.info(f"{qtd_pre_inativo:,} registros 'Pré-Cadastrado' ou 'Indicado Moderado' com 90+ dias de DataInclusao na base do banco convertidos para 'Inativo'")
         df_cad = df_cad.drop(columns=["DataInclusao_dt"])
     else:
         logger.warning(f"Base do banco não encontrada em {BANCO_PARTICIPANTES_PATH}. Regra de Pré-Cadastrado 90+ dias não aplicada.")
