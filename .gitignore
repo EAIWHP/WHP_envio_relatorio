@@ -54,6 +54,9 @@ desktop.ini
 # Resumo das regras de calculo do relatorio semanal
 !envio_relatorio/Resumo_Regras_Calculo_Relatorio_Semanal_TOP.docx
 
+# Documento de regras de negocio para validacao
+!envio_relatorio/Regras_de_Negocio_envio_relatorio_Validacao.docx
+
 # Bases antigas e arquivos grandes (não versionar)
 bases/Old/
 bases/Tabelas/Bases_antigas/
