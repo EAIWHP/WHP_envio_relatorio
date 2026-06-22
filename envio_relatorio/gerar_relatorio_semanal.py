@@ -78,6 +78,9 @@ BANCO_PARTICIPANTES_PATH = Path("/home/thamiresvieira/projetos/validacoes_precad
 # Pasta com as hierarquias mensais por revenda (fonte correta de CPF -> revenda/loja/CNPJ)
 HIERARQUIA_DIR = DATA_DIR / "bases_cadastro_hierarquia"
 
+# Base consolidada de hierarquia com cadastro do site — considerada a fonte correta para total de cadastros
+CONSOLIDADO_HIERARQUIA_CADASTRO_SITE_PATH = HIERARQUIA_DIR / "consolidado_hierarquia_com_cadastro_site.xlsx"
+
 # Prazo em dias para considerar Pré-Cadastrado como Inativo (conforme regulamento)
 PRAZO_PRE_CADASTRO_INATIVO = 90
 
@@ -432,6 +435,83 @@ def carregar_hierarquias():
     return df_hier
 
 
+def carregar_cadastro_consolidado_hierarquia():
+    """
+    Carrega a base consolidada 'consolidado_hierarquia_com_cadastro_site.xlsx',
+    considerada a fonte correta para o total de cadastros do Programa +TOP.
+    Retorna DataFrame padronizado com cpf_limp, nome, revenda, status, cargo etc.
+    """
+    if not CONSOLIDADO_HIERARQUIA_CADASTRO_SITE_PATH.exists():
+        logger.warning(f"Base consolidada não encontrada: {CONSOLIDADO_HIERARQUIA_CADASTRO_SITE_PATH}")
+        return None
+
+    try:
+        df = pd.read_excel(
+            CONSOLIDADO_HIERARQUIA_CADASTRO_SITE_PATH,
+            sheet_name="CPFs Distintos Hierarquia",
+            dtype={"CPF_limpo": str, "CPF": str},
+        )
+    except Exception as e:
+        logger.warning(f"Não foi possível ler a base consolidada: {e}")
+        return None
+
+    df.columns = [str(c).strip() for c in df.columns]
+
+    # Renomeia para o padrão usado no restante do script
+    df = df.rename(columns={
+        "CPF_limpo": "cpf_limp",
+        "CPF": "cpf",
+        "Nome": "nome",
+        "Revenda": "revenda",
+        "Status": "status",
+        "Cargo": "cargo",
+        "Loja": "loja",
+        "CNPJ_Loja": "cnpj_loja",
+        "Cod_Loja_Hierarquia": "cod_loja",
+        "CNPJ_Hierarquia": "cnpj_hierarquia",
+        "Vendedor_Hierarquia": "vendedor_hierarquia",
+        "Gerente_Loja_Hierarquia": "gerente_loja_hierarquia",
+        "Gerente_Regional_Hierarquia": "gerente_regional_hierarquia",
+        "Data_Inclusao": "data_inclusao",
+    })
+
+    # Garante CPF limpo com 11 dígitos (texto)
+    df["cpf_limp"] = df["cpf_limp"].astype(str).str.replace(r"[^0-9]", "", regex=True)
+    # Remove CPFs vazios/inválidos
+    df = df[df["cpf_limp"].str.len().isin([11])].copy()
+
+    # Normaliza revenda
+    df["revenda"] = df["revenda"].apply(normalizar_revenda_hierarquia)
+    df["revenda"] = df["revenda"].apply(nome_revenda_exibicao)
+
+    # Mapeamento revenda -> regional a partir do cadastro base (fallback inclui CDA/Casas da Agua)
+    cadastro_path = DATA_DIR / "cadastro.xlsx"
+    mapa_regional = {}
+    if cadastro_path.exists():
+        try:
+            xl_cad = pd.ExcelFile(cadastro_path)
+            df_cad_orig = pd.read_excel(cadastro_path, sheet_name=xl_cad.sheet_names[0])
+            df_cad_orig.columns = [c.strip().lower() for c in df_cad_orig.columns]
+            if "grupo" in df_cad_orig.columns and "regional" in df_cad_orig.columns:
+                for _, row in df_cad_orig.dropna(subset=["grupo", "regional"]).iterrows():
+                    rev = str(row["grupo"]).strip()
+                    reg = str(row["regional"]).strip()
+                    if rev and reg and rev.lower() != "nan" and reg.lower() != "nan":
+                        mapa_regional[rev] = reg
+                # Adiciona mapeamento para Casas da Água via CDA
+                if "CDA" in mapa_regional and "Casas da Água" not in mapa_regional:
+                    mapa_regional["Casas da Água"] = mapa_regional["CDA"]
+        except Exception as e:
+            logger.warning(f"Não foi possível carregar mapeamento revenda->regional: {e}")
+
+    # Aplica mapeamento considerando normalização
+    df["regional"] = df["revenda"].apply(lambda r: regional_por_revenda(r, mapa_regional))
+    df["regional_curta"] = df["regional"].apply(regional_curta)
+
+    logger.info(f"Base consolidada hierarquia+cadastro: {len(df):,} registros, {df['cpf_limp'].nunique():,} CPFs únicos")
+    return df
+
+
 def mapeamento_revenda_regional(df_cad):
     """Cria mapeamento revenda -> regional a partir do cadastro base."""
     mapa = {}
@@ -442,6 +522,25 @@ def mapeamento_revenda_regional(df_cad):
             if rev and reg and rev.lower() != "nan" and reg.lower() != "nan":
                 mapa[rev] = reg
     return mapa
+
+
+def regional_por_revenda(revenda, mapa_regional):
+    """Busca regional no mapa de forma case-insensitiva e tratando CDA -> Casas da Água."""
+    if pd.isna(revenda):
+        return None
+    rev = str(revenda).strip()
+    if not rev or rev.lower() == "nan":
+        return None
+    if rev in mapa_regional:
+        return mapa_regional[rev]
+    rev_upper = rev.upper()
+    for k, v in mapa_regional.items():
+        if str(k).strip().upper() == rev_upper:
+            return v
+    # Fallback para Casas da Água via CDA
+    if rev == "Casas da Água" and "CDA" in mapa_regional:
+        return mapa_regional["CDA"]
+    return None
 
 
 def descobrir_aba_aceites(xl, ano_mes):
@@ -690,47 +789,102 @@ def carregar_bases():
     # ------------------------------------------------------------------
     cadastro_path = DATA_DIR / "cadastro.xlsx"
     xl_cad = pd.ExcelFile(cadastro_path)
-    df_cad = pd.read_excel(cadastro_path, sheet_name=xl_cad.sheet_names[0])
-    df_cad.columns = [c.strip().lower() for c in df_cad.columns]
-    df_cad["cpf_limp"] = df_cad["cpf/cnpj"].apply(limpar_cpf)
-    df_cad["revenda_original"] = df_cad["grupo"].astype(str).str.strip()
-    df_cad["regional_original"] = df_cad["regional"].astype(str).str.strip()
+    df_cad_orig = pd.read_excel(cadastro_path, sheet_name=xl_cad.sheet_names[0])
+    df_cad_orig.columns = [c.strip().lower() for c in df_cad_orig.columns]
+    df_cad_orig["cpf_limp"] = df_cad_orig["cpf/cnpj"].apply(limpar_cpf)
+    df_cad_orig["revenda_original"] = df_cad_orig["grupo"].astype(str).str.strip()
+    df_cad_orig["regional_original"] = df_cad_orig["regional"].astype(str).str.strip()
 
     # Mapeamento revenda -> regional a partir do cadastro base
-    mapa_regional = mapeamento_revenda_regional(df_cad)
+    mapa_regional = mapeamento_revenda_regional(df_cad_orig)
     logger.info(f"Mapeamento revenda->regional: {len(mapa_regional)} revendas")
 
     # ------------------------------------------------------------------
-    # Hierarquias (fonte correta de CPF -> revenda/loja/CNPJ/cargo)
+    # Hierarquias individuais (usadas para o detalhamento / aba de lojas)
     # ------------------------------------------------------------------
     df_hier = carregar_hierarquias()
-    if df_hier is not None:
-        cols_hier = ["cpf_limp", "revenda", "cod_loja", "cnpj", "nome_hier", "cargo_hier",
-                     "vendedor", "gerente_loja", "gerente_regional", "diretor", "desligado"]
-        df_hier = df_hier[[c for c in cols_hier if c in df_hier.columns]].copy()
-        df_cad = df_cad.merge(df_hier, on="cpf_limp", how="left")
-        # Normaliza revenda da hierarquia para revenda principal
-        df_hier["revenda"] = df_hier["revenda"].apply(normalizar_revenda_hierarquia)
-        df_cad["revenda_hier_norm"] = df_cad["revenda"].apply(normalizar_revenda_hierarquia)
-        # Se encontrou revenda na hierarquia, usa a normalizada; senao mantem a original
-        df_cad["revenda"] = df_cad["revenda_hier_norm"].fillna(df_cad["revenda_original"].apply(normalizar_revenda))
-        # Aplica nome amigavel de exibicao
-        df_cad["revenda"] = df_cad["revenda"].apply(nome_revenda_exibicao)
-        # Regional pela nova revenda, via mapeamento; fallback para original
-        df_cad["regional"] = df_cad["revenda"].map(mapa_regional).fillna(df_cad["regional_original"])
-        # Usa nome da hierarquia quando disponivel
-        if "nome_hier" in df_cad.columns:
-            df_cad["nome"] = df_cad["nome_hier"].fillna(df_cad["nome"])
-        # Cargo da hierarquia (quando houver)
-        if "cargo_hier" in df_cad.columns:
-            df_cad["cargo"] = df_cad["cargo_hier"].fillna(df_cad["cargo"])
-        logger.info(f"CPFs do cadastro com hierarquia encontrada: {df_cad['revenda'].notna().sum()}")
-    else:
-        df_cad["revenda"] = df_cad["revenda_original"].apply(nome_revenda_exibicao)
-        df_cad["regional"] = df_cad["regional_original"]
-        logger.warning("Hierarquias não carregadas. Usando cadastro base para revenda/regional.")
 
-    df_cad["regional_curta"] = df_cad["regional"].apply(regional_curta)
+    # ------------------------------------------------------------------
+    # Base consolidada hierarquia + cadastro site (fonte correta de CPFs)
+    # ------------------------------------------------------------------
+    df_cad_cons = carregar_cadastro_consolidado_hierarquia()
+
+    if df_cad_cons is not None:
+        # Usa o consolidado como base principal de cadastros
+        df_cad = df_cad_cons.copy()
+
+        # Cruza com cadastro base para complementar dados (cidade, uf, bairro, telefone, email etc.)
+        # sem sobrescrever as informações do consolidado, que é a fonte correta.
+        cols_complementares = ["cpf_limp", "nome", "cargo", "status", "cidade", "uf", "bairro", "rua", "cep", "telefone", "celular", "email", "data de aceite", "lgpd"]
+        cols_existentes = [c for c in cols_complementares if c in df_cad_orig.columns]
+        df_comp = df_cad_orig[cols_existentes].drop_duplicates(subset=["cpf_limp"], keep="first")
+
+        # Renomeia colunas que já existem no consolidado para sufixo _cadastro_base
+        colunas_sobreposicao = [c for c in cols_existentes if c in df_cad.columns and c != "cpf_limp"]
+        if colunas_sobreposicao:
+            df_comp = df_comp.rename(columns={c: f"{c}_cadastro_base" for c in colunas_sobreposicao})
+        df_cad = df_cad.merge(df_comp, on="cpf_limp", how="left")
+
+        # Preenche campos vazios do consolidado com dados do cadastro base, mas status/nome/cargo do consolidado prevalecem
+        for col in colunas_sobreposicao:
+            if col in ["status", "nome", "cargo"]:
+                # Consolidado é a fonte correta; cadastro base só preenche vazios
+                df_cad[col] = df_cad[col].combine_first(df_cad.get(f"{col}_cadastro_base"))
+            else:
+                # Dados complementares: cadastro base preenche vazios do consolidado
+                df_cad[col] = df_cad.get(f"{col}_cadastro_base").combine_first(df_cad[col])
+            df_cad = df_cad.drop(columns=[f"{col}_cadastro_base"])
+
+        # Garante colunas esperadas pelo restante do fluxo
+        if "nome" not in df_cad.columns:
+            df_cad["nome"] = None
+        if "cargo" not in df_cad.columns:
+            df_cad["cargo"] = None
+        if "cidade" not in df_cad.columns:
+            df_cad["cidade"] = None
+        if "uf" not in df_cad.columns:
+            df_cad["uf"] = None
+        if "bairro" not in df_cad.columns:
+            df_cad["bairro"] = None
+
+        # Força regional a partir do mapeamento do cadastro base (o consolidado pode não ter)
+        df_cad["regional"] = df_cad["revenda"].apply(lambda r: regional_por_revenda(r, mapa_regional))
+        df_cad["regional_curta"] = df_cad["regional"].apply(regional_curta)
+
+        logger.info(f"CPFs da base consolidada com regional mapeada: {df_cad['regional'].notna().sum():,}")
+    else:
+        # ------------------------------------------------------------------
+        # Fallback: hierarquias individuais + cadastro base
+        # ------------------------------------------------------------------
+        df_cad = df_cad_orig.copy()
+        if df_hier is not None:
+            cols_hier = ["cpf_limp", "revenda", "cod_loja", "cnpj", "nome_hier", "cargo_hier",
+                         "vendedor", "gerente_loja", "gerente_regional", "diretor", "desligado"]
+            df_hier = df_hier[[c for c in cols_hier if c in df_hier.columns]].copy()
+            df_cad = df_cad.merge(df_hier, on="cpf_limp", how="left")
+            # Normaliza revenda da hierarquia para revenda principal
+            df_hier["revenda"] = df_hier["revenda"].apply(normalizar_revenda_hierarquia)
+            df_cad["revenda_hier_norm"] = df_cad["revenda"].apply(normalizar_revenda_hierarquia)
+            # Se encontrou revenda na hierarquia, usa a normalizada; senao mantem a original
+            df_cad["revenda"] = df_cad["revenda_hier_norm"].fillna(df_cad["revenda_original"].apply(normalizar_revenda))
+            # Aplica nome amigavel de exibicao
+            df_cad["revenda"] = df_cad["revenda"].apply(nome_revenda_exibicao)
+            # Regional pela nova revenda, via mapeamento; fallback para original
+            df_cad["regional"] = df_cad["revenda"].map(mapa_regional).fillna(df_cad["regional_original"])
+            # Usa nome da hierarquia quando disponivel
+            if "nome_hier" in df_cad.columns:
+                df_cad["nome"] = df_cad["nome_hier"].fillna(df_cad["nome"])
+            # Cargo da hierarquia (quando houver)
+            if "cargo_hier" in df_cad.columns:
+                df_cad["cargo"] = df_cad["cargo_hier"].fillna(df_cad["cargo"])
+            logger.info(f"CPFs do cadastro com hierarquia encontrada: {df_cad['revenda'].notna().sum()}")
+        else:
+            df_cad["revenda"] = df_cad["revenda_original"].apply(nome_revenda_exibicao)
+            df_cad["regional"] = df_cad["regional_original"]
+            logger.warning("Hierarquias não carregadas. Usando cadastro base para revenda/regional.")
+
+        df_cad["regional_curta"] = df_cad["regional"].apply(regional_curta)
+
     df_cad = df_cad[~df_cad["revenda"].isin(REVENDAS_EXCLUIR)].copy()
 
     # ------------------------------------------------------------------
