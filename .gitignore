@@ -51,6 +51,9 @@ desktop.ini
 *.pptx
 *.pdf
 
+# Resumo das regras de calculo do relatorio semanal
+!envio_relatorio/Resumo_Regras_Calculo_Relatorio_Semanal_TOP.docx
+
 # Bases antigas e arquivos grandes (não versionar)
 bases/Old/
 bases/Tabelas/Bases_antigas/
