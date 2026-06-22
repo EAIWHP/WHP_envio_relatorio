@@ -537,8 +537,9 @@ def regional_por_revenda(revenda, mapa_regional):
     for k, v in mapa_regional.items():
         if str(k).strip().upper() == rev_upper:
             return v
-    # Fallback para Casas da Água via CDA
-    if rev == "Casas da Água" and "CDA" in mapa_regional:
+    # Fallback para Casas da Água via CDA (com ou sem acento)
+    rev_lower = rev.lower().replace("á", "a").replace("ã", "a").replace("ç", "c")
+    if rev_lower == "casas da agua" and "CDA" in mapa_regional:
         return mapa_regional["CDA"]
     return None
 
