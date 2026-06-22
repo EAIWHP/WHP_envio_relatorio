@@ -1761,7 +1761,13 @@ def preparar_tabela_treinamentos_combinada(trein_por_curso, trein_ambos=None, ni
         df_ambos = trein_ambos[cols].rename(columns={"pct_realizaram": "% Ambos"})
         df = df.merge(df_ambos, on=chave, how="left")
 
-    df = df.sort_values(f"% {nome1}", ascending=False).fillna(0)
+    df = df.sort_values("% Ambos", ascending=False).fillna(0)
+
+    # Reordena colunas: regional/revenda, % Ambos, curso1, curso2
+    cols_exibicao = ["Regional"]
+    if nivel == "revenda":
+        cols_exibicao.append("Revenda")
+    cols_exibicao.extend(["% Ambos", f"% {nome1}", f"% {nome2}"])
 
     # Renomeia chaves para exibição
     rename = {"regional_curta": "Regional"}
@@ -1769,7 +1775,7 @@ def preparar_tabela_treinamentos_combinada(trein_por_curso, trein_ambos=None, ni
         rename["revenda"] = "Revenda"
     df = df.rename(columns=rename)
 
-    return df
+    return df[cols_exibicao]
 
 
 def preparar_tabelas(dados):
