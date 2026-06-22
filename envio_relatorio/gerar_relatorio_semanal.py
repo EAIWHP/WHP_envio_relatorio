@@ -1248,7 +1248,7 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
                 "pct_ativos": "% Ativos",
             })
             resultado["cadastros"]["alerta_titulo"] = "Ponto de atenção: revendas com % de base menor do que a média do programa"
-            resultado["cadastros"]["alerta_subtitulo"] = "Conto com o reforço das regionais para revertermos isso."
+            resultado["cadastros"]["alerta_subtitulo"] = ""
             resultado["cadastros"]["alerta_itens"] = itens_df
 
         # Apenas 1 destaque geral (a melhor revenda do programa, que atingiu a meta)
@@ -1653,7 +1653,7 @@ def preparar_tabelas(dados):
 
 
 def _destaque_tom_ok_html(texto, imagens_kv=None, imagens_tom=None):
-    """Gera card verde de destaque com Tom fazendo joinha ao lado."""
+    """Gera card verde de destaque com Tom fazendo joinha ao lado, ajustado ao tamanho do texto."""
     if not texto:
         return ""
     imagens_tom = imagens_tom or {}
@@ -1664,14 +1664,14 @@ def _destaque_tom_ok_html(texto, imagens_kv=None, imagens_tom=None):
         cid = "tom_ok"
     elif "tom" in imagens_kv:
         cid = "kv_tom"
-    tom_html = f'<img src="cid:{cid}" alt="Tom +TOP" width="100" style="display:block;">' if cid else ""
+    tom_html = f'<img src="cid:{cid}" alt="Tom +TOP" width="60" style="display:block;">' if cid else ""
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0;">
+    <table cellpadding="0" cellspacing="0" border="0" style="margin:12px 0; width:auto; display:inline-table;">
       <tr>
-        <td width="110" height="120" align="center" valign="middle" style="padding-right:10px;">
+        <td width="70" align="center" valign="middle" style="padding-right:6px;">
           {tom_html}
         </td>
-        <td valign="middle" style="padding:12px 14px; background-color:#d4edda; border-radius:12px; border:1px solid #00a651; color:#155724; font-size:14px; line-height:1.6;">
+        <td valign="middle" style="padding:6px 10px; background-color:#d4edda; border-radius:8px; border:1px solid #00a651; color:#155724; font-size:13px; line-height:1.35;">
           {texto}
         </td>
       </tr>
@@ -1698,24 +1698,24 @@ def _balao_tom_html(texto, imagens_kv=None, imagens_tom=None, tipo_tom="tom", al
 
     if alinhamento == "direita":
         return f"""
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0;">
           <tr>
-            <td valign="bottom" style="padding:10px 14px; background-color:#ffffff; border-radius:12px; border:2px solid #ef4e22; color:#333333; font-size:15px; line-height:1.5;">
+            <td valign="middle" style="padding:8px 12px; background-color:#ffffff; border-radius:12px; border:2px solid #00a651; color:#333333; font-size:15px; line-height:1.4;">
               {texto}
             </td>
-            <td width="{largura_tom + 10}" align="center" valign="bottom" style="padding-left:10px;">
+            <td width="{largura_tom + 10}" align="center" valign="middle" style="padding-left:10px;">
               {tom_html}
             </td>
           </tr>
         </table>
         """
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0;">
       <tr>
-        <td width="{largura_tom + 10}" align="center" valign="bottom" style="padding-right:10px;">
+        <td width="{largura_tom + 10}" align="center" valign="middle" style="padding-right:10px;">
           {tom_html}
         </td>
-        <td valign="bottom" style="padding:10px 14px; background-color:#ffffff; border-radius:12px; border:2px solid #ef4e22; color:#333333; font-size:15px; line-height:1.5;">
+        <td valign="middle" style="padding:8px 12px; background-color:#ffffff; border-radius:12px; border:2px solid #00a651; color:#333333; font-size:15px; line-height:1.4;">
           {texto}
         </td>
       </tr>
@@ -1740,13 +1740,13 @@ def _pontos_atencao_secao_html(titulo, subtitulo, tabela_html, imagens_kv=None, 
 
 
 def _balao_insight_html(texto):
-    """Gera balão branco com borda laranja para insights, sem imagem do Tom."""
+    """Gera balão branco com borda verde para insights, sem imagem do Tom."""
     if not texto:
         return ""
     return f"""
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0;">
       <tr>
-        <td style="padding:14px; background-color:#ffffff; border-radius:12px; border:2px solid #ef4e22; color:#333333; font-size:15px; line-height:1.5;">
+        <td style="padding:14px; background-color:#ffffff; border-radius:12px; border:2px solid #00a651; color:#333333; font-size:15px; line-height:1.5;">
           {texto}
         </td>
       </tr>
@@ -1759,7 +1759,7 @@ def _secao_html(titulo):
     return f"""
     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:28px;">
       <tr>
-        <td style="color:#ef4e22; font-size:18px; font-weight:bold; padding-bottom:8px; border-bottom:3px solid #00a651;">
+        <td style="color:#ef4e22; font-size:18px; font-weight:bold; padding-bottom:8px;">
           {titulo}
         </td>
       </tr>
@@ -1885,12 +1885,14 @@ def carregar_imagens_tom():
 
 def _metric_box(titulo, valor, meta=None):
     meta_html = f"{meta:.0f}%" if meta is not None else ""
-    farol = farol_html(valor, meta, tamanho=16) if meta is not None else ""
+    farol = farol_html(valor, meta, tamanho=38) if meta is not None else ""
     return f"""
-    <td align="center" valign="middle" bgcolor="#ffffff" style="padding:20px 24px; color:#333333; font-size:16px; font-weight:bold; border-radius:10px; border:3px solid #ef4e22;">
+    <td width="33%" align="center" valign="middle" bgcolor="#ffffff" style="padding:20px 24px; color:#333333; font-size:16px; font-weight:bold; border-radius:10px; border:3px solid #ef4e22;">
       <div style="font-size:16px; margin-bottom:6px; color:#ef4e22;">{titulo}</div>
-      <div style="font-size:42px; margin-bottom:8px; color:#ef4e22;">{meta_html}</div>
-      <div style="font-size:14px; color:#333333;">base atual {farol} <strong>{valor}%</strong></div>
+      <div style="font-size:42px; margin-bottom:8px; color:#ef4e22; line-height:1; white-space:nowrap;">
+        {farol}&nbsp;<strong>{valor}%</strong>
+      </div>
+      <div style="font-size:14px; color:#333333;">objetivo ideal <strong>{meta_html}</strong></div>
     </td>
     """
 
@@ -1928,7 +1930,7 @@ def _header_html(titulo, hoje, imagens_kv=None):
           <table width="100%" cellpadding="0" cellspacing="0" border="0">
             <tr>
               <td>
-                <h1 style="margin:0; font-size:18px; font-weight:bold;">{titulo}</h1>
+                <h1 style="margin:0; font-size:18px; font-weight:bold; color:#ffffff;">{titulo}</h1>
               </td>
               <td align="right">
                 <p style="margin:0; font-size:12px; color:#ffffff;">{hoje}</p>
@@ -1942,25 +1944,23 @@ def _header_html(titulo, hoje, imagens_kv=None):
 
 
 def _destaques_cadastro_html(cad_rev, imagens_kv=None, imagens_tom=None):
-    """Gera balão verde de destaques com todas as revendas que atingiram a meta de cadastro."""
+    """Gera um único balão verde de destaque com revendas agrupadas por regional."""
     if cad_rev is None or cad_rev.empty:
         return ""
 
-    atingiram = cad_rev[cad_rev["pct_ativos"] >= META_CADASTRO].sort_values("pct_ativos", ascending=False)
+    atingiram = cad_rev[cad_rev["pct_ativos"] >= META_CADASTRO].copy()
     if atingiram.empty:
         return ""
 
-    linhas = []
-    for _, r in atingiram.iterrows():
-        linhas.append(
-            f"• Regional <strong>{r['regional_curta']}</strong> com a revenda <strong>{r['revenda']}</strong> com <strong>{r['pct_ativos']:.1f}%</strong>"
-        )
+    # Ordenar revendas dentro de cada regional do maior para o menor
+    atingiram = atingiram.sort_values(["regional_curta", "pct_ativos"], ascending=[True, False])
 
-    conteudo = (
-        f"<div style='font-size:18px; font-weight:bold; margin-bottom:4px;'>🟢 Parabéns.</div>"
-        f"<div style='font-size:15px; font-weight:bold; margin-bottom:10px;'>Melhor % de cadastros ativos.</div>"
-        f"As revendas abaixo atingiram ou superaram o objetivo de {META_CADASTRO:.0f}%:<br>"
-        + "<br>".join(linhas)
+    # Ordenar regionais pela média de % ativos (maior primeiro)
+    ordem_regional = (
+        atingiram.groupby("regional_curta")["pct_ativos"]
+        .mean()
+        .sort_values(ascending=False)
+        .index.tolist()
     )
 
     imagens_tom = imagens_tom or {}
@@ -1973,13 +1973,42 @@ def _destaques_cadastro_html(cad_rev, imagens_kv=None, imagens_tom=None):
         cid = "kv_tom"
     tom_html = f'<img src="cid:{cid}" alt="Tom +TOP" width="100" style="display:block;">' if cid else ""
 
+    blocos_regional = []
+    for regional in ordem_regional:
+        revendas_reg = atingiram[atingiram["regional_curta"] == regional]
+        linhas_rev = []
+        for _, r in revendas_reg.iterrows():
+            linhas_rev.append(
+                f"• <strong>{r['revenda']}</strong> — <strong>{r['pct_ativos']:.1f}%</strong>"
+            )
+
+        bloco = (
+            f"<div style='margin-bottom:16px;'>"
+            f"<div style='font-size:16px; font-weight:bold; margin-bottom:6px;'>"
+            f"🟢 Regional <strong>{regional}</strong></div>"
+            f"<div style='font-size:14px; line-height:1.7;'>"
+            + "<br>".join(linhas_rev)
+            + "</div></div>"
+        )
+        blocos_regional.append(bloco)
+
+    conteudo = (
+        f"<div style='font-size:18px; font-weight:bold; margin-bottom:4px;'>"
+        f"🎉 Parabéns!</div>"
+        f"<div style='font-size:15px; font-weight:bold; margin-bottom:12px;'>"
+        f"Melhor % de cadastros ativos.</div>"
+        f"<div style='font-size:14px; margin-bottom:12px;'>"
+        f"As revendas abaixo atingiram ou superaram o objetivo de <strong>{META_CADASTRO:.0f}%</strong>:</div>"
+        + "\n".join(blocos_regional)
+    )
+
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
       <tr>
-        <td width="110" height="120" align="center" valign="middle" style="padding-right:10px;">
+        <td width="110" align="center" valign="middle" style="padding-right:10px;">
           {tom_html}
         </td>
-        <td valign="middle" style="padding:12px 14px; background-color:#d4edda; border-radius:12px; border:1px solid #00a651; color:#155724; font-size:14px; line-height:1.6;">
+        <td valign="middle" style="padding:14px 16px; background-color:#d4edda; border-radius:12px; border:1px solid #00a651; color:#155724; font-size:14px; line-height:1.6;">
           {conteudo}
         </td>
       </tr>
@@ -2096,8 +2125,6 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   {metricas}
 
-                  {_balao_insight_html(insights.get("evolucao", ""))}
-
                   {_secao_html("CADASTROS")}
                   {_balao_tom_html(
                       f"<p style='font-size:20px; margin:0 0 10px 0; line-height:1.4;'><strong>Nosso objetivo ideal para a base de cadastros do Programa +TOP é de <span style='font-size:28px; color:#ef4e22;'>{META_CADASTRO:.0f}%</span></strong></p>"
@@ -2165,6 +2192,11 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                   {_destaque_tom_ok_html(insights.get("aceites", {}).get("destaque", ""), imagens_kv=imagens_kv, imagens_tom=imagens_tom)}
                   {subsecao_titulo("TOP 10 revendas")}
                   {tabelas_usar['aceite_rev'] if tabelas_usar.get('aceite_rev') else '<p><em>Sem dados de aceites por revenda.</em></p>'}
+
+                  <p style="margin-top:28px; font-size:16px; color:#155724; background-color:#d4edda; padding:14px 16px; border-radius:10px; border:1px solid #00a651; line-height:1.5;">
+                    💪 <strong>Conto com o reforço das regionais para revertermos isso.</strong><br>
+                    Juntos, vamos fortalecer ainda mais o Programa +TOP!
+                  </p>
 
                   <p style="margin-top:24px; font-size:16px;">Em anexo <strong>base detalhada</strong>.</p>
 
