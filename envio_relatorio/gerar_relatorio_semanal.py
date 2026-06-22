@@ -638,7 +638,7 @@ def fig_to_base64(fig):
         return None
 
 
-def identificar_destaque(df, coluna_metrica, coluna_nome, maior_melhor=True, min_base=10, coluna_base=None, meta=None):
+def identificar_destaque(df, coluna_metrica, coluna_nome, maior_melhor=True, min_base=0, coluna_base=None, meta=None):
     """Identifica a melhor revenda/regional, exigindo base mínima para evitar outliers.
     Se meta for informada, só destaca quem atingiu ou superou o objetivo."""
     if df is None or df.empty or coluna_metrica not in df.columns or coluna_nome not in df.columns:
@@ -1407,7 +1407,7 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
             resultado["cadastros"]["alerta_itens"] = itens_df
 
         # Apenas 1 destaque geral (a melhor revenda do programa, que atingiu a meta)
-        dest = identificar_destaque(cad_rev, "pct_ativos", "revenda", maior_melhor=True, min_base=20, meta=META_CADASTRO)
+        dest = identificar_destaque(cad_rev, "pct_ativos", "revenda", maior_melhor=True, min_base=0, meta=META_CADASTRO)
         if dest:
             resultado["cadastros"]["destaque"] = html_destaque(
                 "Melhor % de cadastros ativos.", dest["nome"], dest["regional"], dest["valor"], meta=META_CADASTRO
@@ -1464,7 +1464,7 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
             resultado["treinamentos"]["alerta_itens"] = itens_df
 
         # Apenas 1 destaque geral
-        dest = identificar_destaque(trein_rev, "pct_realizaram", "revenda", maior_melhor=True, min_base=20, meta=META_TREINAMENTOS)
+        dest = identificar_destaque(trein_rev, "pct_realizaram", "revenda", maior_melhor=True, min_base=0, meta=META_TREINAMENTOS)
         if dest:
             resultado["treinamentos"]["destaque"] = html_destaque(
                 "Melhor % de treinamentos concluídos.", dest["nome"], dest["regional"], dest["valor"], meta=META_TREINAMENTOS
@@ -1500,7 +1500,7 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
 
         # Apenas 1 destaque geral
         if aceite_rev is not None and not aceite_rev.empty:
-            dest = identificar_destaque(aceite_rev, "pct_aceite", "revenda", maior_melhor=True, min_base=20, meta=META_ACEITES)
+            dest = identificar_destaque(aceite_rev, "pct_aceite", "revenda", maior_melhor=True, min_base=0, meta=META_ACEITES)
             if dest:
                 resultado["aceites"]["destaque"] = html_destaque(
                     "Melhor % de aceite mensal.", dest["nome"], dest["regional"], dest["valor"], meta=META_ACEITES
@@ -1547,7 +1547,7 @@ def gerar_insights_regional(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, 
                 "Revendas da regional abaixo da média geral do programa. Precisam de reforço.<br>" + "<br>".join(linhas)
             )
 
-        dest = identificar_destaque(cad_rev_f, "pct_ativos", "revenda", maior_melhor=True, min_base=10, meta=META_CADASTRO)
+        dest = identificar_destaque(cad_rev_f, "pct_ativos", "revenda", maior_melhor=True, min_base=0, meta=META_CADASTRO)
         if dest:
             resultado["cadastros"]["destaque"] = html_destaque(
                 "Melhor % de cadastros ativos.", dest["nome"], dest["regional"], dest["valor"], meta=META_CADASTRO
@@ -1590,7 +1590,7 @@ def gerar_insights_regional(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, 
                 "Revendas da regional com treinamentos abaixo da media.<br>" + "<br>".join(linhas)
             )
 
-        dest = identificar_destaque(trein_rev_f, "pct_realizaram", "revenda", maior_melhor=True, min_base=10, meta=META_TREINAMENTOS)
+        dest = identificar_destaque(trein_rev_f, "pct_realizaram", "revenda", maior_melhor=True, min_base=0, meta=META_TREINAMENTOS)
         if dest:
             resultado["treinamentos"]["destaque"] = html_destaque(
                 "Melhor % de treinamentos concluídos.", dest["nome"], dest["regional"], dest["valor"], meta=META_TREINAMENTOS
@@ -1606,7 +1606,7 @@ def gerar_insights_regional(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, 
         )
 
         if aceite_rev_f is not None and not aceite_rev_f.empty:
-            dest = identificar_destaque(aceite_rev_f, "pct_aceite", "revenda", maior_melhor=True, min_base=10, meta=META_ACEITES)
+            dest = identificar_destaque(aceite_rev_f, "pct_aceite", "revenda", maior_melhor=True, min_base=0, meta=META_ACEITES)
             if dest:
                 resultado["aceites"]["destaque"] = html_destaque(
                     "Melhor % de aceite mensal.", dest["nome"], dest["regional"], dest["valor"], meta=META_ACEITES
