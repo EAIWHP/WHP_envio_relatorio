@@ -141,7 +141,9 @@ Ou use o instalador automático:
 
 ## Saídas geradas
 
-- `relatorios_gerados/relatorio_top_YYYYMMDD.xlsx` — relatório completo em Excel
+- `relatorios_gerados/base_detalhada_relatorio_semanal_programa_+TOP_DDMMYYYY.xlsx` — relatório completo em Excel (anexo do e-mail)
+  - Contém as abas: `Resumo`, `Cadastro_Regional`, `Cadastro_Revenda`, `Treinamento_Regional`, `Treinamento_Revenda`, `Aceite_Regional`, `Aceite_Revenda`, `Detalhamento`
+  - A aba **Detalhamento** traz, linha a linha, todas as informações necessárias para replicar os cálculos do e-mail: CPF, CNPJ, código da loja, status, flag "Ativo no +TOP?", "Em Férias?", "Aceite no Mês?", "Realizou Ambos os Cursos?", data de aceite, status/data dos cursos obrigatórios e mês de referência.
 - `relatorios_gerados/relatorio_top_YYYYMMDD.html` — cópia do e-mail em HTML
 - `relatorios_gerados/relatorio_top_YYYYMMDD_REGIONAL.xlsx` — relatório individual por regional
 - `logs/relatorio_YYYYMMDD.log` — log de execução

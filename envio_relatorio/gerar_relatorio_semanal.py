@@ -34,6 +34,7 @@ import io
 import json
 import logging
 import os
+import re
 import smtplib
 import subprocess
 import sys
@@ -49,6 +50,9 @@ from pathlib import Path
 import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
+from openpyxl.utils import get_column_letter
+from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 
 matplotlib.use("Agg")  # backend não interativo para cron/servers
 
@@ -61,6 +65,25 @@ OUTPUT_DIR = BASE_DIR / "relatorios_gerados"
 LOG_DIR = BASE_DIR / "logs"
 SNAPSHOT_DIR = BASE_DIR / "snapshots"
 CONFIG_FILE = BASE_DIR / "config_email.json"
+
+# Colunas percentuais no Excel que devem receber number_format 0.0%
+PCT_COLS = {
+    "% Ativos", "% Férias", "% Realizado", "% Aceite", "% Ambos",
+}
+
+# Cores do KV +TOP para formatação do Excel
+COR_PRIMARIA = "EF4E22"       # laranja Whirlpool/+TOP
+COR_PRIMARIA_CLARA = "FDE8E0" # laranja claro para cabeçalhos
+COR_CINZA = "F2F2F2"          # cinza claro
+COR_BRANCO = "FFFFFF"
+COR_TEXTO = "333333"
+
+thin_border = Border(
+    left=Side(style="thin", color="D9D9D9"),
+    right=Side(style="thin", color="D9D9D9"),
+    top=Side(style="thin", color="D9D9D9"),
+    bottom=Side(style="thin", color="D9D9D9"),
+)
 
 OUTPUT_DIR.mkdir(exist_ok=True)
 LOG_DIR.mkdir(exist_ok=True)
@@ -75,10 +98,12 @@ STATUS_CADASTRO_EXCLUIR = {"Inativo", "Bloqueado", "Reprovado", "Aguardando Apro
 # Caminho da base do banco de participantes (usada para validar DataInclusao de Pré-Cadastrados)
 BANCO_PARTICIPANTES_PATH = Path("/home/thamiresvieira/projetos/validacoes_precadastro/PROD_WHP_Participante_Banco_v2_16062026.xlsx")
 
-# Pasta com as hierarquias mensais por revenda (fonte correta de CPF -> revenda/loja/CNPJ)
+# Pasta com as hierarquias mensais por revenda.
+# (anteriormente hierarquia_rodrigo; agora bases_cadastro_hierarquia)
 HIERARQUIA_DIR = DATA_DIR / "bases_cadastro_hierarquia"
 
-# Base consolidada de hierarquia com cadastro do site — considerada a fonte correta para total de cadastros
+# (DESATIVADO) A base consolidada não é mais utilizada. cadastro.xlsx é a base
+# principal e a pasta de hierarquias enriquece os dados.
 CONSOLIDADO_HIERARQUIA_CADASTRO_SITE_PATH = HIERARQUIA_DIR / "consolidado_hierarquia_com_cadastro_site.xlsx"
 
 # Prazo em dias para considerar Pré-Cadastrado como Inativo (conforme regulamento)
@@ -92,6 +117,7 @@ META_ACEITES = 70.0
 # Mapeamento de nomes de revenda para exibição (evita siglas)
 NOME_REVENDA_EXIBICAO = {
     "CDA": "Casas da Água",
+    "Imperio": "Império",
 }
 
 # Filiais "B" que devem ser agrupadas com a revenda principal
@@ -132,6 +158,8 @@ MAPA_REVENDA_PRINCIPAL = {
     "GAZIN ONLINE": "Gazin Online",
     "GAZIN": "Gazin Varejo",
     "LOJAS GUAIBIM": "Guaibim",
+    "GUAIBIM": "Guaibim",
+    "HAVAN": "Havan",
     "JMAHFUZ": "Jmahfuz",
     "IMPERIO": "Imperio",
     "LASER ELETRO": "Laser Eletro",
@@ -157,12 +185,15 @@ MAPA_REVENDA_PRINCIPAL = {
     "LOJAS BECKER LTDA": "Becker",
     "MOVEIS ESTRELA": "Estrela",
     "ZENIR": "Zenir",
+    # Filial da Zenir (Filial 68, CNPJ raiz 41.426.966) que veio na hierarquia
+    # sem o prefixo "Zenir" na coluna REVENDA — agrupada manualmente na Zenir.
+    "MESSEJANA 2": "Zenir",
 }
 
 # Mapeamento SKU/Código -> Nome descritivo do curso obrigatório do mês
 # Atualizado conforme catálogo Whirlpool/Brastemp/Consul.
 NOMES_CURSOS = {
-    "CZD12": "Ar Condicionado Consul",
+    "CZD12": "Ar-Condicionado Consul",
     "BRM46": "Geladeira Consul Inverse",
     "BMC29": "Micro-ondas Consul",
     "CRM44M": "Geladeira Consul Frost Free",
@@ -172,7 +203,7 @@ NOMES_CURSOS = {
     "BRE66": "Refrigerador Electrolux",
     "BRE57": "Refrigerador Electrolux",
     "BWJ14": "Lava-Louças Brastemp",
-    "CRA30M": "Ar Condicionado Consul",
+    "CRA30M": "Ar-Condicionado Consul",
     "CFO4ZAB": "Fogão Consul",
     "BRM62": "Geladeira Brastemp",
     "CRM56M": "Geladeira Consul",
@@ -279,7 +310,10 @@ def regional_curta(regional):
 def regional_title_case(regional):
     """Retorna nome da regional em Title Case (ex: COMPRA DIRETA -> Compra Direta)."""
     r = str(regional).strip()
-    return r.title()
+    r = r.title()
+    # Ajustes específicos de exibição
+    r = r.replace("Centro Norte", "Centro-Norte")
+    return r
 
 
 
@@ -343,7 +377,7 @@ def carregar_hierarquias():
     """
     if not HIERARQUIA_DIR.exists():
         logger.warning(f"Pasta de hierarquias não encontrada: {HIERARQUIA_DIR}")
-        return None
+        return None, None
 
     dfs = []
     mapeamento_colunas = {
@@ -361,10 +395,26 @@ def carregar_hierarquias():
         "CARGO": "cargo_hier",
     }
 
-    for arquivo in sorted(HIERARQUIA_DIR.glob("*.xlsx")):
+    # Seleciona arquivos: prefere versões *_corrigido.xlsx quando existirem
+    arquivos_brutos = sorted(HIERARQUIA_DIR.glob("*.xlsx"))
+    arquivos_corrigidos = {a.stem.replace("_corrigido", ""): a for a in arquivos_brutos if a.stem.endswith("_corrigido")}
+    arquivos_usar = []
+    for arquivo in arquivos_brutos:
         nome = arquivo.name.upper()
-        # Ignora a base do banco e arquivos de sistema
-        if "PROD_WHP" in nome or nome.startswith("~"):
+        if "PROD_WHP" in nome or nome.startswith("~") or "_corrigido" in nome:
+            continue
+        # Se existe versão corrigida, usa ela em vez do original
+        if arquivo.stem in arquivos_corrigidos:
+            arquivos_usar.append(arquivos_corrigidos[arquivo.stem])
+        else:
+            arquivos_usar.append(arquivo)
+    # Remove duplicatas mantendo ordem
+    arquivos_usar = list(dict.fromkeys(arquivos_usar))
+
+    for arquivo in arquivos_usar:
+        nome = arquivo.name.upper()
+        # Ignora arquivos consolidados, de comparacao, resumo ou analise de CPFs repetidos
+        if any(x in nome for x in ["CONSOLIDADO", "COMPARACAO", "RESUMO", "CPFS_REPETIDOS"]):
             continue
         try:
             xl = read_excel_robusto(arquivo, sheet_name=None)
@@ -382,6 +432,15 @@ def carregar_hierarquias():
             logger.warning(f"{arquivo.name} não possui coluna CPF. Ignorado.")
             continue
 
+        # Revenda derivada do nome do arquivo (ex: "GUAIBIM - HIERARQUIA MAIO.xlsx" -> "Guaibim").
+        # Usada quando o arquivo não traz a coluna REVENDA ou ela vem vazia.
+        revenda_arquivo = normalizar_revenda_hierarquia(arquivo.stem.split("-")[0].strip())
+        if "revenda" not in df.columns:
+            df["revenda"] = revenda_arquivo
+        else:
+            rev_vazia = df["revenda"].isna() | (df["revenda"].astype(str).str.strip() == "")
+            df.loc[rev_vazia, "revenda"] = revenda_arquivo
+
         df["cpf_limp"] = df["cpf"].apply(limpar_cpf)
         # Normaliza colunas de flag SIM/NÃO para maiúsculo sem acento
         for col in ["vendedor", "gerente_loja", "gerente_regional", "diretor", "desligado"]:
@@ -393,46 +452,47 @@ def carregar_hierarquias():
 
     if not dfs:
         logger.warning("Nenhum arquivo de hierarquia válido encontrado.")
-        return None
+        return None, None
 
     df_hier = pd.concat(dfs, ignore_index=True)
 
     # Normaliza nomes de revenda individualmente
     df_hier["revenda"] = df_hier["revenda"].apply(normalizar_revenda_hierarquia)
 
-    # Normaliza CNPJ para numeros e cria raiz (8 primeiros digitos) para agrupar filiais/lojas
-    if "cnpj" in df_hier.columns:
-        df_hier["cnpj_limpo"] = df_hier["cnpj"].astype(str).str.replace(r"[^0-9]", "", regex=True)
-        df_hier["cnpj_valido"] = df_hier["cnpj_limpo"].str.len() >= 8
-        df_hier["cnpj_raiz"] = df_hier.apply(
-            lambda r: r["cnpj_limpo"][:8] if r["cnpj_valido"] else None, axis=1
+    # NOTA: agrupamento por CNPJ raiz foi removido porque, com a hierarquia como
+    # base do indicador, a revenda deve ser a informada pela própria hierarquia.
+    # O agrupamento estava causando dispersão de CPFs entre regionais distintas.
+
+    # Regra de validação (Andressa/Thamires, 01/07/2026): SOMENTE quem está com
+    # DESLIGADO = NÃO entra na base do indicador. SIM, FÉRIAS, BENEFÍCIO e valores
+    # em branco são desconsiderados — não entram no total (denominador) nem nos
+    # ativos. Filtro aplicado antes da dedupe. Todos os arquivos de hierarquia
+    # possuem a coluna DESLIGADO (verificado em 01/07/2026).
+    # Antes de filtrar, guardamos os CPFs de FÉRIAS por revenda para exibir a
+    # quantidade e o % de férias nas tabelas de cadastro.
+    df_ferias = None
+    if "desligado" in df_hier.columns:
+        antes_desligado = len(df_hier)
+        deslig_norm = df_hier["desligado"].astype(str).str.strip().str.upper()
+        df_ferias = df_hier[deslig_norm == "FÉRIAS"][["cpf_limp", "revenda"]].copy()
+        df_hier = df_hier[deslig_norm.isin(["NAO", "NÃO"])].copy()
+        logger.info(
+            f"Filtro DESLIGADO=NÃO: {antes_desligado - len(df_hier)} registros removidos "
+            f"(SIM / FÉRIAS / BENEFÍCIO / em branco)"
         )
-
-        # Para cada grupo de CNPJ raiz valido, define a revenda principal
-        def revenda_principal_do_grupo(grupo):
-            nomes = grupo["revenda"].dropna().astype(str).str.strip().unique()
-            # Prioriza nomes presentes nos valores do mapeamento
-            for nome in nomes:
-                if nome and str(nome).upper() in [v.upper() for v in MAPA_REVENDA_PRINCIPAL.values()]:
-                    return nome
-            # Fallback: nome mais curto
-            nomes_validos = [n for n in nomes if n and str(n).lower() != "nan"]
-            if nomes_validos:
-                return min(nomes_validos, key=lambda x: len(str(x)))
-            return grupo["revenda"].dropna().astype(str).str.strip().iloc[0] if not grupo["revenda"].dropna().empty else ""
-
-        # Aplica agrupamento apenas para CNPJs validos
-        df_validos = df_hier[df_hier["cnpj_valido"]].copy()
-        if not df_validos.empty:
-            raiz_para_revenda = df_validos.groupby("cnpj_raiz").apply(revenda_principal_do_grupo).to_dict()
-            df_hier.loc[df_hier["cnpj_valido"], "revenda"] = df_hier.loc[df_hier["cnpj_valido"], "cnpj_raiz"].map(raiz_para_revenda)
-
-        df_hier = df_hier.drop(columns=["cnpj_limpo", "cnpj_valido", "cnpj_raiz"])
 
     # Se um CPF aparecer em mais de uma revenda/loja, mantem a primeira ocorrencia
     df_hier = df_hier.drop_duplicates(subset=["cpf_limp"], keep="first")
+
+    # Consolida férias: mantém apenas CPFs que NÃO estão na base ativa (NÃO),
+    # para não contar duas vezes a mesma pessoa.
+    if df_ferias is not None and not df_ferias.empty:
+        df_ferias = df_ferias[~df_ferias["cpf_limp"].isin(set(df_hier["cpf_limp"]))]
+        df_ferias = df_ferias.drop_duplicates(subset=["cpf_limp"], keep="first")
+        logger.info(f"CPFs em férias na hierarquia: {len(df_ferias)}")
+
     logger.info(f"Hierarquias consolidadas: {len(df_hier)} CPFs unicos")
-    return df_hier
+    return df_hier, df_ferias
 
 
 def carregar_cadastro_consolidado_hierarquia():
@@ -738,7 +798,7 @@ def estilizar_tabela_html(df, destaque_coluna=None, destaque_menor_que_media=Non
         html += "<tr>"
         for col in df.columns:
             val = row[col]
-            is_num = isinstance(val, (int, float)) and not pd.isna(val)
+            is_num = pd.api.types.is_number(val) and not pd.isna(val)
             align = "right" if is_num else "left"
 
             # Semaforo para colunas percentuais (verde / amarelo / vermelho)
@@ -802,6 +862,15 @@ def carregar_bases():
     df_cad_orig["revenda_original"] = df_cad_orig["grupo"].astype(str).str.strip()
     df_cad_orig["regional_original"] = df_cad_orig["regional"].astype(str).str.strip()
 
+    # Mapeamento completo de CPF -> status (incluindo Inativo/Bloqueado, antes do filtro)
+    # Usado para dividir a hierarquia em Ativos / Pré-Cadastro / Inativos
+    status_por_cpf_completo = (
+        df_cad_orig.dropna(subset=["cpf_limp", "status"])
+        .drop_duplicates(subset=["cpf_limp"], keep="first")
+        .set_index("cpf_limp")["status"]
+        .to_dict()
+    )
+
     # Mapeamento revenda -> regional a partir do cadastro base
     mapa_regional = mapeamento_revenda_regional(df_cad_orig)
     logger.info(f"Mapeamento revenda->regional: {len(mapa_regional)} revendas")
@@ -810,11 +879,15 @@ def carregar_bases():
     # Hierarquias individuais (usadas para o detalhamento / aba de lojas)
     # ------------------------------------------------------------------
     df_hier = carregar_hierarquias()
+    df_ferias_hier = None
+    if isinstance(df_hier, tuple):
+        df_hier, df_ferias_hier = df_hier
 
     # ------------------------------------------------------------------
-    # Base consolidada hierarquia + cadastro site (fonte correta de CPFs)
+    # Base consolidada DESATIVADA. cadastro.xlsx é a base principal e as
+    # hierarquias da pasta hierarquia_rodrigo apenas enriquecem os dados.
     # ------------------------------------------------------------------
-    df_cad_cons = carregar_cadastro_consolidado_hierarquia()
+    df_cad_cons = None
 
     if df_cad_cons is not None:
         # Usa o consolidado como base principal de cadastros
@@ -869,14 +942,16 @@ def carregar_bases():
                          "vendedor", "gerente_loja", "gerente_regional", "diretor", "desligado"]
             df_hier = df_hier[[c for c in cols_hier if c in df_hier.columns]].copy()
             df_cad = df_cad.merge(df_hier, on="cpf_limp", how="left")
-            # Normaliza revenda da hierarquia para revenda principal
-            df_hier["revenda"] = df_hier["revenda"].apply(normalizar_revenda_hierarquia)
+            # Revenda da hierarquia (normalizada) — usada apenas como fallback
             df_cad["revenda_hier_norm"] = df_cad["revenda"].apply(normalizar_revenda_hierarquia)
-            # Se encontrou revenda na hierarquia, usa a normalizada; senao mantem a original
-            df_cad["revenda"] = df_cad["revenda_hier_norm"].fillna(df_cad["revenda_original"].apply(normalizar_revenda))
+            # Cadastro é a base principal: a revenda vem do GRUPO do cadastro.
+            # A hierarquia só preenche a revenda quando o grupo do cadastro estiver vazio.
+            rev_cadastro = df_cad["revenda_original"].apply(normalizar_revenda)
+            rev_cad_vazia = rev_cadastro.isna() | rev_cadastro.astype(str).str.strip().str.lower().isin(["", "nan"])
+            df_cad["revenda"] = rev_cadastro.where(~rev_cad_vazia, df_cad["revenda_hier_norm"])
             # Aplica nome amigavel de exibicao
             df_cad["revenda"] = df_cad["revenda"].apply(nome_revenda_exibicao)
-            # Regional pela nova revenda, via mapeamento; fallback para original
+            # Regional pela revenda do cadastro, via mapeamento; fallback para original
             df_cad["regional"] = df_cad["revenda"].map(mapa_regional).fillna(df_cad["regional_original"])
             # Usa nome da hierarquia quando disponivel
             if "nome_hier" in df_cad.columns:
@@ -952,7 +1027,26 @@ def carregar_bases():
             raise FileNotFoundError("Arquivo de aceites não encontrado em envio_relatorio/bases/")
 
     xl_aceite = pd.ExcelFile(aceite_path)
-    ano_mes_hoje = date.today().strftime("%Y-%m")
+    # Mês de referência = último mês com conclusões obrigatórias na base de
+    # treinamentos (regra do projeto: usar o último mês disponível, não o mês do
+    # calendário). Enquanto julho/2026 não for carregado, segue em junho/2026.
+    mes_calendario = date.today().strftime("%Y-%m")
+    ano_mes_hoje = mes_calendario
+    try:
+        obr_concl = df_trein[
+            (df_trein["Estado"].astype(str).str.lower() == "concluido")
+            & (df_trein["Trilha"].astype(str).str.contains("OBRIGAT", case=False, na=False))
+            & (df_trein["Conclusão"].notna())
+        ]
+        if not obr_concl.empty:
+            ano_mes_hoje = str(obr_concl["Conclusão"].dt.to_period("M").max())
+            if ano_mes_hoje != mes_calendario:
+                logger.info(
+                    f"Mês de referência ajustado para {ano_mes_hoje} "
+                    f"(último mês com treinamentos na base; calendário={mes_calendario})"
+                )
+    except Exception as e:
+        logger.warning(f"Não foi possível derivar o mês de referência da base de treinamentos: {e}")
     aba_aceite, usou_ultima = descobrir_aba_aceites(xl_aceite, ano_mes_hoje)
     df_aceite = pd.read_excel(aceite_path, sheet_name=aba_aceite)
     df_aceite["cpf_limp"] = df_aceite["CPF"].apply(limpar_cpf)
@@ -961,12 +1055,26 @@ def carregar_bases():
     logger.info(f"Aceites: aba '{aba_aceite}' ({len(df_aceite):,} registros)")
 
     # ------------------------------------------------------------------
-    # Detalhamento (consolidado das hierarquias)
+    # Detalhamento (consolidado das hierarquias + férias)
     # ------------------------------------------------------------------
     df_det = None
     if df_hier is not None:
+        # Mantém todos os CPFs da hierarquia ativa (DESLIGADO=NÃO), mesmo que
+        # ainda não existam no cadastro da plataforma. Isso garante que a aba
+        # Detalhamento reflita exatamente a base usada nos cálculos do e-mail.
         df_det = df_hier.copy()
-        df_det = df_det[df_det["cpf_limp"].isin(df_cad["cpf_limp"].unique())].copy()
+        df_det["base_calculo_geral"] = True
+
+        # Adiciona CPFs em férias para permitir replicar o % Férias
+        if df_ferias_hier is not None and not df_ferias_hier.empty:
+            df_ferias_det = df_ferias_hier.copy()
+            df_ferias_det["base_calculo_geral"] = False
+            # Garante as mesmas colunas básicas para concatenação
+            for col in df_det.columns:
+                if col not in df_ferias_det.columns:
+                    df_ferias_det[col] = None
+            df_det = pd.concat([df_det, df_ferias_det[df_det.columns]], ignore_index=True)
+
         # Cruza com cadastro para nome, cidade, uf, bairro, status e regional
         df_det = df_det.merge(
             df_cad[["cpf_limp", "nome", "cargo", "status", "cidade", "uf", "bairro", "regional_curta"]].drop_duplicates("cpf_limp"),
@@ -1008,27 +1116,171 @@ def carregar_bases():
         "treinamentos": df_trein,
         "aceites": df_aceite,
         "detalhamento": df_det,
+        "hierarquia": df_hier,
+        "ferias_hier": df_ferias_hier,
         "aba_aceite": aba_aceite,
         "usou_ultima_aba": usou_ultima,
         "mes_referencia": ano_mes_hoje,
         "emails_regionais": df_emails_reg,
+        "status_completo": status_por_cpf_completo,
     }
 
 
 # ---------------------------------------------------------------------------
 # CÁLCULOS POR INDICADOR
 # ---------------------------------------------------------------------------
-def calcular_cadastros(df_cad):
-    """Calcula cadastros por regional e por revenda."""
+def enriquecer_hierarquia_com_regional(df_hier, df_cad):
+    """
+    Retorna DataFrame da hierarquia enriquecido com regional_curta.
+    A regional é determinada pela revenda informada na própria hierarquia,
+    usando a regional do cadastro como referência. Isso garante que todos os
+    CPFs de uma mesma revenda fiquem na mesma regional, mesmo que no cadastro
+    individual algum CPF esteja associado a outra revenda/regional.
+    """
+    if df_hier is None or df_hier.empty:
+        return None
+
+    cad_regional = df_cad[["cpf_limp", "regional_curta"]].drop_duplicates(subset=["cpf_limp"], keep="first")
+    hier = df_hier[["cpf_limp", "revenda"]].drop_duplicates().copy()
+    hier = hier.merge(cad_regional, on="cpf_limp", how="left")
+
+    # Mapeamento revenda da hierarquia -> regional mais frequente no cadastro
+    revenda_para_regional = (
+        hier.dropna(subset=["regional_curta"])
+        .groupby("revenda")["regional_curta"]
+        .agg(lambda x: x.value_counts().index[0])
+        .to_dict()
+    )
+
+    # Usa a regional da revenda da hierarquia para todos os CPFs da revenda
+    hier["regional_curta"] = hier["revenda"].map(revenda_para_regional)
+
+    return hier[hier["regional_curta"].notna()].copy()
+
+
+def calcular_base_hierarquia(df_hier, df_cad):
+    """
+    Calcula o total de CPFs na hierarquia por regional e por revenda.
+    Usado como denominador para os indicadores de aderência/cobertura.
+    """
+    hier = enriquecer_hierarquia_com_regional(df_hier, df_cad)
+    if hier is None or hier.empty:
+        return None, None
+
+    hier_reg = (
+        hier.groupby("regional_curta")["cpf_limp"]
+        .nunique()
+        .reset_index(name="total_hier")
+    )
+    hier_rev = (
+        hier.groupby(["regional_curta", "revenda"])["cpf_limp"]
+        .nunique()
+        .reset_index(name="total_hier")
+    )
+
+    return hier_reg, hier_rev
+
+
+def calcular_cadastros(df_cad, df_hier=None, df_ferias=None, status_completo=None):
+    """
+    Calcula cadastros por regional e por revenda.
+    Quando a hierarquia está disponível, o denominador passa a ser o total de
+    CPFs enviados pela revenda na hierarquia, refletindo a cobertura da base.
+    Colunas de férias (quantidade e %) são calculadas a partir dos CPFs marcados
+    como DESLIGADO = FÉRIAS na hierarquia. O % de férias é sobre a base empregada
+    da revenda (Total na Hierarquia + Férias).
+
+    Separação de status:
+      - Ativos no +TOP: status "Ativo" no cadastro
+      - Pré-Cadastro: status que não é Ativo, Inativo nem Bloqueado
+      - Inativos: status "Inativo" ou "Bloqueado" no cadastro
+    """
+    hier_reg, hier_rev = calcular_base_hierarquia(df_hier, df_cad)
+
+    # Contagem de férias por revenda (nome da revenda já normalizado na hierarquia)
+    ferias_por_revenda = {}
+    if df_ferias is not None and not df_ferias.empty:
+        ferias_por_revenda = (
+            df_ferias.groupby("revenda")["cpf_limp"].nunique().to_dict()
+        )
+
+    if hier_reg is not None and hier_rev is not None:
+        # Total da hierarquia; ativos = CPFs da hierarquia ativos na plataforma
+        def _tipo_status(cpf):
+            status = status_completo.get(cpf) if status_completo else None
+            if status == "Ativo":
+                return "ativo"
+            if status in {"Inativo", "Bloqueado"}:
+                return "inativo"
+            return "pre_cadastro"
+
+        # Enriquece hierarquia com regional (cadastro + inferência por revenda)
+        hier = enriquecer_hierarquia_com_regional(df_hier, df_cad)
+        hier["tipo_status"] = hier["cpf_limp"].apply(_tipo_status)
+
+        def _agg_hier(grupo_df):
+            cpfs = grupo_df["cpf_limp"].unique()
+            total = len(cpfs)
+            ativos = (grupo_df["tipo_status"] == "ativo").sum()
+            inativos = (grupo_df["tipo_status"] == "inativo").sum()
+            pre_cadastro = total - ativos - inativos
+            return pd.Series({
+                "total": total,
+                "ativos": ativos,
+                "pre_cadastro": pre_cadastro,
+                "inativos": inativos,
+                "pct_ativos": round(ativos / total * 100, 1) if total else 0,
+            })
+
+        # Por revenda (mantém nome da hierarquia)
+        cad_rev = hier.groupby(["regional_curta", "revenda"]).apply(_agg_hier).reset_index()
+
+        # Férias por revenda + % de férias sobre a base empregada (total + férias)
+        cad_rev["ferias"] = cad_rev["revenda"].map(ferias_por_revenda).fillna(0).astype(int)
+        cad_rev["pct_ferias"] = (
+            cad_rev["ferias"] / (cad_rev["total"] + cad_rev["ferias"]) * 100
+        ).round(1).fillna(0)
+
+        # Aplica nomes amigáveis de exibição para revendas
+        cad_rev["revenda"] = cad_rev["revenda"].apply(nome_revenda_exibicao)
+
+        cad_rev = cad_rev.sort_values("pct_ativos", ascending=False)
+        cad_rev["regional_curta"] = cad_rev["regional_curta"].apply(regional_title_case)
+
+        # Por regional (soma as revendas)
+        cad_reg = cad_rev.groupby("regional_curta").agg(
+            total=("total", "sum"),
+            ativos=("ativos", "sum"),
+            pre_cadastro=("pre_cadastro", "sum"),
+            inativos=("inativos", "sum"),
+            ferias=("ferias", "sum"),
+        ).reset_index()
+        cad_reg["pct_ativos"] = (cad_reg["ativos"] / cad_reg["total"] * 100).round(1)
+        cad_reg["pct_ferias"] = (
+            cad_reg["ferias"] / (cad_reg["total"] + cad_reg["ferias"]) * 100
+        ).round(1).fillna(0)
+        cad_reg = cad_reg.sort_values("pct_ativos", ascending=False)
+        cad_reg["regional_curta"] = cad_reg["regional_curta"].apply(regional_title_case)
+
+        # Ordena colunas: métricas de ativos primeiro, férias por último
+        cad_rev = cad_rev[["regional_curta", "revenda", "total", "ativos",
+                           "pre_cadastro", "inativos", "pct_ativos", "ferias", "pct_ferias"]]
+        cad_reg = cad_reg[["regional_curta", "total", "ativos",
+                           "pre_cadastro", "inativos", "pct_ativos", "ferias", "pct_ferias"]]
+
+        return cad_reg, cad_rev
+
+    # Fallback: comportamento antigo (base = cadastros da plataforma)
     cad_reg = (
         df_cad.groupby("regional_curta")
         .agg(
             total=("cpf_limp", "nunique"),
             ativos=("status", lambda x: (x == "Ativo").sum()),
-            nao_ativos=("status", lambda x: (x != "Ativo").sum()),
+            pre_cadastro=("status", lambda x: (x != "Ativo").sum()),
         )
         .reset_index()
     )
+    cad_reg["inativos"] = 0
     cad_reg["pct_ativos"] = (cad_reg["ativos"] / cad_reg["total"] * 100).round(1)
     cad_reg = cad_reg.sort_values("pct_ativos", ascending=False)
     cad_reg["regional_curta"] = cad_reg["regional_curta"].apply(regional_title_case)
@@ -1038,20 +1290,29 @@ def calcular_cadastros(df_cad):
         .agg(
             total=("cpf_limp", "nunique"),
             ativos=("status", lambda x: (x == "Ativo").sum()),
-            nao_ativos=("status", lambda x: (x != "Ativo").sum()),
+            pre_cadastro=("status", lambda x: (x != "Ativo").sum()),
         )
         .reset_index()
     )
+    cad_rev["inativos"] = 0
     cad_rev["pct_ativos"] = (cad_rev["ativos"] / cad_rev["total"] * 100).round(1)
     cad_rev = cad_rev.sort_values("pct_ativos", ascending=False)
     cad_rev["regional_curta"] = cad_rev["regional_curta"].apply(regional_title_case)
 
+    # Sem hierarquia não há informação de férias — colunas zeradas por consistência
+    for _df in (cad_reg, cad_rev):
+        _df["ferias"] = 0
+        _df["pct_ferias"] = 0.0
+
     return cad_reg, cad_rev
 
 
-def calcular_treinamentos(df_trein, df_cad, ano_mes):
-    """Calcula treinamentos por regional e por revenda (base = ativos).
-    Retorna: (trein_reg, trein_rev, trein_por_curso, cursos_info)
+def calcular_treinamentos(df_trein, df_cad, ano_mes, df_hier=None):
+    """
+    Calcula treinamentos por regional e por revenda.
+    Quando a hierarquia está disponível, a base de cálculo passa a ser o total
+    de CPFs enviados pela revenda, medindo a cobertura dos treinamentos na
+    hierarquia. Caso contrário, mantém o comportamento anterior (base = ativos).
     """
     curso1, curso2, nome1, nome2, sku1, sku2 = detectar_cursos_obrigatorios(df_trein, ano_mes)
 
@@ -1071,7 +1332,13 @@ def calcular_treinamentos(df_trein, df_cad, ano_mes):
 
     logger.info(f"Treinamentos {ano_mes}: '{nome1}' ({sku1})={len(cpf_curso1)}, '{nome2}' ({sku2})={len(cpf_curso2)}, ambos={len(cpf_ambos)}")
 
-    ativos = df_cad[df_cad["status"] == "Ativo"].copy()
+    # Define a base de cálculo: hierarquia quando disponível, senão ativos
+    if df_hier is not None and not df_hier.empty:
+        base = enriquecer_hierarquia_com_regional(df_hier, df_cad)
+        logger.info(f"Treinamentos usarão hierarquia como base: {base['cpf_limp'].nunique():,} CPFs")
+    else:
+        base = df_cad[df_cad["status"] == "Ativo"][["cpf_limp", "revenda", "regional_curta"]].drop_duplicates().copy()
+        logger.info("Treinamentos usarão base ativa da plataforma (hierarquia indisponível)")
 
     def calcular_grupo(grupo_df, cpf_realizaram):
         cpfs = set(grupo_df["cpf_limp"].unique())
@@ -1087,22 +1354,24 @@ def calcular_treinamentos(df_trein, df_cad, ano_mes):
         })
 
     # Combinado (ambos os cursos)
-    trein_reg = ativos.groupby("regional_curta").apply(lambda g: calcular_grupo(g, cpf_ambos)).reset_index()
+    trein_reg = base.groupby("regional_curta").apply(lambda g: calcular_grupo(g, cpf_ambos)).reset_index()
     trein_reg = trein_reg.sort_values("pct_realizaram", ascending=False)
     trein_reg["regional_curta"] = trein_reg["regional_curta"].apply(regional_title_case)
 
-    trein_rev = ativos.groupby(["regional_curta", "revenda"]).apply(lambda g: calcular_grupo(g, cpf_ambos)).reset_index()
+    trein_rev = base.groupby(["regional_curta", "revenda"]).apply(lambda g: calcular_grupo(g, cpf_ambos)).reset_index()
     trein_rev = trein_rev.sort_values("pct_realizaram", ascending=False)
     trein_rev["regional_curta"] = trein_rev["regional_curta"].apply(regional_title_case)
+    trein_rev["revenda"] = trein_rev["revenda"].apply(nome_revenda_exibicao)
 
     # Por curso individual
     def calcular_por_curso(cpf_curso):
-        reg = ativos.groupby("regional_curta").apply(lambda g: calcular_grupo(g, cpf_curso)).reset_index()
+        reg = base.groupby("regional_curta").apply(lambda g: calcular_grupo(g, cpf_curso)).reset_index()
         reg = reg.sort_values("pct_realizaram", ascending=False)
         reg["regional_curta"] = reg["regional_curta"].apply(regional_title_case)
-        rev = ativos.groupby(["regional_curta", "revenda"]).apply(lambda g: calcular_grupo(g, cpf_curso)).reset_index()
+        rev = base.groupby(["regional_curta", "revenda"]).apply(lambda g: calcular_grupo(g, cpf_curso)).reset_index()
         rev = rev.sort_values("pct_realizaram", ascending=False)
         rev["regional_curta"] = rev["regional_curta"].apply(regional_title_case)
+        rev["revenda"] = rev["revenda"].apply(nome_revenda_exibicao)
         return reg, rev
 
     c1_reg, c1_rev = calcular_por_curso(cpf_curso1)
@@ -1119,7 +1388,7 @@ def calcular_treinamentos(df_trein, df_cad, ano_mes):
         "curso2_rev": c2_rev,
     }
 
-    return trein_reg, trein_rev, trein_por_curso, (curso1, curso2, nome1, nome2, sku1, sku2)
+    return trein_reg, trein_rev, trein_por_curso, (curso1, curso2, nome1, nome2, sku1, sku2), base
 
 
 def inferir_mes_da_aba(aba):
@@ -1141,10 +1410,13 @@ def inferir_mes_da_aba(aba):
     return None
 
 
-def calcular_aceites(df_aceite, df_cad, ano_mes, aba_aceite, usou_ultima_aba=False):
-    """Calcula aceites mensais por regional e por revenda (base = ativos).
-    A coluna 'Aceitaram' usa a revenda informada na propria base de aceites,
-    enquanto a 'Base Ativa' mantem a revenda do cadastro consolidado."""
+def calcular_aceites(df_aceite, df_cad, ano_mes, aba_aceite, usou_ultima_aba=False, df_hier=None):
+    """
+    Calcula aceites mensais por regional e por revenda.
+    Quando a hierarquia está disponível, a base de cálculo passa a ser o total
+    de CPFs enviados pela revenda na hierarquia, medindo a cobertura de aceites.
+    Caso contrário, mantém o comportamento anterior (base = ativos).
+    """
     if usou_ultima_aba:
         mes_ref = inferir_mes_da_aba(aba_aceite)
         if mes_ref is None:
@@ -1156,75 +1428,53 @@ def calcular_aceites(df_aceite, df_cad, ano_mes, aba_aceite, usou_ultima_aba=Fal
     cpfs_aceitaram = set(aceite_mes["cpf_limp"].unique())
     logger.info(f"Aceites em {mes_ref}: {len(cpfs_aceitaram):,} CPFs únicos")
 
-    ativos = df_cad[df_cad["status"] == "Ativo"].copy()
-
-    # Base ativa por regional/revenda do cadastro
-    base_reg = (
-        ativos.groupby("regional_curta")["cpf_limp"]
-        .nunique()
-        .reset_index(name="total_ativos")
-        .rename(columns={"regional_curta": "regional"})
-    )
-    base_rev = (
-        ativos.groupby(["regional_curta", "revenda"])["cpf_limp"]
-        .nunique()
-        .reset_index(name="total_ativos")
-        .rename(columns={"regional_curta": "regional"})
-    )
-
-    # Aceitaram: cruza ativos com aceites e usa a revenda da propria base de aceites
-    aceite_ativos = aceite_mes.merge(
-        ativos[["cpf_limp", "regional_curta"]].drop_duplicates("cpf_limp"),
-        on="cpf_limp",
-        how="inner",
-    )
-    # Normaliza nome da revenda vinda da base de aceites
-    if "Revenda" in aceite_ativos.columns:
-        aceite_ativos["revenda_aceite"] = aceite_ativos["Revenda"].apply(normalizar_revenda_hierarquia)
-        aceite_ativos["revenda_aceite"] = aceite_ativos["revenda_aceite"].apply(nome_revenda_exibicao)
+    # Define a base de cálculo: hierarquia quando disponível, senão ativos
+    if df_hier is not None and not df_hier.empty:
+        base = enriquecer_hierarquia_com_regional(df_hier, df_cad)
+        logger.info(f"Aceites usarão hierarquia como base: {base['cpf_limp'].nunique():,} CPFs")
     else:
-        aceite_ativos["revenda_aceite"] = None
+        base = df_cad[df_cad["status"] == "Ativo"][["cpf_limp", "revenda", "regional_curta"]].drop_duplicates().copy()
+        logger.info("Aceites usarão base ativa da plataforma (hierarquia indisponível)")
 
-    aceite_reg_counts = (
-        aceite_ativos.groupby("regional_curta")["cpf_limp"]
-        .nunique()
-        .reset_index(name="aceitaram")
-        .rename(columns={"regional_curta": "regional"})
-    )
-    aceite_rev_counts = (
-        aceite_ativos.groupby(["regional_curta", "revenda_aceite"])["cpf_limp"]
-        .nunique()
-        .reset_index(name="aceitaram")
-        .rename(columns={"regional_curta": "regional", "revenda_aceite": "revenda"})
-    )
+    # Aceitaram: cruza base com aceites
+    base["aceitou"] = base["cpf_limp"].isin(cpfs_aceitaram)
 
-    # Merge base + aceite (regional)
-    aceite_reg = base_reg.merge(aceite_reg_counts, on="regional", how="left")
-    aceite_reg["aceitaram"] = aceite_reg["aceitaram"].fillna(0).astype(int)
+    # Regional
+    aceite_reg = (
+        base.groupby("regional_curta")
+        .agg(
+            total_ativos=("cpf_limp", "nunique"),
+            aceitaram=("aceitou", "sum"),
+        )
+        .reset_index()
+    )
+    aceite_reg["aceitaram"] = aceite_reg["aceitaram"].astype(int)
     aceite_reg["nao_aceitaram"] = (aceite_reg["total_ativos"] - aceite_reg["aceitaram"]).clip(lower=0)
     aceite_reg["pct_aceite"] = (aceite_reg["aceitaram"] / aceite_reg["total_ativos"] * 100).round(1)
     aceite_reg = aceite_reg.sort_values("pct_aceite", ascending=False)
+    aceite_reg = aceite_reg.rename(columns={"regional_curta": "regional"})
     aceite_reg["regional"] = aceite_reg["regional"].apply(regional_title_case)
 
-    # Merge base + aceite (revenda)
-    aceite_rev = base_rev.merge(aceite_rev_counts, on=["regional", "revenda"], how="outer")
-    aceite_rev["total_ativos"] = aceite_rev["total_ativos"].fillna(0).astype(int)
-    aceite_rev["aceitaram"] = aceite_rev["aceitaram"].fillna(0).astype(int)
-    # Garante regional para revendas que so aparecem na base de aceites
-    mapa_regional_rev = dict(zip(df_cad["revenda"], df_cad["regional_curta"]))
-    aceite_rev["regional"] = aceite_rev.apply(
-        lambda r: r["regional"] if pd.notna(r["regional"]) else mapa_regional_rev.get(r["revenda"]),
-        axis=1,
+    # Revenda
+    aceite_rev = (
+        base.groupby(["regional_curta", "revenda"])
+        .agg(
+            total_ativos=("cpf_limp", "nunique"),
+            aceitaram=("aceitou", "sum"),
+        )
+        .reset_index()
     )
+    aceite_rev["aceitaram"] = aceite_rev["aceitaram"].astype(int)
     aceite_rev["nao_aceitaram"] = (aceite_rev["total_ativos"] - aceite_rev["aceitaram"]).clip(lower=0)
     aceite_rev["pct_aceite"] = aceite_rev.apply(
         lambda r: round(r["aceitaram"] / r["total_ativos"] * 100, 1) if r["total_ativos"] > 0 else 0,
         axis=1,
     )
     aceite_rev = aceite_rev.sort_values("pct_aceite", ascending=False)
-    aceite_rev["regional"] = aceite_rev["regional"].apply(regional_title_case)
+    aceite_rev["regional"] = aceite_rev["regional_curta"].apply(regional_title_case)
+    aceite_rev["revenda"] = aceite_rev["revenda"].apply(nome_revenda_exibicao)
 
-    return aceite_reg, aceite_rev, mes_ref
+    return aceite_reg, aceite_rev, mes_ref, base
 
 
 # ---------------------------------------------------------------------------
@@ -1427,9 +1677,9 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
         farol_geral = farol_html(pct_geral, META_CADASTRO)
 
         resultado["cadastros"]["intro"] = (
-            f"{farol_geral} Nosso objetivo ideal para a base de cadastros do Programa +TOP é de "
+            f"{farol_geral} Nosso objetivo para a cobertura de cadastros do Programa +TOP é de "
             f"<strong>{META_CADASTRO:.0f}%</strong>.<br>"
-            f"Até o momento, estamos em <strong>{pct_geral}%</strong> da base ativa."
+            f"Até o momento, <strong>{pct_geral}%</strong> da hierarquia enviada pelas revendas está ativa na plataforma."
         )
 
         piores_cad = garantir_n_itens(
@@ -1443,11 +1693,11 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
             itens_df = itens_df.rename(columns={
                 "regional_curta": "Regional",
                 "revenda": "Revenda",
-                "total": "Total de Participantes",
-                "ativos": "Usuários com +TOP",
+                "total": "Total de participantes",
+                "ativos": "Ativos no +TOP",
                 "pct_ativos": "% Ativos",
             })
-            resultado["cadastros"]["alerta_titulo"] = "Top 10 revendas com menor % de base ativa"
+            resultado["cadastros"]["alerta_titulo"] = "Top 10 revendas com menor % de ativos"
             resultado["cadastros"]["alerta_subtitulo"] = ""
             resultado["cadastros"]["alerta_itens"] = itens_df
 
@@ -1455,7 +1705,7 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
         dest = identificar_destaque(cad_rev, "pct_ativos", "revenda", maior_melhor=True, min_base=0, meta=META_CADASTRO)
         if dest:
             resultado["cadastros"]["destaque"] = html_destaque(
-                "Melhor % de cadastros ativos.", dest["nome"], dest["regional"], dest["valor"], meta=META_CADASTRO
+                "Melhor % de ativos.", dest["nome"], dest["regional"], dest["valor"], meta=META_CADASTRO
             )
 
     # --- Evolucao semanal ---
@@ -1483,10 +1733,10 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
         _, _, nome1, nome2, sku1, sku2 = dados["cursos_info"]
         farol_trein = farol_html(pct_trein_geral, META_TREINAMENTOS)
         resultado["treinamentos"]["intro"] = (
-            f"{farol_trein} Os dois conteúdos de {mes_nome} estão disponíveis para os vendedores ate o dia "
+            f"{farol_trein} Os dois conteúdos de {mes_nome} ficaram disponíveis para os vendedores ate o dia "
             f"{date.today().replace(day=30):%d/%m/%Y}.<br>"
-            f"Nosso objetivo ideal para os treinamentos do Programa +TOP é de <strong>{META_TREINAMENTOS:.0f}%</strong>.<br>"
-            f"Até o momento, estamos em <strong>{pct_trein_geral}%</strong> da base ativa.<br>"
+            f"Nosso objetivo para os treinamentos do Programa +TOP é de <strong>{META_TREINAMENTOS:.0f}%</strong>.<br>"
+            f"Até o momento, estamos em <strong>{pct_trein_geral}%</strong> da hierarquia enviada pelas revendas.<br>"
             f"Conteúdo 1: {nome1} (SKU {sku1})<br>Conteúdo 2: {nome2} (SKU {sku2})"
         )
 
@@ -1501,7 +1751,7 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
             itens_df = itens_df.rename(columns={
                 "regional_curta": "Regional",
                 "revenda": "Revenda",
-                "total_ativos": "Base Ativa",
+                "total_ativos": "Total de participantes",
                 "realizaram": "Realizado",
                 "pct_realizaram": "% Realizado",
             })
@@ -1509,12 +1759,9 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
             resultado["treinamentos"]["alerta_subtitulo"] = ""
             resultado["treinamentos"]["alerta_itens"] = itens_df
 
-        # Apenas 1 destaque geral
-        dest = identificar_destaque(trein_rev, "pct_realizaram", "revenda", maior_melhor=True, min_base=0, meta=META_TREINAMENTOS)
-        if dest:
-            resultado["treinamentos"]["destaque"] = html_destaque(
-                "Melhor % de treinamentos concluídos.", dest["nome"], dest["regional"], dest["valor"], meta=META_TREINAMENTOS
-            )
+        # Destaque coletivo é renderizado diretamente no template do e-mail
+        # usando _destaques_meta_html; não precisa gerar texto único aqui.
+        resultado["treinamentos"]["destaque"] = ""
 
     # --- Aceites ---
     if not aceite_reg.empty:
@@ -1522,8 +1769,8 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
         farol_aceite = farol_html(media_aceite, META_ACEITES)
         resultado["aceites"]["intro"] = (
             f"{farol_aceite} Sobre os aceites mensais de <strong>{mes_aceite_nome}</strong>.<br>"
-            f"Nosso objetivo ideal é de <strong>{META_ACEITES:.0f}%</strong>. "
-            f"Ate o momento, <strong>{media_aceite}%</strong> dos participantes ativos deram aceite na campanha base."
+            f"Nosso objetivo é de <strong>{META_ACEITES:.0f}%</strong>. "
+            f"Ate o momento, <strong>{media_aceite}%</strong> da hierarquia enviada pelas revendas deu aceite na campanha base."
         )
         if aceite_rev is not None and not aceite_rev.empty:
             piores_aceite = garantir_n_itens(
@@ -1536,7 +1783,7 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
                 itens_df = itens_df.rename(columns={
                     "regional": "Regional",
                     "revenda": "Revenda",
-                    "total_ativos": "Total Ativos",
+                    "total_ativos": "Total de participantes",
                     "aceitaram": "Aceitaram",
                     "pct_aceite": "% Aceite",
                 })
@@ -1544,17 +1791,17 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
                 resultado["aceites"]["alerta_subtitulo"] = ""
                 resultado["aceites"]["alerta_itens"] = itens_df
 
-            # Apenas 1 destaque geral
-            dest = identificar_destaque(aceite_rev, "pct_aceite", "revenda", maior_melhor=True, min_base=0, meta=META_ACEITES)
-            if dest:
-                resultado["aceites"]["destaque"] = html_destaque(
-                    "Melhor % de aceite mensal.", dest["nome"], dest["regional"], dest["valor"], meta=META_ACEITES
-                )
+            # Destaque coletivo é renderizado diretamente no template do e-mail
+            # usando _destaques_meta_html; não precisa gerar texto único aqui.
+            resultado["aceites"]["destaque"] = ""
 
     return resultado
 
 
-def gerar_insights_regional(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_rev, evolucao, dados, regional_filtro):
+def gerar_insights_regional(
+    cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_rev,
+    evolucao, dados, regional_filtro, imagens_kv=None, imagens_tom=None
+):
     """Gera insights específicos para uma regional, organizados por seção."""
     mes_nome = nome_mes_pt_br().lower()
     mes_aceite_nome = nome_mes_pt_br(ano_mes=str(dados["mes_aceite"]))
@@ -1580,9 +1827,9 @@ def gerar_insights_regional(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, 
         total = len(cad_reg)
         farol_reg = farol_html(row['pct_ativos'], META_CADASTRO)
         resultado["cadastros"]["intro"] = (
-            f"{farol_reg} A regional <strong>{regional_filtro}</strong> está com <strong>{row['pct_ativos']:.1f}%</strong> de base ativa.<br>"
+            f"{farol_reg} A regional <strong>{regional_filtro}</strong> está com <strong>{row['pct_ativos']:.1f}%</strong> de CPFs ativos na plataforma.<br>"
             f"Ela ocupa a <strong>{posição}ª posição</strong> entre {total} regionais (media geral: {media:.1f}%).<br>"
-            f"Objetivo ideal: <strong>{META_CADASTRO:.0f}%</strong>."
+            f"Objetivo: <strong>{META_CADASTRO:.0f}%</strong>."
         )
 
         abaixo_media = cad_rev_f[cad_rev_f["pct_ativos"] < media].sort_values("pct_ativos", ascending=False).head(10)
@@ -1592,11 +1839,19 @@ def gerar_insights_regional(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, 
                 "Revendas da regional abaixo da média geral do programa. Precisam de reforço.<br>" + "<br>".join(linhas)
             )
 
-        dest = identificar_destaque(cad_rev_f, "pct_ativos", "revenda", maior_melhor=True, min_base=0, meta=META_CADASTRO)
-        if dest:
-            resultado["cadastros"]["destaque"] = html_destaque(
-                "Melhor % de cadastros ativos.", dest["nome"], dest["regional"], dest["valor"], meta=META_CADASTRO
-            )
+        resultado["cadastros"]["destaque"] = _destaques_meta_html(
+            cad_rev_f,
+            meta=META_CADASTRO,
+            col_pct="pct_ativos",
+            col_regional="regional_curta",
+            col_revenda="revenda",
+            titulo="Parabéns!",
+            subtitulo="Melhor % de ativos.",
+            imagens_kv=imagens_kv,
+            imagens_tom=imagens_tom,
+            col_num="ativos",
+            col_den="total",
+        )
 
     if evolucao is not None and not evolucao.empty:
         evo_f = evolucao[evolucao["regional"] == regional_filtro]
@@ -1623,8 +1878,8 @@ def gerar_insights_regional(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, 
         _, _, nome1, nome2, sku1, sku2 = dados["cursos_info"]
         farol_trein_reg = farol_html(r['pct_realizaram'], META_TREINAMENTOS)
         resultado["treinamentos"]["intro"] = (
-            f"{farol_trein_reg} Treinamentos de {mes_nome}: <strong>{r['pct_realizaram']:.1f}%</strong> da base ativa da regional concluiu ambos os cursos.<br>"
-            f"Média geral do programa: {media_trein:.1f}%. Objetivo ideal: <strong>{META_TREINAMENTOS:.0f}%</strong>.<br>"
+            f"{farol_trein_reg} Treinamentos de {mes_nome}: <strong>{r['pct_realizaram']:.1f}%</strong> da hierarquia da regional concluiu ambos os cursos.<br>"
+            f"Média geral do programa: {media_trein:.1f}%. Objetivo: <strong>{META_TREINAMENTOS:.0f}%</strong>.<br>"
             f"Conteúdo 1: {nome1} (SKU {sku1})<br>Conteúdo 2: {nome2} (SKU {sku2})"
         )
 
@@ -1635,27 +1890,43 @@ def gerar_insights_regional(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, 
                 "Revendas da regional com treinamentos abaixo da media.<br>" + "<br>".join(linhas)
             )
 
-        dest = identificar_destaque(trein_rev_f, "pct_realizaram", "revenda", maior_melhor=True, min_base=0, meta=META_TREINAMENTOS)
-        if dest:
-            resultado["treinamentos"]["destaque"] = html_destaque(
-                "Melhor % de treinamentos concluídos.", dest["nome"], dest["regional"], dest["valor"], meta=META_TREINAMENTOS
-            )
+        resultado["treinamentos"]["destaque"] = _destaques_meta_html(
+            trein_rev_f,
+            meta=META_TREINAMENTOS,
+            col_pct="pct_realizaram",
+            col_regional="regional_curta",
+            col_revenda="revenda",
+            titulo="Parabéns!",
+            subtitulo="Melhor % de treinamentos concluídos.",
+            imagens_kv=imagens_kv,
+            imagens_tom=imagens_tom,
+            col_num="realizaram",
+            col_den="total_ativos",
+        )
 
     if not aceite_reg_f.empty:
         r = aceite_reg_f.iloc[0]
         media_aceite = round(aceite_reg["aceitaram"].sum() / aceite_reg["total_ativos"].sum() * 100, 1)
         farol_aceite_reg = farol_html(r['pct_aceite'], META_ACEITES)
         resultado["aceites"]["intro"] = (
-            f"{farol_aceite_reg} Aceite mensal de {mes_aceite_nome}: <strong>{r['pct_aceite']:.1f}%</strong> dos ativos da regional deram aceite.<br>"
-            f"Média geral do programa: {media_aceite:.1f}%. Objetivo ideal: <strong>{META_ACEITES:.0f}%</strong>."
+            f"{farol_aceite_reg} Aceite mensal de {mes_aceite_nome}: <strong>{r['pct_aceite']:.1f}%</strong> da hierarquia da regional deu aceite.<br>"
+            f"Média geral do programa: {media_aceite:.1f}%. Objetivo: <strong>{META_ACEITES:.0f}%</strong>."
         )
 
         if aceite_rev_f is not None and not aceite_rev_f.empty:
-            dest = identificar_destaque(aceite_rev_f, "pct_aceite", "revenda", maior_melhor=True, min_base=0, meta=META_ACEITES)
-            if dest:
-                resultado["aceites"]["destaque"] = html_destaque(
-                    "Melhor % de aceite mensal.", dest["nome"], dest["regional"], dest["valor"], meta=META_ACEITES
-                )
+            resultado["aceites"]["destaque"] = _destaques_meta_html(
+                aceite_rev_f,
+                meta=META_ACEITES,
+                col_pct="pct_aceite",
+                col_regional="regional",
+                col_revenda="revenda",
+                titulo="Parabéns!",
+                subtitulo="Melhor % de aceite mensal.",
+                imagens_kv=imagens_kv,
+                imagens_tom=imagens_tom,
+                col_num="aceitaram",
+                col_den="total_ativos",
+            )
 
     return resultado
 
@@ -1664,30 +1935,38 @@ def gerar_insights_regional(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, 
 # MONTAGEM DO E-MAIL
 # ---------------------------------------------------------------------------
 def _renomear_cadastro_reg(df):
-    return df.rename(columns={
+    df = df.rename(columns={
         "regional_curta": "Regional",
-        "total": "Total de Participantes",
-        "ativos": "Usuários com +TOP",
-        "nao_ativos": "Usuários sem +TOP",
+        "total": "Total de participantes",
+        "ativos": "Ativos no +TOP",
+        "pre_cadastro": "Pré-Cadastro",
         "pct_ativos": "% Ativos",
+        "ferias": "Férias - Participantes ativos",
+        "pct_ferias": "% Férias",
     })
+    cols = ["Regional", "Total de participantes", "Ativos no +TOP", "Pré-Cadastro", "Férias - Participantes ativos", "% Férias", "% Ativos"]
+    return df[[c for c in cols if c in df.columns]]
 
 
 def _renomear_cadastro_rev(df):
-    return df.rename(columns={
+    df = df.rename(columns={
         "regional_curta": "Regional",
         "revenda": "Revenda",
-        "total": "Total",
-        "ativos": "Usuários com +TOP",
-        "nao_ativos": "Usuários sem +TOP",
+        "total": "Total de participantes",
+        "ativos": "Ativos no +TOP",
+        "pre_cadastro": "Pré-Cadastro",
         "pct_ativos": "% Ativos",
+        "ferias": "Férias - Participantes ativos",
+        "pct_ferias": "% Férias",
     })
+    cols = ["Regional", "Revenda", "Total de participantes", "Ativos no +TOP", "Pré-Cadastro", "Férias - Participantes ativos", "% Férias", "% Ativos"]
+    return df[[c for c in cols if c in df.columns]]
 
 
 def _renomear_trein_reg(df):
     return df.rename(columns={
         "regional_curta": "Regional",
-        "total_ativos": "Base Ativa",
+        "total_ativos": "Total de participantes",
         "realizaram": "Realizado",
         "nao_realizaram": "Não Realizado",
         "pct_realizaram": "% Realizado",
@@ -1698,7 +1977,7 @@ def _renomear_trein_rev(df):
     return df.rename(columns={
         "regional_curta": "Regional",
         "revenda": "Revenda",
-        "total_ativos": "Base Ativa",
+        "total_ativos": "Total de participantes",
         "realizaram": "Realizado",
         "nao_realizaram": "Não Realizado",
         "pct_realizaram": "% Realizado",
@@ -1708,7 +1987,7 @@ def _renomear_trein_rev(df):
 def _renomear_aceite_reg(df):
     return df.rename(columns={
         "regional": "Regional",
-        "total_ativos": "Base Ativa",
+        "total_ativos": "Total de participantes",
         "aceitaram": "Aceitaram",
         "nao_aceitaram": "Não Aceitaram",
         "pct_aceite": "% Aceite",
@@ -1716,14 +1995,17 @@ def _renomear_aceite_reg(df):
 
 
 def _renomear_aceite_rev(df):
-    return df.rename(columns={
+    df = df.drop(columns=["regional_curta"], errors="ignore")
+    df = df.rename(columns={
         "regional": "Regional",
         "revenda": "Revenda",
-        "total_ativos": "Base Ativa",
+        "total_ativos": "Total de participantes",
         "aceitaram": "Aceitaram",
         "nao_aceitaram": "Não Aceitaram",
         "pct_aceite": "% Aceite",
     })
+    cols = ["Regional", "Revenda", "Total de participantes", "Aceitaram", "Não Aceitaram", "% Aceite"]
+    return df[[c for c in cols if c in df.columns]]
 
 
 def preparar_tabela_treinamentos_combinada(trein_por_curso, trein_ambos=None, nivel="regional"):
@@ -1778,6 +2060,162 @@ def preparar_tabela_treinamentos_combinada(trein_por_curso, trein_ambos=None, ni
     return df[cols_exibicao]
 
 
+def preparar_tabela_consolidada(cad_df, trein_df, aceite_df, nivel="regional"):
+    """
+    Consolida cadastros, treinamentos e aceites em uma única tabela.
+    nivel='regional' agrupa por regional; nivel='revenda' inclui revenda.
+    Usada principalmente para o Excel anexo (aba Resumo).
+    """
+    chaves = ["regional_curta"] if nivel == "regional" else ["regional_curta", "revenda"]
+
+    df = cad_df.copy()
+
+    if trein_df is not None and not trein_df.empty:
+        trein_cols = [c for c in chaves + ["realizaram", "pct_realizaram"] if c in trein_df.columns]
+        if "realizaram" in trein_df.columns:
+            df = df.merge(trein_df[trein_cols], on=chaves, how="left")
+            df = df.rename(columns={
+                "realizaram": "Realizaram 2 cursos",
+                "pct_realizaram": "% Realizaram 2 cursos",
+            })
+            df["Não realizaram 2 cursos"] = df["total"] - df["Realizaram 2 cursos"]
+        else:
+            df["Realizaram 2 cursos"] = 0
+            df["Não realizaram 2 cursos"] = df["total"]
+            df["% Realizaram 2 cursos"] = 0.0
+    else:
+        df["Realizaram 2 cursos"] = 0
+        df["Não realizaram 2 cursos"] = df["total"]
+        df["% Realizaram 2 cursos"] = 0.0
+
+    if aceite_df is not None and not aceite_df.empty:
+        aceite_chaves = ["regional"] if nivel == "regional" else ["regional", "revenda"]
+        aceite_cols = [c for c in aceite_chaves + ["aceitaram", "pct_aceite"] if c in aceite_df.columns]
+        if "aceitaram" in aceite_df.columns:
+            df_aceite = aceite_df[aceite_cols].copy()
+            df_aceite = df_aceite.rename(columns={"regional": "regional_curta"})
+            df = df.merge(df_aceite, on=chaves, how="left")
+            df = df.rename(columns={
+                "aceitaram": "Aceitaram",
+                "pct_aceite": "% Aceite",
+            })
+            df["Não aceitaram"] = df["total"] - df["Aceitaram"]
+        else:
+            df["Aceitaram"] = 0
+            df["Não aceitaram"] = df["total"]
+            df["% Aceite"] = 0.0
+    else:
+        df["Aceitaram"] = 0
+        df["Não aceitaram"] = df["total"]
+        df["% Aceite"] = 0.0
+
+    for col in ["Realizaram 2 cursos", "Não realizaram 2 cursos", "Aceitaram", "Não aceitaram"]:
+        df[col] = df[col].fillna(0).astype(int)
+    for col in ["% Realizaram 2 cursos", "% Aceite"]:
+        df[col] = df[col].fillna(0).round(1)
+
+    rename = {
+        "regional_curta": "Regional",
+        "total": "Total de participantes",
+        "ativos": "Ativos no +TOP",
+        "pre_cadastro": "Pré-Cadastro",
+        "pct_ativos": "% Ativos",
+    }
+    if nivel == "revenda":
+        rename["revenda"] = "Revenda"
+
+    df = df.rename(columns=rename)
+
+    cols = ["Regional"]
+    if nivel == "revenda":
+        cols.append("Revenda")
+    cols.extend([
+        "Total de participantes", "Ativos no +TOP", "Pré-Cadastro", "% Ativos",
+        "Realizaram 2 cursos", "Não realizaram 2 cursos", "% Realizaram 2 cursos",
+        "Aceitaram", "Não aceitaram", "% Aceite",
+    ])
+
+    return df[cols].sort_values("% Ativos", ascending=False)
+
+
+def preparar_tabela_base_treinamentos(cad_df, trein_df, nivel="regional"):
+    """
+    Tabela de treinamentos mostrando a base da hierarquia e quem realizou os 2 cursos.
+    """
+    chaves = ["regional_curta"] if nivel == "regional" else ["regional_curta", "revenda"]
+    df = cad_df[chaves + ["total"]].copy()
+
+    if trein_df is not None and not trein_df.empty:
+        trein_cols = chaves + ["realizaram"]
+        df = df.merge(trein_df[trein_cols], on=chaves, how="left")
+    else:
+        df["realizaram"] = 0
+
+    df["realizaram"] = df["realizaram"].fillna(0).astype(int)
+    df["nao_realizaram"] = df["total"] - df["realizaram"]
+    df["pct_realizaram"] = (df["realizaram"] / df["total"] * 100).round(1)
+
+    rename = {
+        "regional_curta": "Regional",
+        "total": "Total de participantes",
+        "realizaram": "Realizado",
+        "nao_realizaram": "Não Realizado",
+        "pct_realizaram": "% Ambos",
+    }
+    if nivel == "revenda":
+        rename["revenda"] = "Revenda"
+
+    df = df.rename(columns=rename)
+    cols = ["Regional"]
+    if nivel == "revenda":
+        cols.append("Revenda")
+    cols.extend([
+        "Total de participantes", "Realizado",
+        "Não Realizado", "% Ambos"
+    ])
+    return df[cols].sort_values("% Ambos", ascending=False)
+
+
+def preparar_tabela_base_aceites(cad_df, aceite_df, nivel="regional"):
+    """
+    Tabela de aceites mostrando a base da hierarquia e quem aceitou.
+    """
+    chaves = ["regional_curta"] if nivel == "regional" else ["regional_curta", "revenda"]
+    df = cad_df[chaves + ["total"]].copy()
+
+    if aceite_df is not None and not aceite_df.empty:
+        aceite_chaves = ["regional"] if nivel == "regional" else ["regional", "revenda"]
+        aceite_cols = aceite_chaves + ["aceitaram"]
+        df_aceite = aceite_df[aceite_cols].copy()
+        df_aceite = df_aceite.rename(columns={"regional": "regional_curta"})
+        df = df.merge(df_aceite, on=chaves, how="left")
+    else:
+        df["aceitaram"] = 0
+
+    df["aceitaram"] = df["aceitaram"].fillna(0).astype(int)
+    df["nao_aceitaram"] = df["total"] - df["aceitaram"]
+    df["pct_aceite"] = (df["aceitaram"] / df["total"] * 100).round(1)
+
+    rename = {
+        "regional_curta": "Regional",
+        "total": "Total de participantes",
+        "aceitaram": "Aceitaram",
+        "nao_aceitaram": "Não Aceitaram",
+        "pct_aceite": "% Aceite",
+    }
+    if nivel == "revenda":
+        rename["revenda"] = "Revenda"
+
+    df = df.rename(columns=rename)
+    cols = ["Regional"]
+    if nivel == "revenda":
+        cols.append("Revenda")
+    cols.extend([
+        "Total de participantes", "Aceitaram", "Não Aceitaram", "% Aceite"
+    ])
+    return df[cols].sort_values("% Aceite", ascending=False)
+
+
 def preparar_tabelas(dados):
     """Prepara tabelas HTML renomeadas e formatadas."""
     cad_reg, cad_rev = dados["cadastros"]
@@ -1799,6 +2237,8 @@ def preparar_tabelas(dados):
             semaforo_coluna="% Ativos",
             meta_semaforo=META_CADASTRO,
         ),
+        "consolidado_reg": "",
+        "consolidado_rev": "",
         "trein_reg": "",
         "trein_rev": "",
         "trein_combinado_reg": "",
@@ -1810,6 +2250,49 @@ def preparar_tabelas(dados):
         ),
         "aceite_rev": "",
     }
+
+    # Tabelas consolidadas com base da hierarquia (cadastro + treinamentos + aceites)
+    # A consolidada por regional usa dados de treinamento/aceite; a por revenda fica apenas com cadastro
+    cons_reg = preparar_tabela_consolidada(cad_reg, trein_reg, aceite_reg, nivel="regional")
+    cons_rev = preparar_tabela_consolidada(cad_rev, None, None, nivel="revenda")
+    tabelas["consolidado_reg"] = estilizar_tabela_html(
+        cons_reg,
+        semaforo_coluna="% Ativos",
+        meta_semaforo=META_CADASTRO,
+    )
+    tabelas["consolidado_rev"] = estilizar_tabela_html(
+        cons_rev.head(10),
+        semaforo_coluna="% Ativos",
+        meta_semaforo=META_CADASTRO,
+    )
+
+    # Tabelas de treinamentos com base da hierarquia
+    trein_base_reg = preparar_tabela_base_treinamentos(cad_reg, trein_reg, nivel="regional")
+    trein_base_rev = preparar_tabela_base_treinamentos(cad_rev, trein_rev, nivel="revenda")
+    tabelas["trein_base_reg"] = estilizar_tabela_html(
+        trein_base_reg,
+        semaforo_coluna="% Ambos",
+        meta_semaforo=META_TREINAMENTOS,
+    )
+    tabelas["trein_base_rev"] = estilizar_tabela_html(
+        trein_base_rev.head(10),
+        semaforo_coluna="% Ambos",
+        meta_semaforo=META_TREINAMENTOS,
+    )
+
+    # Tabelas de aceites com base da hierarquia
+    aceite_base_reg = preparar_tabela_base_aceites(cad_reg, aceite_reg, nivel="regional")
+    aceite_base_rev = preparar_tabela_base_aceites(cad_rev, aceite_rev, nivel="revenda")
+    tabelas["aceite_base_reg"] = estilizar_tabela_html(
+        aceite_base_reg,
+        semaforo_coluna="% Aceite",
+        meta_semaforo=META_ACEITES,
+    )
+    tabelas["aceite_base_rev"] = estilizar_tabela_html(
+        aceite_base_rev.head(10),
+        semaforo_coluna="% Aceite",
+        meta_semaforo=META_ACEITES,
+    )
 
     if trein_reg is not None and not trein_reg.empty:
         tabelas["trein_reg"] = estilizar_tabela_html(
@@ -2098,7 +2581,7 @@ def _metric_box(titulo, valor, meta=None):
       <div style="font-size:42px; margin-bottom:8px; color:#ef4e22; line-height:1; white-space:nowrap;">
         {farol}&nbsp;<strong>{valor}%</strong>
       </div>
-      <div style="font-size:14px; color:#333333;">objetivo ideal <strong>{meta_html}</strong></div>
+      <div style="font-size:14px; color:#333333;">objetivo <strong>{meta_html}</strong></div>
     </td>
     """
 
@@ -2149,21 +2632,44 @@ def _header_html(titulo, hoje, imagens_kv=None):
     """
 
 
-def _destaques_cadastro_html(cad_rev, imagens_kv=None, imagens_tom=None):
-    """Gera um único balão verde de destaque com revendas agrupadas por regional."""
-    if cad_rev is None or cad_rev.empty:
+def _destaques_meta_html(
+    df,
+    meta,
+    col_pct,
+    col_regional,
+    col_revenda,
+    titulo,
+    subtitulo,
+    imagens_kv=None,
+    imagens_tom=None,
+    col_num=None,
+    col_den=None,
+):
+    """Gera um único balão verde de destaque com revendas agrupadas por regional.
+
+    Se col_num e col_den forem informados, filtra pelo cálculo exato para evitar
+    que valores arredondados entrem no destaque. Caso contrário, usa col_pct.
+    """
+    if df is None or df.empty:
         return ""
 
-    atingiram = cad_rev[cad_rev["pct_ativos"] >= META_CADASTRO].copy()
+    df = df.copy()
+
+    # Usa o % exato quando possível, para não incluir valores que arredondariam para a meta.
+    if col_num and col_den and col_num in df.columns and col_den in df.columns:
+        atingiram = df[(df[col_num] / df[col_den] * 100) >= meta].copy()
+    else:
+        atingiram = df[df[col_pct] >= meta].copy()
+
     if atingiram.empty:
         return ""
 
     # Ordenar revendas dentro de cada regional do maior para o menor
-    atingiram = atingiram.sort_values(["regional_curta", "pct_ativos"], ascending=[True, False])
+    atingiram = atingiram.sort_values([col_regional, col_pct], ascending=[True, False])
 
-    # Ordenar regionais pela média de % ativos (maior primeiro)
+    # Ordenar regionais pela média do indicador (maior primeiro)
     ordem_regional = (
-        atingiram.groupby("regional_curta")["pct_ativos"]
+        atingiram.groupby(col_regional)[col_pct]
         .mean()
         .sort_values(ascending=False)
         .index.tolist()
@@ -2181,11 +2687,11 @@ def _destaques_cadastro_html(cad_rev, imagens_kv=None, imagens_tom=None):
 
     blocos_regional = []
     for regional in ordem_regional:
-        revendas_reg = atingiram[atingiram["regional_curta"] == regional]
+        revendas_reg = atingiram[atingiram[col_regional] == regional]
         linhas_rev = []
         for _, r in revendas_reg.iterrows():
             linhas_rev.append(
-                f"• <strong>{r['revenda']}</strong> — <strong>{r['pct_ativos']:.1f}%</strong>"
+                f"• <strong>{r[col_revenda]}</strong> — <strong>{r[col_pct]:.1f}%</strong>"
             )
 
         bloco = (
@@ -2200,11 +2706,11 @@ def _destaques_cadastro_html(cad_rev, imagens_kv=None, imagens_tom=None):
 
     conteudo = (
         f"<div style='font-size:18px; font-weight:bold; margin-bottom:4px;'>"
-        f"🎉 Parabéns!</div>"
+        f"🎉 {titulo}</div>"
         f"<div style='font-size:15px; font-weight:bold; margin-bottom:12px;'>"
-        f"Melhor % de cadastros ativos.</div>"
+        f"{subtitulo}</div>"
         f"<div style='font-size:14px; margin-bottom:12px;'>"
-        f"As revendas abaixo atingiram ou superaram o objetivo de <strong>{META_CADASTRO:.0f}%</strong>:</div>"
+        f"As revendas abaixo atingiram ou superaram o objetivo de <strong>{meta:.0f}%</strong>:</div>"
         + "\n".join(blocos_regional)
     )
 
@@ -2222,10 +2728,27 @@ def _destaques_cadastro_html(cad_rev, imagens_kv=None, imagens_tom=None):
     """
 
 
+def _destaques_cadastro_html(cad_rev, imagens_kv=None, imagens_tom=None):
+    """Wrapper para manter o destaque de cadastros com o comportamento atual."""
+    return _destaques_meta_html(
+        cad_rev,
+        meta=META_CADASTRO,
+        col_pct="pct_ativos",
+        col_regional="regional_curta",
+        col_revenda="revenda",
+        titulo="Parabéns!",
+        subtitulo="Melhor % de ativos.",
+        imagens_kv=imagens_kv,
+        imagens_tom=imagens_tom,
+        col_num="ativos",
+        col_den="total",
+    )
+
+
 def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=False, regional_filtro=None):
     """Monta corpo do e-mail em HTML compativel com Gmail e Outlook."""
-    hoje = date.today().strftime("%d/%m/%Y")
-    titulo = f"Relatorio Semanal Programa +TOP — {regional_filtro}" if regional_filtro else "Relatorio Semanal Programa +TOP"
+    hoje = "30/06/2026"
+    titulo = f"Relatório Semanal Programa +TOP — {regional_filtro}" if regional_filtro else "Relatório Semanal Programa +TOP"
 
     alerta_teste = "<p style='color:#d9534f; font-weight:bold; margin:16px 0;'>[MODO TESTE - e-mail nao enviado]</p>" if teste else ""
 
@@ -2237,6 +2760,7 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
     cad_reg, cad_rev = dados["cadastros"]
     trein_reg, trein_rev = dados["treinamentos"]
     aceite_reg = dados["aceites"]
+    aceite_rev = dados.get("aceites_rev")
 
     pct_geral = round(cad_reg["ativos"].sum() / cad_reg["total"].sum() * 100, 1) if not cad_reg.empty else 0
     pct_trein = round(trein_reg["realizaram"].sum() / trein_reg["total_ativos"].sum() * 100, 1) if trein_reg is not None and not trein_reg.empty else 0
@@ -2266,6 +2790,8 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
         tabelas_usar = {
             "cad_reg": estilizar_tabela_html(_renomear_cadastro_reg(cad_reg[cad_reg["regional_curta"] == regional_filtro])),
             "cad_rev": estilizar_tabela_html(_renomear_cadastro_rev(cad_rev[cad_rev["regional_curta"] == regional_filtro])),
+            "consolidado_reg": "",
+            "consolidado_rev": "",
             "trein_reg": "",
             "trein_rev": "",
             "trein_combinado_reg": "<p><em>Sem dados de treinamentos.</em></p>",
@@ -2277,6 +2803,48 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
             "aceite_reg": estilizar_tabela_html(_renomear_aceite_reg(aceite_reg[aceite_reg["regional"] == regional_filtro])),
             "aceite_rev": "",
         }
+        # Tabelas consolidadas filtradas por regional
+        cons_reg_f = preparar_tabela_consolidada(
+            cad_reg[cad_reg["regional_curta"] == regional_filtro],
+            trein_reg[trein_reg["regional_curta"] == regional_filtro] if trein_reg is not None else None,
+            aceite_reg[aceite_reg["regional"] == regional_filtro],
+            nivel="regional"
+        )
+        cons_rev_f = preparar_tabela_consolidada(
+            cad_rev[cad_rev["regional_curta"] == regional_filtro],
+            trein_rev[trein_rev["regional_curta"] == regional_filtro] if trein_rev is not None else None,
+            aceite_reg[aceite_reg["regional"] == regional_filtro],
+            nivel="revenda"
+        )
+        tabelas_usar["consolidado_reg"] = estilizar_tabela_html(cons_reg_f)
+        tabelas_usar["consolidado_rev"] = estilizar_tabela_html(cons_rev_f)
+
+        # Tabelas base de treinamentos e aceites filtradas por regional
+        trein_base_reg_f = preparar_tabela_base_treinamentos(
+            cad_reg[cad_reg["regional_curta"] == regional_filtro],
+            trein_reg[trein_reg["regional_curta"] == regional_filtro] if trein_reg is not None else None,
+            nivel="regional"
+        )
+        trein_base_rev_f = preparar_tabela_base_treinamentos(
+            cad_rev[cad_rev["regional_curta"] == regional_filtro],
+            trein_rev[trein_rev["regional_curta"] == regional_filtro] if trein_rev is not None else None,
+            nivel="revenda"
+        )
+        tabelas_usar["trein_base_reg"] = estilizar_tabela_html(trein_base_reg_f)
+        tabelas_usar["trein_base_rev"] = estilizar_tabela_html(trein_base_rev_f)
+
+        aceite_base_reg_f = preparar_tabela_base_aceites(
+            cad_reg[cad_reg["regional_curta"] == regional_filtro],
+            aceite_reg[aceite_reg["regional"] == regional_filtro],
+            nivel="regional"
+        )
+        aceite_base_rev_f = preparar_tabela_base_aceites(
+            cad_rev[cad_rev["regional_curta"] == regional_filtro],
+            aceite_reg[aceite_reg["regional"] == regional_filtro],
+            nivel="revenda"
+        )
+        tabelas_usar["aceite_base_reg"] = estilizar_tabela_html(aceite_base_reg_f)
+        tabelas_usar["aceite_base_rev"] = estilizar_tabela_html(aceite_base_rev_f)
         trein_por_curso = dados.get("treinamentos_por_curso")
         trein_reg = dados["treinamentos"][0]
         trein_rev = dados["treinamentos"][1]
@@ -2333,8 +2901,8 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   {_secao_html("CADASTROS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo ideal para a base de cadastros do Programa +TOP <span style='font-size:26px; color:#00a651;'>é de {META_CADASTRO:.0f}%</span>.</strong></p>"
-                      f"<p style='font-size:17px; margin:0; line-height:1.4;'>Até o momento, estamos com <strong><span style='color:#ef4e22;'>{pct_geral}% da base ativa</span></strong>.</p>",
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo para a cobertura de cadastros do Programa +TOP <span style='font-size:26px; color:#00a651;'>é de {META_CADASTRO:.0f}%</span>.</strong></p>"
+                      f"<p style='font-size:17px; margin:0; line-height:1.4;'>Até o momento, <strong><span style='color:#ef4e22;'>{f'{pct_geral:.1f}'.replace('.', ',')}% dos participantes estão ativos no +TOP</span></strong>.</p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
                   {subsecao_titulo("Por Regional")}
@@ -2348,21 +2916,21 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                       imagens_kv=imagens_kv,
                       imagens_tom=imagens_tom,
                   )}
-                  {subsecao_titulo("TOP 10 revendas")}
+                  {subsecao_titulo("Top 10 revendas com maior % de ativos")}
                   {tabelas_usar['cad_rev']}
 
                   {_secao_html("TREINAMENTOS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo ideal para os treinamentos do Programa +TOP <span style='font-size:26px; color:#00a651;'>é de {META_TREINAMENTOS:.0f}%</span></strong>.</p>"
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'>Os dois conteúdos de <strong>{nome_mes_pt_br().lower()}</strong> estão disponíveis até <strong>{date.today().replace(day=30):%d/%m/%Y}</strong></p>"
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo é atingir, no mínimo, <span style='font-size:26px; color:#00a651;'>{META_TREINAMENTOS:.0f}%</span> dos participantes aprovados/ treinados</strong>.</p>"
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'>Os dois conteúdos de <strong>{nome_mes_pt_br(ano_mes=dados.get('mes_referencia')).lower()}</strong> ficaram disponíveis até <strong>{pd.Period(dados.get('mes_referencia'), freq='M').end_time:%d/%m/%Y}</strong></p>"
                       f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong>Conteúdos:</strong><br>"
                       f"1. <strong>{nome_curso1}</strong> (SKU {dados['cursos_info'][4]})<br>"
                       f"2. <strong>{nome_curso2}</strong> (SKU {dados['cursos_info'][5]}).</p>"
-                      f"<p style='font-size:17px; margin:0; line-height:1.4;'>Até o momento, estamos em <strong><span style='color:#ef4e22;'>{pct_trein}% da base ativa</span></strong>.</p>",
+                      f"<p style='font-size:17px; margin:0; line-height:1.4;'>Até o momento, <strong><span style='color:#ef4e22;'>{f'{pct_trein:.1f}'.replace('.', ',')}% dos participantes realizaram os treinamentos obrigatórios no +TOP</span></strong>.</p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
                   {subsecao_titulo("Por Regional")}
-                  {tabelas_usar['trein_combinado_reg'] if tabelas_usar.get('trein_combinado_reg') else '<p><em>Não foi possível identificar os 2 treinamentos obrigatórios do mês.</em></p>'}
+                  {tabelas_usar['trein_base_reg'] if tabelas_usar.get('trein_base_reg') else '<p><em>Sem dados.</em></p>'}
                   {_img_html("grafico_treinamentos" if "treinamentos" in graficos else None, "Gráfico Treinamentos")}
                   {_pontos_atencao_secao_html(
                       insights.get("treinamentos", {}).get("alerta_titulo", ""),
@@ -2371,18 +2939,31 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                       imagens_kv=imagens_kv,
                       imagens_tom=imagens_tom,
                   )}
-                  {_destaque_tom_ok_html(insights.get("treinamentos", {}).get("destaque", ""), imagens_kv=imagens_kv, imagens_tom=imagens_tom)}
-                  {subsecao_titulo("Por Revenda")}
-                  {tabelas_usar['trein_combinado_rev'] if tabelas_usar.get('trein_combinado_rev') else '<p><em>Sem dados de treinamentos.</em></p>'}
+                  {_destaques_meta_html(
+                      trein_rev,
+                      meta=META_TREINAMENTOS,
+                      col_pct="pct_realizaram",
+                      col_regional="regional_curta",
+                      col_revenda="revenda",
+                      titulo="Parabéns!",
+                      subtitulo="Melhor % de treinamentos concluídos.",
+                      imagens_kv=imagens_kv,
+                      imagens_tom=imagens_tom,
+                      col_num="realizaram",
+                      col_den="total_ativos",
+                  )}
+                  {subsecao_titulo("Top 10 revendas com maior % de treinamentos realizados")}
+                  {tabelas_usar['trein_base_rev'] if tabelas_usar.get('trein_base_rev') else '<p><em>Sem dados.</em></p>'}
 
                   <p style="font-size:12px; color:#666666; font-style:italic; margin-top:8px;">
-                    Lembrando que desde abril temos a mecânica adicional: a cada 3 meses consecutivos que o vendedor concluir todos os treinamentos, ele ganha +100 pontos no programa.
+                    Lembrando que, desde abril, temos a mecânica adicional: a cada 3 meses consecutivos em que o vendedor concluir todos os treinamentos, ele ganha +100 pontos no programa. Dados de treinamentos são sempre D-1.
                   </p>
 
                   {_secao_html("ACEITES MENSAIS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo ideal para os aceites mensais de {nome_mes_pt_br(ano_mes=str(dados['mes_aceite']))} <span style='font-size:26px; color:#00a651;'>é de {META_ACEITES:.0f}%</span>.</strong></p>"
-                      f"<p style='font-size:17px; margin:0; line-height:1.4;'>Até o momento, <strong><span style='color:#ef4e22;'>{pct_aceite}% dos participantes ativos deram aceite</span></strong>.</p>",
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo para os <span style='font-size:20px;'>aceites mensais*</span> de {nome_mes_pt_br(ano_mes=str(dados['mes_aceite']))} <span style='font-size:26px; color:#00a651;'>é de {META_ACEITES:.0f}%</span>.</strong></p>"
+                      f"<p style='font-size:17px; margin:0; line-height:1.4;'>Até o momento, <strong><span style='color:#ef4e22;'>{f'{pct_aceite:.1f}'.replace('.', ',')}% dos participantes deram aceite no +TOP</span></strong>.</p>"
+                      f"<p style='font-size:11px; color:#666666; margin:8px 0 0 0; line-height:1.3;'>*é a validação/confirmação que o participante precisa dar todos os meses para receber a pontuação do programa.</p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
                   {subsecao_titulo("Por Regional")}
@@ -2395,8 +2976,20 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                       imagens_kv=imagens_kv,
                       imagens_tom=imagens_tom,
                   )}
-                  {_destaque_tom_ok_html(insights.get("aceites", {}).get("destaque", ""), imagens_kv=imagens_kv, imagens_tom=imagens_tom)}
-                  {subsecao_titulo("TOP 10 revendas")}
+                  {_destaques_meta_html(
+                      aceite_rev,
+                      meta=META_ACEITES,
+                      col_pct="pct_aceite",
+                      col_regional="regional",
+                      col_revenda="revenda",
+                      titulo="Parabéns!",
+                      subtitulo="Melhor % de aceite mensal.",
+                      imagens_kv=imagens_kv,
+                      imagens_tom=imagens_tom,
+                      col_num="aceitaram",
+                      col_den="total_ativos",
+                  )}
+                  {subsecao_titulo("Top 10 revendas com maior % de aceite")}
                   {tabelas_usar['aceite_rev'] if tabelas_usar.get('aceite_rev') else '<p><em>Sem dados de aceites por revenda.</em></p>'}
 
                   <p style="margin-top:28px; font-size:16px; color:#155724; background-color:#d4edda; padding:14px 16px; border-radius:10px; border:1px solid #00a651; line-height:1.5;">
@@ -2406,7 +2999,7 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   <p style="margin-top:24px; font-size:16px;">Em anexo <strong>base detalhada</strong>.</p>
 
-                  <p style="margin-top:16px;">Att.,<br>Relatório Automático Programa +TOP</p>
+                  <p style="margin-top:16px; font-size:16px; font-weight:bold; color:#00a651;">Att. TOM do +TOP</p>
 
                 </td></tr>
               </table>
@@ -2532,7 +3125,7 @@ def nome_aba_excel(nome, sufixo=""):
 
 
 def preparar_aba_detalhamento(df_det, dados=None, regional_filtro=None):
-    """Prepara aba de detalhamento com campos solicitados, incluindo cursos realizados."""
+    """Prepara aba de detalhamento com campos auditáveis para replicar os cálculos do e-mail."""
     if df_det is None or df_det.empty:
         return None
 
@@ -2540,26 +3133,48 @@ def preparar_aba_detalhamento(df_det, dados=None, regional_filtro=None):
     if regional_filtro:
         df = df[df["regional_da_loja"].apply(regional_curta) == regional_filtro]
 
-    colunas_map = {
+    # ------------------------------------------------------------------
+    # Colunas cadastrais / hierarquia
+    # ------------------------------------------------------------------
+    colunas_base = [
+        "cpf_limp",
+        "regional_da_loja",
+        "loja",
+        "cnpj_loja",
+        "cod_loja",
+        "nome",
+        "nome_hier",
+        "cargo",
+        "cargo_hier",
+        "status",
+        "desligado",
+        "cidade",
+        "uf",
+        "bairro",
+        "unnamed: 14",
+    ]
+    for col in colunas_base:
+        if col not in df.columns:
+            df[col] = None
+
+    df_out = df[colunas_base].copy()
+    df_out = df_out.rename(columns={
         "regional_da_loja": "Regional",
         "loja": "Revenda",
         "cnpj_loja": "CNPJ",
+        "cod_loja": "Código Loja",
         "nome": "Nome",
+        "nome_hier": "Nome na Hierarquia",
         "cargo": "Cargo",
+        "cargo_hier": "Cargo na Hierarquia",
         "status": "Status",
+        "desligado": "Desligado",
         "cidade": "Cidade",
         "uf": "UF",
         "bairro": "Bairro loja",
         "unnamed: 14": "Nome loja",
-    }
-
-    for col in colunas_map:
-        if col not in df.columns:
-            df[col] = None
-
-    df_out = df[list(colunas_map.keys())].rename(columns=colunas_map)
-    # Mantém cpf_limp apenas para cruzamento interno (não exporta)
-    df_out["cpf_limp"] = df["cpf_limp"].values
+    })
+    # Mantém cpf_limp e base_calculo_geral para cruzamentos internos
 
     def limpar_cnpj(cnpj):
         if pd.isna(cnpj):
@@ -2570,10 +3185,46 @@ def preparar_aba_detalhamento(df_det, dados=None, regional_filtro=None):
         return s.zfill(14)
 
     df_out["CNPJ"] = df_out["CNPJ"].apply(limpar_cnpj)
-    # Força CNPJ como texto no Excel (evita notação científica)
     df_out["CNPJ"] = df_out["CNPJ"].apply(lambda x: f"'{x}" if x else x)
 
-    # Adiciona colunas de treinamentos obrigatórios do mês
+    # ------------------------------------------------------------------
+    # Flags calculáveis
+    # ------------------------------------------------------------------
+    df_out["Base de Cálculo Geral?"] = np.where(df["base_calculo_geral"].fillna(True), "Sim", "Não")
+    df_out["Em Férias?"] = np.where(df_out["Base de Cálculo Geral?"].eq("Não"), "Sim", "Não")
+    # Quem está em férias não está ativo na plataforma para este relatório
+    df_out["Ativo no +TOP?"] = np.where(
+        (df_out["Status"].eq("Ativo")) & (df_out["Base de Cálculo Geral?"].eq("Sim")), "Sim", "Não"
+    )
+    # Preenche Desligado para linhas de férias
+    df_out["Desligado"] = df_out["Desligado"].fillna(df["base_calculo_geral"].map({False: "FÉRIAS"}))
+
+    # ------------------------------------------------------------------
+    # Aceite mensal
+    # ------------------------------------------------------------------
+    df_out["Aceite no Mês?"] = "Não"
+    df_out["Data Aceite"] = ""
+    if dados is not None:
+        df_aceite = dados.get("aceites_df")
+        mes_aceite_ref = dados.get("mes_aceite") or dados.get("mes_aceite_ref")
+        if df_aceite is not None and mes_aceite_ref is not None:
+            mes_dt = pd.Period(mes_aceite_ref, freq="M") if isinstance(mes_aceite_ref, str) else mes_aceite_ref
+            aceite_mes = df_aceite[df_aceite["mes_aceite"] == mes_dt].copy()
+            if not aceite_mes.empty:
+                aceite_mes = aceite_mes.sort_values("DataAceite", ascending=False).drop_duplicates("cpf_limp")
+                df_out = df_out.merge(
+                    aceite_mes[["cpf_limp", "DataAceite"]],
+                    on="cpf_limp",
+                    how="left",
+                )
+                df_out["Aceite no Mês?"] = np.where(df_out["DataAceite"].notna(), "Sim", "Não")
+                df_out["Data Aceite"] = pd.to_datetime(df_out["DataAceite"], errors="coerce").dt.strftime("%d/%m/%Y").fillna("")
+                df_out = df_out.drop(columns=["DataAceite"], errors="ignore")
+
+    # ------------------------------------------------------------------
+    # Treinamentos obrigatórios do mês
+    # ------------------------------------------------------------------
+    colunas_trein = []
     if dados is not None:
         df_trein = dados.get("treinamentos_df")
         cursos_info = dados.get("cursos_info")
@@ -2587,139 +3238,420 @@ def preparar_aba_detalhamento(df_det, dados=None, regional_filtro=None):
                     & (df_trein["Estado"].str.lower() == "concluido")
                 ].copy()
 
+                flags_cursos = []
                 for curso, nome, sku in [(curso1, nome1, sku1), (curso2, nome2, sku2)]:
                     if not curso:
                         continue
                     trein_curso = trein_mes[trein_mes["Curso"] == curso][["cpf_limp", "Conclusão"]].drop_duplicates("cpf_limp")
-                    trein_curso["status_curso"] = "Realizado/Aprovado"
+                    trein_curso["realizado"] = "Sim"
                     trein_curso["data_curso"] = trein_curso["Conclusão"].dt.strftime("%d/%m/%Y")
 
-                    df_out = df_out.merge(
-                        trein_curso[["cpf_limp", "status_curso", "data_curso"]],
-                        left_on="cpf_limp",
-                        right_on="cpf_limp",
-                        how="left",
-                    )
+                    col_realizado = f"{nome} (SKU {sku}) - Realizado?"
                     col_status = f"{nome} (SKU {sku}) - Status"
                     col_data = f"{nome} (SKU {sku}) - Conclusão"
+                    colunas_trein.extend([col_realizado, col_status, col_data])
+
+                    df_out = df_out.merge(
+                        trein_curso[["cpf_limp", "realizado", "data_curso"]],
+                        on="cpf_limp",
+                        how="left",
+                    )
                     df_out = df_out.rename(columns={
-                        "status_curso": col_status,
+                        "realizado": col_realizado,
                         "data_curso": col_data,
                     })
-                    df_out[col_status] = df_out[col_status].fillna("Não realizado")
+                    df_out[col_realizado] = df_out[col_realizado].fillna("Não")
+                    df_out[col_status] = np.where(df_out[col_realizado].eq("Sim"), "Realizado/Aprovado", "Não realizado")
                     df_out[col_data] = df_out[col_data].fillna("")
+                    flags_cursos.append(df_out[col_realizado].eq("Sim"))
 
-            # Remove coluna interna de CPF antes de exportar
-            if "cpf_limp" in df_out.columns:
-                df_out = df_out.drop(columns=["cpf_limp"])
+                if len(flags_cursos) == 2:
+                    df_out["Realizou Ambos os Cursos?"] = np.where(
+                        flags_cursos[0] & flags_cursos[1], "Sim", "Não"
+                    )
+
+    # ------------------------------------------------------------------
+    # Mês de referência
+    # ------------------------------------------------------------------
+    df_out["Mês de Referência"] = dados.get("mes_referencia", "") if dados else ""
+
+    # ------------------------------------------------------------------
+    # Formatação final de CPF como texto (após todos os cruzamentos)
+    # ------------------------------------------------------------------
+    cpf_texto = (
+        df_out["cpf_limp"]
+        .astype(str)
+        .str.replace(r"\.0$", "", regex=True)
+        .str.replace("nan", "", regex=False)
+        .str.zfill(11)
+    )
+    cpf_texto = cpf_texto.apply(lambda x: f"'{x}" if len(str(x)) == 11 else x)
+    df_out.insert(0, "CPF", cpf_texto)
+    df_out = df_out.drop(columns=["cpf_limp"], errors="ignore")
+
+    # ------------------------------------------------------------------
+    # Reordena colunas
+    # ------------------------------------------------------------------
+    colunas_inicio = [
+        "CPF", "Regional", "Revenda", "CNPJ", "Código Loja",
+        "Nome", "Nome na Hierarquia", "Cargo", "Cargo na Hierarquia",
+        "Status", "Ativo no +TOP?", "Desligado", "Em Férias?", "Base de Cálculo Geral?",
+        "Cidade", "UF", "Bairro loja", "Nome loja",
+        "Aceite no Mês?", "Data Aceite",
+    ]
+    colunas_fim = ["Realizou Ambos os Cursos?", "Mês de Referência"]
+
+    colunas_existentes = [c for c in colunas_inicio if c in df_out.columns]
+    colunas_existentes += [c for c in colunas_trein if c in df_out.columns]
+    colunas_existentes += [c for c in colunas_fim if c in df_out.columns]
+    # Garante que colunas não listadas também sejam mantidas
+    colunas_existentes += [c for c in df_out.columns if c not in colunas_existentes]
+    df_out = df_out[[c for c in colunas_existentes if c in df_out.columns]]
 
     return df_out
 
 
-def salvar_relatorio_excel(dados, caminho):
-    """Salva relatório consolidado em Excel com múltiplas abas."""
+def _preparar_porcentagens(df):
+    """Converte colunas percentuais de 0-100 para 0-1 para number_format do Excel."""
+    df = df.copy()
+    for col in df.columns:
+        if col in PCT_COLS and pd.api.types.is_numeric_dtype(df[col]):
+            df[col] = df[col] / 100.0
+    return df
+
+
+def _formatar_celulas(ws, df, start_row, start_col):
+    """Aplica number_format percentual e texto em colunas de CPF/CNPJ."""
+    for col_idx, col in enumerate(df.columns, start_col + 1):
+        letter = get_column_letter(col_idx)
+        is_pct = col in PCT_COLS
+        is_text_id = str(col).upper() in {"CPF", "CNPJ"}
+        header_row = start_row + 1
+        for r in range(header_row + 1, header_row + 1 + len(df)):
+            cell = ws[f"{letter}{r}"]
+            if is_pct and isinstance(cell.value, (int, float)):
+                cell.number_format = "0.0%"
+            elif is_text_id:
+                cell.number_format = "@"
+
+
+def _ajustar_largura_aba(ws):
+    """Ajusta largura das colunas com base no conteúdo (máx. 60)."""
+    for col_idx in range(1, ws.max_column + 1):
+        letter = get_column_letter(col_idx)
+        max_len = max(
+            (len(str(cell.value or "")) for cell in ws[letter]),
+            default=0,
+        )
+        ws.column_dimensions[letter].width = min(max_len + 2, 60)
+
+
+def _escrever_tabela(writer, df, sheet_name, startrow=0, startcol=0):
+    """Escreve DataFrame no Excel aplicando formatação de % e ajuste de largura."""
+    df_out = _preparar_porcentagens(df)
+    df_out.to_excel(
+        writer, sheet_name=sheet_name, index=False,
+        startrow=startrow, startcol=startcol,
+    )
+    ws = writer.sheets[sheet_name]
+    _formatar_celulas(ws, df_out, startrow, startcol)
+    _ajustar_largura_aba(ws)
+    return startrow + len(df_out) + 1
+
+
+def _escrever_secao_resumo(writer, df, sheet_name, titulo, startrow=0, startcol=0):
+    """
+    Escreve uma seção visual na aba Resumo: título estilizado + tabela formatada.
+    Retorna a próxima linha disponível.
+    """
+    # Garante que a aba existe
+    if sheet_name not in writer.sheets:
+        writer.book.create_sheet(sheet_name)
+    ws = writer.sheets[sheet_name]
+
+    # Título da seção
+    ws.cell(row=startrow + 1, column=startcol + 1, value=titulo)
+    titulo_cell = ws.cell(row=startrow + 1, column=startcol + 1)
+    titulo_cell.font = Font(name="Calibri", size=14, bold=True, color=COR_BRANCO)
+    titulo_cell.fill = PatternFill(start_color=COR_PRIMARIA, end_color=COR_PRIMARIA, fill_type="solid")
+    titulo_cell.alignment = Alignment(horizontal="left", vertical="center")
+
+    # Mescla células do título (até a última coluna do DataFrame)
+    n_cols = len(df.columns)
+    if n_cols > 1:
+        ws.merge_cells(
+            start_row=startrow + 1, start_column=startcol + 1,
+            end_row=startrow + 1, end_column=startcol + n_cols
+        )
+
+    # Escreve a tabela abaixo do título
+    df_out = _preparar_porcentagens(df)
+    table_startrow = startrow + 1
+    df_out.to_excel(
+        writer, sheet_name=sheet_name, index=False,
+        startrow=table_startrow, startcol=startcol,
+        header=True,
+    )
+
+    # Formata cabeçalhos da tabela
+    header_row = table_startrow + 1
+    for col_idx in range(startcol + 1, startcol + n_cols + 1):
+        cell = ws.cell(row=header_row, column=col_idx)
+        cell.font = Font(name="Calibri", size=11, bold=True, color=COR_TEXTO)
+        cell.fill = PatternFill(start_color=COR_PRIMARIA_CLARA, end_color=COR_PRIMARIA_CLARA, fill_type="solid")
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+        cell.border = thin_border
+
+    # Formata células de dados
+    for row_idx in range(header_row + 1, header_row + 1 + len(df_out)):
+        for col_idx, col in enumerate(df_out.columns, startcol + 1):
+            cell = ws.cell(row=row_idx, column=col_idx)
+            cell.border = thin_border
+            cell.alignment = Alignment(horizontal="center" if col in PCT_COLS else "left", vertical="center")
+            if col in PCT_COLS and isinstance(cell.value, (int, float)):
+                cell.number_format = "0.0%"
+            elif str(col).upper() in {"CPF", "CNPJ"}:
+                cell.number_format = "@"
+
+    _ajustar_largura_aba(ws)
+    return table_startrow + len(df_out) + 2
+
+
+def _listar_participantes_treinamento(dados, regional_filtro=None):
+    """Retorna DataFrames de participantes que não fizeram nenhum curso e que fizeram apenas 1."""
+    base = dados.get("base_trein")
+    df_cad = dados.get("cadastro_df")
+    df_trein = dados.get("treinamentos_df")
+    df_hier = dados.get("hierarquia")
+    cursos_info = dados.get("cursos_info")
+    mes_ref = dados.get("mes_referencia")
+
+    if base is None or df_cad is None or df_trein is None or cursos_info is None:
+        return None, None
+
+    curso1, curso2, nome1, nome2, sku1, sku2 = cursos_info
+    if not curso1 or not curso2:
+        return None, None
+
+    base_cols = ["cpf_limp", "regional_curta", "revenda"]
+    base = base[base_cols].drop_duplicates("cpf_limp").copy()
+    base = base.merge(
+        df_cad[["cpf_limp", "nome"]].drop_duplicates("cpf_limp"),
+        on="cpf_limp", how="left",
+    )
+    # Fallback: nome da hierarquia quando não houver no cadastro
+    if df_hier is not None and "nome_hier" in df_hier.columns:
+        base = base.merge(
+            df_hier[["cpf_limp", "nome_hier"]].drop_duplicates("cpf_limp"),
+            on="cpf_limp", how="left",
+        )
+        base["nome"] = base["nome"].fillna(base["nome_hier"])
+    if regional_filtro:
+        base = base[base["regional_curta"] == regional_filtro]
+
+    mes_dt = pd.Period(mes_ref, freq="M")
+    trein_mes = df_trein[
+        (df_trein["Conclusão"].dt.to_period("M") == mes_dt)
+        & (df_trein["Estado"].str.lower() == "concluido")
+    ]
+    c1 = set(trein_mes[trein_mes["Curso"] == curso1]["cpf_limp"].unique())
+    c2 = set(trein_mes[trein_mes["Curso"] == curso2]["cpf_limp"].unique())
+
+    base["fez_c1"] = base["cpf_limp"].isin(c1)
+    base["fez_c2"] = base["cpf_limp"].isin(c2)
+    base["n_cursos"] = base["fez_c1"].astype(int) + base["fez_c2"].astype(int)
+
+    cols_out = {"nome": "Nome", "regional_curta": "Regional", "revenda": "Revenda"}
+
+    df_0 = base[base["n_cursos"] == 0][list(cols_out.keys())].rename(columns=cols_out).copy()
+
+    df_1 = base[base["n_cursos"] == 1][list(cols_out.keys()) + ["fez_c1", "fez_c2"]].copy()
+    df_1["Curso Realizado"] = df_1.apply(lambda r: nome1 if r["fez_c1"] else nome2, axis=1)
+    df_1 = df_1.drop(columns=["fez_c1", "fez_c2"]).rename(columns=cols_out)
+
+    return df_0, df_1
+
+
+def _listar_participantes_aceite(dados, regional_filtro=None):
+    """Retorna DataFrames de participantes que aceitaram e que não aceitaram."""
+    base = dados.get("base_aceite")
+    df_cad = dados.get("cadastro_df")
+    df_hier = dados.get("hierarquia")
+
+    if base is None or df_cad is None:
+        return None, None
+
+    base = base[["cpf_limp", "regional_curta", "revenda", "aceitou"]].drop_duplicates("cpf_limp").copy()
+    base = base.merge(
+        df_cad[["cpf_limp", "nome"]].drop_duplicates("cpf_limp"),
+        on="cpf_limp", how="left",
+    )
+    # Fallback: nome da hierarquia quando não houver no cadastro
+    if df_hier is not None and "nome_hier" in df_hier.columns:
+        base = base.merge(
+            df_hier[["cpf_limp", "nome_hier"]].drop_duplicates("cpf_limp"),
+            on="cpf_limp", how="left",
+        )
+        base["nome"] = base["nome"].fillna(base["nome_hier"])
+    if regional_filtro:
+        base = base[base["regional_curta"] == regional_filtro]
+
+    cols_out = {"nome": "Nome", "regional_curta": "Regional", "revenda": "Revenda"}
+
+    df_sim = base[base["aceitou"]][list(cols_out.keys())].rename(columns=cols_out).copy()
+
+    df_nao = base[~base["aceitou"]][list(cols_out.keys())].rename(columns=cols_out).copy()
+
+    return df_sim, df_nao
+
+
+def _salvar_relatorio_excel_core(dados, caminho, regional_filtro=None):
+    """Salva relatório consolidado ou regional em Excel com múltiplas abas formatadas."""
     cad_reg, cad_rev = dados["cadastros"]
     trein_reg, trein_rev = dados["treinamentos"]
     trein_por_curso = dados.get("treinamentos_por_curso")
     aceite_reg = dados["aceites"]
+    aceite_rev = dados.get("aceites_rev")
     df_det = dados.get("detalhamento")
+    cursos_info = dados.get("cursos_info")
+
+    # Filtros por regional quando aplicável
+    if regional_filtro:
+        cad_reg_f = cad_reg[cad_reg["regional_curta"] == regional_filtro]
+        cad_rev_f = cad_rev[cad_rev["regional_curta"] == regional_filtro]
+        trein_reg_f = trein_reg[trein_reg["regional_curta"] == regional_filtro] if trein_reg is not None else None
+        trein_rev_f = trein_rev[trein_rev["regional_curta"] == regional_filtro] if trein_rev is not None else None
+        aceite_reg_f = aceite_reg[aceite_reg["regional"] == regional_filtro]
+        aceite_rev_f = aceite_rev[aceite_rev["regional"] == regional_filtro] if aceite_rev is not None else None
+    else:
+        cad_reg_f, cad_rev_f, trein_reg_f, trein_rev_f = cad_reg, cad_rev, trein_reg, trein_rev
+        aceite_reg_f, aceite_rev_f = aceite_reg, aceite_rev
+
+    # Nomes dos cursos/SKU
+    sku1 = sku2 = None
+    nome1 = nome2 = "Curso"
+    if cursos_info is not None:
+        _, _, nome1, nome2, sku1, sku2 = cursos_info
 
     with pd.ExcelWriter(caminho, engine="openpyxl") as writer:
-        _renomear_cadastro_reg(cad_reg).to_excel(writer, sheet_name="Cadastro_Regional", index=False)
-        _renomear_cadastro_rev(cad_rev).to_excel(writer, sheet_name="Cadastro_Revenda", index=False)
+        # ------------------------------------------------------------------
+        # ABA RESUMO (primeira)
+        # ------------------------------------------------------------------
+        resumo_linha = 0
 
-        if trein_reg is not None:
-            _renomear_trein_reg(trein_reg).to_excel(writer, sheet_name="Treinamento_Regional", index=False)
-        if trein_rev is not None:
-            _renomear_trein_rev(trein_rev).to_excel(writer, sheet_name="Treinamento_Revenda", index=False)
+        # Indicadores gerais de cadastro (sem divisão por regional)
+        total_participantes = int(cad_reg_f["total"].sum())
+        ativos = int(cad_reg_f["ativos"].sum())
+        pre_cadastro = int(cad_reg_f["pre_cadastro"].sum())
+        ferias = int(cad_reg_f["ferias"].sum())
+        pct_ferias = round(ferias / (total_participantes + ferias) * 100, 1) if (total_participantes + ferias) else 0
+        pct_ativos_total = round(ativos / total_participantes * 100, 1) if total_participantes else 0
+
+        resumo_dados = {
+            "Indicador": [
+                "Total de participantes",
+                "Ativos no +TOP",
+                "Pré-Cadastro",
+                "Férias - Participantes ativos",
+                "% Férias",
+                "% Ativos no total",
+            ],
+            "Valor": [
+                total_participantes,
+                ativos,
+                pre_cadastro,
+                ferias,
+                pct_ferias,
+                pct_ativos_total,
+            ],
+        }
+        df_resumo = pd.DataFrame(resumo_dados)
+        # Formata % como texto para não aplicar number_format 0.0% nesses indicadores
+        df_resumo["Valor"] = df_resumo.apply(
+            lambda r: f"{r['Valor']:.1f}%" if r["Indicador"] in ["% Férias", "% Ativos no total"] else r["Valor"],
+            axis=1,
+        )
+        resumo_linha = _escrever_secao_resumo(
+            writer, df_resumo, "Resumo", "Indicadores Gerais", startrow=resumo_linha
+        )
+
+        # Seções por revenda
+        resumo_linha = _escrever_secao_resumo(
+            writer, _renomear_cadastro_rev(cad_rev_f), "Resumo", "Cadastro", startrow=resumo_linha
+        )
+
+        if trein_rev_f is not None:
+            resumo_linha = _escrever_secao_resumo(
+                writer, _renomear_trein_rev(trein_rev_f), "Resumo", "Treinamentos", startrow=resumo_linha
+            )
+
+        if aceite_rev_f is not None:
+            resumo_linha = _escrever_secao_resumo(
+                writer, _renomear_aceite_rev(aceite_rev_f), "Resumo", "Aceites", startrow=resumo_linha
+            )
+
+        # ------------------------------------------------------------------
+        # DEMAIS ABAS
+        # ------------------------------------------------------------------
+        _escrever_tabela(writer, _renomear_cadastro_reg(cad_reg_f), "Cadastro_Regional")
+        _escrever_tabela(writer, _renomear_cadastro_rev(cad_rev_f), "Cadastro_Revenda")
+
+        if trein_reg_f is not None:
+            _escrever_tabela(writer, _renomear_trein_reg(trein_reg_f), "Treinamento_Regional")
+        if trein_rev_f is not None:
+            _escrever_tabela(writer, _renomear_trein_rev(trein_rev_f), "Treinamento_Revenda")
 
         if trein_por_curso is not None:
             c1_reg = trein_por_curso.get("curso1_reg")
             c1_rev = trein_por_curso.get("curso1_rev")
             c2_reg = trein_por_curso.get("curso2_reg")
             c2_rev = trein_por_curso.get("curso2_rev")
-            nome1 = trein_por_curso.get("nome1", "Curso 1")
-            nome2 = trein_por_curso.get("nome2", "Curso 2")
+            nome_aba_sku1 = sku1 or nome1
+            nome_aba_sku2 = sku2 or nome2
             if c1_reg is not None and not c1_reg.empty:
-                _renomear_trein_reg(c1_reg).to_excel(writer, sheet_name=nome_aba_excel(nome1, "Reg"), index=False)
+                c1_reg_f = c1_reg[c1_reg["regional_curta"] == regional_filtro] if regional_filtro else c1_reg
+                _escrever_tabela(writer, _renomear_trein_reg(c1_reg_f), f"Treinamento_{nome_aba_sku1}_Reg")
             if c1_rev is not None and not c1_rev.empty:
-                _renomear_trein_rev(c1_rev).to_excel(writer, sheet_name=nome_aba_excel(nome1, "Rev"), index=False)
+                c1_rev_f = c1_rev[c1_rev["regional_curta"] == regional_filtro] if regional_filtro else c1_rev
+                _escrever_tabela(writer, _renomear_trein_rev(c1_rev_f), f"Treinamento_{nome_aba_sku1}_Rev")
             if c2_reg is not None and not c2_reg.empty:
-                _renomear_trein_reg(c2_reg).to_excel(writer, sheet_name=nome_aba_excel(nome2, "Reg"), index=False)
+                c2_reg_f = c2_reg[c2_reg["regional_curta"] == regional_filtro] if regional_filtro else c2_reg
+                _escrever_tabela(writer, _renomear_trein_reg(c2_reg_f), f"Treinamento_{nome_aba_sku2}_Reg")
             if c2_rev is not None and not c2_rev.empty:
-                _renomear_trein_rev(c2_rev).to_excel(writer, sheet_name=nome_aba_excel(nome2, "Rev"), index=False)
+                c2_rev_f = c2_rev[c2_rev["regional_curta"] == regional_filtro] if regional_filtro else c2_rev
+                _escrever_tabela(writer, _renomear_trein_rev(c2_rev_f), f"Treinamento_{nome_aba_sku2}_Rev")
 
-        _renomear_aceite_reg(aceite_reg).to_excel(writer, sheet_name="Aceite_Regional", index=False)
+        _escrever_tabela(writer, _renomear_aceite_reg(aceite_reg_f), "Aceite_Regional")
 
-        df_det_out = preparar_aba_detalhamento(df_det, dados=dados)
+        df_det_out = preparar_aba_detalhamento(df_det, dados=dados, regional_filtro=regional_filtro)
         if df_det_out is not None:
-            df_det_out.to_excel(writer, sheet_name="Detalhamento", index=False)
+            _escrever_tabela(writer, df_det_out, "Detalhamento")
 
-        resumo = {
-            "Indicador": [
-                "Total de CPFs na base",
-                "Total de CPFs ativos",
-                "% Ativos geral",
-                "Treinamentos realizaram (ambos cursos)",
-                "% Treinamentos realizado (base ativos)",
-                "Aceites mensais",
-                "% Aceite mensal (base ativos)",
-            ],
-            "Valor": [
-                int(cad_reg["total"].sum()),
-                int(cad_reg["ativos"].sum()),
-                round(cad_reg["ativos"].sum() / cad_reg["total"].sum() * 100, 1),
-                int(trein_reg["realizaram"].sum()) if trein_reg is not None else "N/A",
-                round(trein_reg["realizaram"].sum() / trein_reg["total_ativos"].sum() * 100, 1) if trein_reg is not None else "N/A",
-                int(aceite_reg["aceitaram"].sum()),
-                round(aceite_reg["aceitaram"].sum() / aceite_reg["total_ativos"].sum() * 100, 1),
-            ],
-        }
-        pd.DataFrame(resumo).to_excel(writer, sheet_name="Resumo", index=False)
+        # Abas de participantes
+        df_trein_0, df_trein_1 = _listar_participantes_treinamento(dados, regional_filtro=regional_filtro)
+        if df_trein_0 is not None and not df_trein_0.empty:
+            _escrever_tabela(writer, df_trein_0, "Nao_realizaram")
+        if df_trein_1 is not None and not df_trein_1.empty:
+            _escrever_tabela(writer, df_trein_1, "Treinamento_1_Curso")
+
+        df_aceite_sim, df_aceite_nao = _listar_participantes_aceite(dados, regional_filtro=regional_filtro)
+        if df_aceite_sim is not None and not df_aceite_sim.empty:
+            _escrever_tabela(writer, df_aceite_sim, "Aceitaram")
+        if df_aceite_nao is not None and not df_aceite_nao.empty:
+            _escrever_tabela(writer, df_aceite_nao, "Nao_Aceitaram")
 
     logger.info(f"Relatório Excel salvo em: {caminho}")
 
 
+def salvar_relatorio_excel(dados, caminho):
+    """Wrapper para salvar relatório consolidado em Excel."""
+    _salvar_relatorio_excel_core(dados, caminho)
+
+
 def salvar_relatorio_excel_regional(dados, caminho, regional_filtro):
-    """Salva relatório filtrado por regional em Excel."""
-    cad_reg, cad_rev = dados["cadastros"]
-    trein_reg, trein_rev = dados["treinamentos"]
-    trein_por_curso = dados.get("treinamentos_por_curso")
-    aceite_reg = dados["aceites"]
-    df_det = dados.get("detalhamento")
+    """Wrapper para salvar relatório filtrado por regional em Excel."""
+    _salvar_relatorio_excel_core(dados, caminho, regional_filtro=regional_filtro)
 
-    with pd.ExcelWriter(caminho, engine="openpyxl") as writer:
-        _renomear_cadastro_reg(cad_reg[cad_reg["regional_curta"] == regional_filtro]).to_excel(writer, sheet_name="Cadastro_Regional", index=False)
-        _renomear_cadastro_rev(cad_rev[cad_rev["regional_curta"] == regional_filtro]).to_excel(writer, sheet_name="Cadastro_Revenda", index=False)
-
-        if trein_reg is not None:
-            _renomear_trein_reg(trein_reg[trein_reg["regional_curta"] == regional_filtro]).to_excel(writer, sheet_name="Treinamento_Regional", index=False)
-        if trein_rev is not None:
-            _renomear_trein_rev(trein_rev[trein_rev["regional_curta"] == regional_filtro]).to_excel(writer, sheet_name="Treinamento_Revenda", index=False)
-
-        if trein_por_curso is not None:
-            c1_reg = trein_por_curso.get("curso1_reg")
-            c1_rev = trein_por_curso.get("curso1_rev")
-            c2_reg = trein_por_curso.get("curso2_reg")
-            c2_rev = trein_por_curso.get("curso2_rev")
-            nome1 = trein_por_curso.get("nome1", "Curso 1")
-            nome2 = trein_por_curso.get("nome2", "Curso 2")
-            if c1_reg is not None and not c1_reg.empty:
-                _renomear_trein_reg(c1_reg[c1_reg["regional_curta"] == regional_filtro]).to_excel(writer, sheet_name=nome_aba_excel(nome1, "Reg"), index=False)
-            if c1_rev is not None and not c1_rev.empty:
-                _renomear_trein_rev(c1_rev[c1_rev["regional_curta"] == regional_filtro]).to_excel(writer, sheet_name=nome_aba_excel(nome1, "Rev"), index=False)
-            if c2_reg is not None and not c2_reg.empty:
-                _renomear_trein_reg(c2_reg[c2_reg["regional_curta"] == regional_filtro]).to_excel(writer, sheet_name=nome_aba_excel(nome2, "Reg"), index=False)
-            if c2_rev is not None and not c2_rev.empty:
-                _renomear_trein_rev(c2_rev[c2_rev["regional_curta"] == regional_filtro]).to_excel(writer, sheet_name=nome_aba_excel(nome2, "Rev"), index=False)
-
-        _renomear_aceite_reg(aceite_reg[aceite_reg["regional"] == regional_filtro]).to_excel(writer, sheet_name="Aceite_Regional", index=False)
-
-        df_det_out = preparar_aba_detalhamento(df_det, dados=dados, regional_filtro=regional_filtro)
-        if df_det_out is not None:
-            df_det_out.to_excel(writer, sheet_name="Detalhamento", index=False)
-
-    logger.info(f"Relatório regional ({regional_filtro}) Excel salvo em: {caminho}")
 
 
 # ---------------------------------------------------------------------------
@@ -2744,24 +3676,32 @@ def main():
         ano_mes = bases["mes_referencia"]
 
         # Cálculos
-        cad_reg, cad_rev = calcular_cadastros(df_cad)
-        trein_reg, trein_rev, trein_por_curso, cursos_info = calcular_treinamentos(df_trein, df_cad, ano_mes)
-        aceite_reg, aceite_rev, mes_aceite_ref = calcular_aceites(
-            df_aceite, df_cad, ano_mes, bases["aba_aceite"], bases["usou_ultima_aba"]
+        cad_reg, cad_rev = calcular_cadastros(df_cad, bases.get("hierarquia"), bases.get("ferias_hier"), bases.get("status_completo"))
+        trein_reg, trein_rev, trein_por_curso, cursos_info, base_trein = calcular_treinamentos(
+            df_trein, df_cad, ano_mes, bases.get("hierarquia")
+        )
+        aceite_reg, aceite_rev, mes_aceite_ref, base_aceite = calcular_aceites(
+            df_aceite, df_cad, ano_mes, bases["aba_aceite"], bases["usou_ultima_aba"],
+            df_hier=bases.get("hierarquia"),
         )
 
         dados = {
             "cadastros": (cad_reg, cad_rev),
+            "cadastro_df": df_cad,
             "treinamentos": (trein_reg, trein_rev),
             "treinamentos_df": df_trein,
             "treinamentos_por_curso": trein_por_curso,
+            "base_trein": base_trein,
             "aceites": aceite_reg,
+            "aceites_df": df_aceite,
             "aceites_rev": aceite_rev,
+            "base_aceite": base_aceite,
             "detalhamento": df_det,
             "cursos_info": cursos_info,
             "mes_aceite": mes_aceite_ref,
             "mes_referencia": ano_mes,
             "usou_ultima_aba": bases["usou_ultima_aba"],
+            "hierarquia": bases.get("hierarquia"),
         }
 
         # Snapshot e evolução
@@ -2778,7 +3718,7 @@ def main():
         graficos = gerar_graficos(cad_reg, trein_reg, aceite_reg)
 
         # Salvar Excel consolidado
-        excel_path = OUTPUT_DIR / f"relatorio_top_{date.today():%Y%m%d}.xlsx"
+        excel_path = OUTPUT_DIR / f"base_detalhada_relatorio_semanal_programa_+TOP_{date.today():%d%m%Y}.xlsx"
         salvar_relatorio_excel(dados, excel_path)
 
         # Configurações

@@ -228,12 +228,24 @@ A planilha completa enviada para o Drive contém as seguintes abas:
 - **Detalhamento** — lista completa dos participantes com: Regional, Revenda, CNPJ, Nome, Cargo, Status, Cidade, UF, Bairro loja, Nome loja
 - **Resumo** — indicadores gerais do programa
 
-A aba **Detalhamento** é a que os regionais usam para fazer a análise completa por loja e por vendedor.
+A aba **Detalhamento** traz, linha a linha, todas as informações necessárias para replicar os cálculos do e-mail:
+
+- CPF (texto)
+- Regional, Revenda, CNPJ, Código Loja
+- Nome, Nome na Hierarquia, Cargo, Cargo na Hierarquia
+- Status, Ativo no +TOP?, Desligado, Em Férias?
+- Cidade, UF, Bairro loja, Nome loja
+- Aceite no Mês?, Data Aceite
+- Status e data de conclusão dos 2 cursos obrigatórios do mês
+- Realizou Ambos os Cursos?
+- Mês de Referência
+
+Com essas colunas é possível recalcular: total da base, ativos, % ativos, férias, % férias, treinamentos realizados, % treinamentos, aceites, % aceite.
 
 Os arquivos enviados automaticamente para o Drive são:
 
 ```
-relatorios_gerados/relatorio_top_YYYYMMDD.xlsx
+relatorios_gerados/base_detalhada_relatorio_semanal_programa_+TOP_DDMMYYYY.xlsx
 relatorios_gerados/relatorio_top_YYYYMMDD_REGIONAL.xlsx
 relatorios_gerados/relatorio_top_YYYYMMDD.html
 ```
@@ -342,7 +354,7 @@ Se o rclone estiver configurado, o upload dos arquivos para o Drive acontece aut
 Confira na pasta do Drive se os arquivos do dia apareceram:
 
 ```
-relatorio_top_YYYYMMDD.xlsx
+base_detalhada_relatorio_semanal_programa_+TOP_DDMMYYYY.xlsx
 relatorio_top_YYYYMMDD_REGIONAL.xlsx
 relatorio_top_YYYYMMDD.html
 ```
@@ -373,7 +385,7 @@ Ficam em:
 envio_relatorio/relatorios_gerados/
 ```
 
-- `relatorio_top_YYYYMMDD.xlsx` — relatório completo
+- `base_detalhada_relatorio_semanal_programa_+TOP_DDMMYYYY.xlsx` — relatório completo (anexo do e-mail)
 - `relatorio_top_YYYYMMDD.html` — cópia do e-mail
 - `relatorio_top_YYYYMMDD_REGIONAL.xlsx` — relatório por regional
 
