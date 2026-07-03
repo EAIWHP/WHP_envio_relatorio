@@ -2956,7 +2956,7 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                   {tabelas_usar['trein_base_rev'] if tabelas_usar.get('trein_base_rev') else '<p><em>Sem dados.</em></p>'}
 
                   <p style="font-size:12px; color:#666666; font-style:italic; margin-top:8px;">
-                    Lembrando que, desde abril, temos a mecânica adicional: a cada 3 meses consecutivos em que o vendedor concluir todos os treinamentos, ele ganha +100 pontos no programa. Dados de treinamentos são sempre D-1.
+                    Dados de treinamentos são sempre D-1.
                   </p>
 
                   {_secao_html("ACEITES MENSAIS")}
