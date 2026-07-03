@@ -98,6 +98,9 @@ STATUS_CADASTRO_EXCLUIR = {"Inativo", "Bloqueado", "Reprovado", "Aguardando Apro
 # Caminho da base do banco de participantes (usada para validar DataInclusao de Pré-Cadastrados)
 BANCO_PARTICIPANTES_PATH = Path("/home/thamiresvieira/projetos/validacoes_precadastro/PROD_WHP_Participante_Banco_v2_16062026.xlsx")
 
+# Base com o nome real da loja/filial por CPF (coluna auxiliar Unnamed: 14)
+LOJA_POR_CPF_PATH = DATA_DIR / "WHP_PROD_Cadastro_Revenda_x_Loja_x_Regional.xlsx"
+
 # Pasta com as hierarquias mensais por revenda.
 # (anteriormente hierarquia_rodrigo; agora bases_cadastro_hierarquia)
 HIERARQUIA_DIR = DATA_DIR / "bases_cadastro_hierarquia"
@@ -1084,6 +1087,28 @@ def carregar_bases():
             on="cpf_limp",
             how="left",
         )
+
+        # Traz o nome real da loja/filial a partir da base de cadastro x revenda x loja
+        if LOJA_POR_CPF_PATH.exists():
+            try:
+                df_loja_real = pd.read_excel(LOJA_POR_CPF_PATH)
+                df_loja_real.columns = [c.strip() for c in df_loja_real.columns]
+                if "Cpf" in df_loja_real.columns and "Unnamed: 14" in df_loja_real.columns:
+                    df_loja_real["cpf_limp"] = df_loja_real["Cpf"].apply(limpar_cpf)
+                    df_loja_real = df_loja_real.rename(columns={"Unnamed: 14": "nome_loja_real"})
+                    df_loja_real = (
+                        df_loja_real.dropna(subset=["cpf_limp", "nome_loja_real"])
+                        .drop_duplicates(subset=["cpf_limp"], keep="first")
+                        [["cpf_limp", "nome_loja_real"]]
+                    )
+                    df_det = df_det.merge(df_loja_real, on="cpf_limp", how="left")
+                    logger.info(
+                        f"Nome real da loja mapeado para {df_det['nome_loja_real'].notna().sum():,} "
+                        f"de {df_det['cpf_limp'].nunique():,} CPFs do detalhamento"
+                    )
+            except Exception as e:
+                logger.warning(f"Não foi possível carregar nome real da loja: {e}")
+
         # Padroniza colunas esperadas pela aba de detalhamento
         df_det = df_det.rename(columns={
             "regional_curta": "regional_da_loja",
@@ -3146,15 +3171,13 @@ def preparar_aba_detalhamento(df_det, dados=None, regional_filtro=None):
         "cnpj_loja",
         "cod_loja",
         "nome",
-        "nome_hier",
         "cargo",
-        "cargo_hier",
         "status",
         "desligado",
         "cidade",
         "uf",
         "bairro",
-        "unnamed: 14",
+        "nome_loja_real",
     ]
     for col in colunas_base:
         if col not in df.columns:
@@ -3167,15 +3190,13 @@ def preparar_aba_detalhamento(df_det, dados=None, regional_filtro=None):
         "cnpj_loja": "CNPJ",
         "cod_loja": "Código Loja",
         "nome": "Nome",
-        "nome_hier": "Nome na Hierarquia",
         "cargo": "Cargo",
-        "cargo_hier": "Cargo na Hierarquia",
         "status": "Status",
         "desligado": "Desligado",
         "cidade": "Cidade",
         "uf": "UF",
         "bairro": "Bairro loja",
-        "unnamed: 14": "Nome loja",
+        "nome_loja_real": "Nome loja",
     })
 
     # Preenche regional vazia a partir do mapeamento revenda -> regional do cadastro
@@ -3211,23 +3232,26 @@ def preparar_aba_detalhamento(df_det, dados=None, regional_filtro=None):
     # ------------------------------------------------------------------
     # Flags calculáveis
     # ------------------------------------------------------------------
-    df_out["Base de Cálculo Geral?"] = np.where(df["base_calculo_geral"].fillna(True), "Sim", "Não")
-    df_out["Em Férias?"] = np.where(df_out["Base de Cálculo Geral?"].eq("Não"), "Sim", "Não")
+    base_calculo = df["base_calculo_geral"].fillna(True)
+    df_out["Em Férias?"] = np.where(base_calculo.eq(False), "Sim", "Não")
     # Quem está em férias não está ativo na plataforma para este relatório
     df_out["Ativo no +TOP?"] = np.where(
-        (df_out["Status"].eq("Ativo")) & (df_out["Base de Cálculo Geral?"].eq("Sim")), "Sim", "Não"
+        (df_out["Status"].eq("Ativo")) & (base_calculo.eq(True)), "Sim", "Não"
     )
     # Preenche Desligado para linhas de férias
     df_out["Desligado"] = df_out["Desligado"].fillna(df["base_calculo_geral"].map({False: "FÉRIAS"}))
 
     # Preenche campos vazios com informações disponíveis da hierarquia/cadastro
-    df_out["Cargo"] = df_out["Cargo"].fillna(df_out["Cargo na Hierarquia"]).fillna("Não informado")
+    df_out["Cargo"] = df_out["Cargo"].fillna("Não informado")
     status_preenchido = pd.Series(
         np.where(df_out["Ativo no +TOP?"].eq("Sim"), "Ativo", "Pré-Cadastrado"),
         index=df_out.index
     )
     df_out["Status"] = df_out["Status"].fillna(status_preenchido)
     df_out["Nome loja"] = df_out["Nome loja"].fillna(df_out["Revenda"])
+
+    # Remove colunas auxiliares que não devem ir para a base final
+    df_out = df_out.drop(columns=["Cargo na Hierarquia"], errors="ignore")
 
     # ------------------------------------------------------------------
     # Aceite mensal
@@ -3306,26 +3330,17 @@ def preparar_aba_detalhamento(df_det, dados=None, regional_filtro=None):
     df_out["Mês de Referência"] = dados.get("mes_referencia", "") if dados else ""
 
     # ------------------------------------------------------------------
-    # Formatação final de CPF como texto (após todos os cruzamentos)
+    # Formatação final: remove CPF da base (dado sensível)
     # ------------------------------------------------------------------
-    cpf_texto = (
-        df_out["cpf_limp"]
-        .astype(str)
-        .str.replace(r"\.0$", "", regex=True)
-        .str.replace("nan", "", regex=False)
-        .str.zfill(11)
-    )
-    cpf_texto = cpf_texto.apply(lambda x: f"'{x}" if len(str(x)) == 11 else x)
-    df_out.insert(0, "CPF", cpf_texto)
     df_out = df_out.drop(columns=["cpf_limp"], errors="ignore")
 
     # ------------------------------------------------------------------
     # Reordena colunas
     # ------------------------------------------------------------------
     colunas_inicio = [
-        "CPF", "Regional", "Revenda", "CNPJ", "Código Loja",
-        "Nome", "Nome na Hierarquia", "Cargo", "Cargo na Hierarquia",
-        "Status", "Ativo no +TOP?", "Desligado", "Em Férias?", "Base de Cálculo Geral?",
+        "Regional", "Revenda", "CNPJ", "Código Loja",
+        "Nome", "Cargo",
+        "Status", "Ativo no +TOP?", "Desligado", "Em Férias?",
         "Cidade", "UF", "Bairro loja", "Nome loja",
         "Aceite no Mês?", "Data Aceite",
     ]
