@@ -167,6 +167,8 @@ MAPA_REVENDA_PRINCIPAL = {
     "MILLENA MOVEIS": "Millena",
     "BECKER": "Becker",
     "BEMOL": "Bemol",
+    "COLOMBO": "Colombo",
+    "Colombo": "Colombo",
     "FORMOSA": "Formosa",
     "ESTRELA": "Estrela",
     "ANGELONI": "Angeloni",
@@ -287,9 +289,10 @@ def normalizar_revenda_hierarquia(nome_revenda):
             return principal
 
     # Heuristica 2: se contiver nome de revenda conhecido (ex: SOLAR no meio)
+    # Usa word boundaries para evitar falsos positivos (ex: GAZIN dentro de MAGAZINE)
     for chave, principal in sorted(MAPA_REVENDA_PRINCIPAL.items(), key=lambda x: -len(x[0])):
         chave_limpa = re.sub(r"\s+", " ", chave.upper())
-        if chave_limpa in nome_upper:
+        if re.search(r"\b" + re.escape(chave_limpa) + r"\b", nome_upper):
             return principal
 
     return nome_revenda.strip() if isinstance(nome_revenda, str) else nome_revenda
@@ -3174,7 +3177,24 @@ def preparar_aba_detalhamento(df_det, dados=None, regional_filtro=None):
         "bairro": "Bairro loja",
         "unnamed: 14": "Nome loja",
     })
-    # Mantém cpf_limp e base_calculo_geral para cruzamentos internos
+
+    # Preenche regional vazia a partir do mapeamento revenda -> regional do cadastro
+    if dados is not None:
+        df_cad = dados.get("cadastro_df")
+        if df_cad is not None and "grupo" in df_cad.columns and "regional" in df_cad.columns:
+            mapa_regional_det = (
+                df_cad.dropna(subset=["grupo", "regional"])
+                .drop_duplicates(subset=["grupo"], keep="first")
+                .set_index("grupo")["regional"]
+                .to_dict()
+            )
+            mapa_regional_det_norm = {
+                normalizar_revenda_hierarquia(str(k).strip()): regional_title_case(str(v))
+                for k, v in mapa_regional_det.items()
+                if pd.notna(k) and pd.notna(v)
+            }
+            regional_preenchida = df_out["Revenda"].map(mapa_regional_det_norm)
+            df_out["Regional"] = df_out["Regional"].fillna(regional_preenchida)
 
     def limpar_cnpj(cnpj):
         if pd.isna(cnpj):
@@ -3185,7 +3205,8 @@ def preparar_aba_detalhamento(df_det, dados=None, regional_filtro=None):
         return s.zfill(14)
 
     df_out["CNPJ"] = df_out["CNPJ"].apply(limpar_cnpj)
-    df_out["CNPJ"] = df_out["CNPJ"].apply(lambda x: f"'{x}" if x else x)
+    # Não adiciona apóstrofo; number_format '@' é aplicado em _formatar_celulas
+    # para manter CPF/CNPJ como texto no Excel.
 
     # ------------------------------------------------------------------
     # Flags calculáveis
@@ -3198,6 +3219,15 @@ def preparar_aba_detalhamento(df_det, dados=None, regional_filtro=None):
     )
     # Preenche Desligado para linhas de férias
     df_out["Desligado"] = df_out["Desligado"].fillna(df["base_calculo_geral"].map({False: "FÉRIAS"}))
+
+    # Preenche campos vazios com informações disponíveis da hierarquia/cadastro
+    df_out["Cargo"] = df_out["Cargo"].fillna(df_out["Cargo na Hierarquia"]).fillna("Não informado")
+    status_preenchido = pd.Series(
+        np.where(df_out["Ativo no +TOP?"].eq("Sim"), "Ativo", "Pré-Cadastrado"),
+        index=df_out.index
+    )
+    df_out["Status"] = df_out["Status"].fillna(status_preenchido)
+    df_out["Nome loja"] = df_out["Nome loja"].fillna(df_out["Revenda"])
 
     # ------------------------------------------------------------------
     # Aceite mensal
