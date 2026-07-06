@@ -2942,9 +2942,8 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   {_secao_html("TREINAMENTOS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo é atingir, no mínimo, <span style='color:#00a651;'>{META_TREINAMENTOS:.0f}%</span> dos participantes aprovados/ treinados.</strong></p>"
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'>Os dois conteúdos de <strong>{nome_mes_pt_br(ano_mes=dados.get('mes_referencia')).lower()}</strong> ficaram disponíveis até <strong>{pd.Period(dados.get('mes_referencia'), freq='M').end_time:%d/%m/%Y}</strong></p>"
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong>Conteúdos:</strong><br>"
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo é atingir, no mínimo, <span style='color:#00a651;'>{META_TREINAMENTOS:.0f}%</span> dos participantes aprovados/ treinados.</strong></p>"
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong>Cursos:</strong><br>"
                       f"1. <strong>{nome_curso1}</strong> (SKU {dados['cursos_info'][4]})<br>"
                       f"2. <strong>{nome_curso2}</strong> (SKU {dados['cursos_info'][5]}).</p>"
                       f"<p style='font-size:17px; margin:0; line-height:1.4;'><strong><span style='color:#ef4e22;'>{f'{pct_trein:.1f}'.replace('.', ',')}% dos participantes realizaram os treinamentos obrigatórios no +TOP</span></strong>.</p>",

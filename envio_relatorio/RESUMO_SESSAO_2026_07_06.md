@@ -9,7 +9,7 @@ Ajustes de layout e regra de negócio no relatório semanal +TOP (`gerar_relator
 1. **Caixa de cadastros:** texto todo do mesmo tamanho, somente `85%` pintado de verde.
 2. **Tabela Por Regional:** removidas colunas de férias, adicionada coluna **Inativos**.
 3. **Tabela Top 10 revendas:** removidas colunas de férias, adicionada coluna **Inativos**.
-4. **Caixa de treinamentos:** `70%` do mesmo tamanho do texto, somente `70%` pintado de verde, removido "Até o momento..." e adicionado texto de realização.
+4. **Caixa de treinamentos:** `70%` do mesmo tamanho do texto, somente `70%` pintado de verde, removido "Até o momento...", removida frase de período disponível, título "Conteúdos:" alterado para "Cursos:" e adicionado texto de realização.
 5. **Caixa de aceites mensais:** removido "Até o momento", frase alterada para "deram o aceite mensal no +TOP".
 6. **Assinatura do e-mail:** separada em duas linhas (`Att.` / `TOM do +TOP`).
 7. **Planilha detalhada (Excel):** removidas colunas de férias.
