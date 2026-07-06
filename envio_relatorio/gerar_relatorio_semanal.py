@@ -1061,7 +1061,7 @@ def carregar_bases():
     logger.info(f"Aceites: aba '{aba_aceite}' ({len(df_aceite):,} registros)")
 
     # ------------------------------------------------------------------
-    # Detalhamento (consolidado das hierarquias ativas)
+    # Detalhamento (consolidado das hierarquias ativas + férias como inativos)
     # ------------------------------------------------------------------
     df_det = None
     if df_hier is not None:
@@ -1070,6 +1070,18 @@ def carregar_bases():
         # Detalhamento reflita exatamente a base usada nos cálculos do e-mail.
         df_det = df_hier.copy()
         df_det["base_calculo_geral"] = True
+        df_det["em_ferias"] = False
+
+        # Adiciona CPFs em férias como inativos na base de detalhamento
+        if df_ferias_hier is not None and not df_ferias_hier.empty:
+            df_ferias_det = df_ferias_hier.copy()
+            df_ferias_det["base_calculo_geral"] = True
+            df_ferias_det["em_ferias"] = True
+            # Garante as mesmas colunas básicas para concatenação
+            for col in df_det.columns:
+                if col not in df_ferias_det.columns:
+                    df_ferias_det[col] = None
+            df_det = pd.concat([df_det, df_ferias_det[df_det.columns]], ignore_index=True)
 
         # Cruza com cadastro para nome, cidade, uf, bairro, status e regional
         df_det = df_det.merge(
@@ -1204,41 +1216,44 @@ def calcular_cadastros(df_cad, df_hier=None, df_ferias=None, status_completo=Non
     Calcula cadastros por regional e por revenda.
     Quando a hierarquia está disponível, o denominador passa a ser o total de
     CPFs enviados pela revenda na hierarquia, refletindo a cobertura da base.
-    Colunas de férias (quantidade e %) são calculadas a partir dos CPFs marcados
-    como DESLIGADO = FÉRIAS na hierarquia. O % de férias é sobre a base empregada
-    da revenda (Total na Hierarquia + Férias).
+    CPFs marcados como DESLIGADO = FÉRIAS na hierarquia são incluídos na base e
+    considerados inativos, independentemente do status na plataforma.
 
     Separação de status:
-      - Ativos no +TOP: status "Ativo" no cadastro
-      - Pré-Cadastro: status que não é Ativo, Inativo nem Bloqueado
-      - Inativos: status "Inativo" ou "Bloqueado" no cadastro
+      - Ativos no +TOP: status "Ativo" no cadastro e NÃO em férias
+      - Pré-Cadastro: status que não é Ativo, Inativo nem Bloqueado, e NÃO em férias
+      - Inativos: status "Inativo" ou "Bloqueado" no cadastro, OU CPF em férias
     """
     hier_reg, hier_rev = calcular_base_hierarquia(df_hier, df_cad)
 
-    # Contagem de férias por revenda (nome da revenda já normalizado na hierarquia)
-    ferias_por_revenda = {}
-    if df_ferias is not None and not df_ferias.empty:
-        ferias_por_revenda = (
-            df_ferias.groupby("revenda")["cpf_limp"].nunique().to_dict()
-        )
-
     if hier_reg is not None and hier_rev is not None:
+        # Enriquece hierarquia com regional (cadastro + inferência por revenda)
+        hier = enriquecer_hierarquia_com_regional(df_hier, df_cad)
+
+        # Adiciona CPFs em férias à base, marcando-os como inativos
+        if df_ferias is not None and not df_ferias.empty:
+            ferias = df_ferias[["cpf_limp", "revenda"]].drop_duplicates().copy()
+            ferias["em_ferias"] = True
+            hier = pd.concat([hier, ferias], ignore_index=True)
+            hier = hier.drop_duplicates(subset=["cpf_limp"], keep="first")
+
+        hier["em_ferias"] = hier["em_ferias"].fillna(False)
+
         # Total da hierarquia; ativos = CPFs da hierarquia ativos na plataforma
-        def _tipo_status(cpf):
-            status = status_completo.get(cpf) if status_completo else None
+        def _tipo_status(row):
+            if row["em_ferias"]:
+                return "inativo"
+            status = status_completo.get(row["cpf_limp"]) if status_completo else None
             if status == "Ativo":
                 return "ativo"
             if status in {"Inativo", "Bloqueado"}:
                 return "inativo"
             return "pre_cadastro"
 
-        # Enriquece hierarquia com regional (cadastro + inferência por revenda)
-        hier = enriquecer_hierarquia_com_regional(df_hier, df_cad)
-        hier["tipo_status"] = hier["cpf_limp"].apply(_tipo_status)
+        hier["tipo_status"] = hier.apply(_tipo_status, axis=1)
 
         def _agg_hier(grupo_df):
-            cpfs = grupo_df["cpf_limp"].unique()
-            total = len(cpfs)
+            total = grupo_df["cpf_limp"].nunique()
             ativos = (grupo_df["tipo_status"] == "ativo").sum()
             inativos = (grupo_df["tipo_status"] == "inativo").sum()
             pre_cadastro = total - ativos - inativos
@@ -1253,12 +1268,6 @@ def calcular_cadastros(df_cad, df_hier=None, df_ferias=None, status_completo=Non
         # Por revenda (mantém nome da hierarquia)
         cad_rev = hier.groupby(["regional_curta", "revenda"]).apply(_agg_hier).reset_index()
 
-        # Férias por revenda + % de férias sobre a base empregada (total + férias)
-        cad_rev["ferias"] = cad_rev["revenda"].map(ferias_por_revenda).fillna(0).astype(int)
-        cad_rev["pct_ferias"] = (
-            cad_rev["ferias"] / (cad_rev["total"] + cad_rev["ferias"]) * 100
-        ).round(1).fillna(0)
-
         # Aplica nomes amigáveis de exibição para revendas
         cad_rev["revenda"] = cad_rev["revenda"].apply(nome_revenda_exibicao)
 
@@ -1271,20 +1280,16 @@ def calcular_cadastros(df_cad, df_hier=None, df_ferias=None, status_completo=Non
             ativos=("ativos", "sum"),
             pre_cadastro=("pre_cadastro", "sum"),
             inativos=("inativos", "sum"),
-            ferias=("ferias", "sum"),
         ).reset_index()
         cad_reg["pct_ativos"] = (cad_reg["ativos"] / cad_reg["total"] * 100).round(1)
-        cad_reg["pct_ferias"] = (
-            cad_reg["ferias"] / (cad_reg["total"] + cad_reg["ferias"]) * 100
-        ).round(1).fillna(0)
         cad_reg = cad_reg.sort_values("pct_ativos", ascending=False)
         cad_reg["regional_curta"] = cad_reg["regional_curta"].apply(regional_title_case)
 
-        # Ordena colunas: métricas de ativos primeiro, férias por último
+        # Ordena colunas
         cad_rev = cad_rev[["regional_curta", "revenda", "total", "ativos",
-                           "pre_cadastro", "inativos", "pct_ativos", "ferias", "pct_ferias"]]
+                           "pre_cadastro", "inativos", "pct_ativos"]]
         cad_reg = cad_reg[["regional_curta", "total", "ativos",
-                           "pre_cadastro", "inativos", "pct_ativos", "ferias", "pct_ferias"]]
+                           "pre_cadastro", "inativos", "pct_ativos"]]
 
         return cad_reg, cad_rev
 
@@ -1958,9 +1963,10 @@ def _renomear_cadastro_reg(df):
         "total": "Total de participantes",
         "ativos": "Ativos no +TOP",
         "pre_cadastro": "Pré-Cadastro",
+        "inativos": "Inativos",
         "pct_ativos": "% Ativos",
     })
-    cols = ["Regional", "Total de participantes", "Ativos no +TOP", "Pré-Cadastro", "% Ativos"]
+    cols = ["Regional", "Total de participantes", "Ativos no +TOP", "Pré-Cadastro", "Inativos", "% Ativos"]
     return df[[c for c in cols if c in df.columns]]
 
 
@@ -1971,9 +1977,10 @@ def _renomear_cadastro_rev(df):
         "total": "Total de participantes",
         "ativos": "Ativos no +TOP",
         "pre_cadastro": "Pré-Cadastro",
+        "inativos": "Inativos",
         "pct_ativos": "% Ativos",
     })
-    cols = ["Regional", "Revenda", "Total de participantes", "Ativos no +TOP", "Pré-Cadastro", "% Ativos"]
+    cols = ["Regional", "Revenda", "Total de participantes", "Ativos no +TOP", "Pré-Cadastro", "Inativos", "% Ativos"]
     return df[[c for c in cols if c in df.columns]]
 
 
@@ -2976,7 +2983,7 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                   {_secao_html("ACEITES MENSAIS")}
                   {_balao_tom_html(
                       f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo para os aceites mensais* de {nome_mes_pt_br(ano_mes=str(dados['mes_aceite']))} é de <span style='color:#00a651;'>{META_ACEITES:.0f}%</span>.</strong></p>"
-                      f"<p style='font-size:17px; margin:0; line-height:1.4;'>Até o momento, <strong><span style='color:#ef4e22;'>{f'{pct_aceite:.1f}'.replace('.', ',')}% dos participantes deram aceite no +TOP</span></strong>.</p>"
+                      f"<p style='font-size:17px; margin:0; line-height:1.4;'><strong><span style='color:#ef4e22;'>{f'{pct_aceite:.1f}'.replace('.', ',')}% dos participantes deram o aceite mensal no +TOP</span></strong>.</p>"
                       f"<p style='font-size:11px; color:#666666; margin:8px 0 0 0; line-height:1.3;'>*é a validação/confirmação que o participante precisa dar todos os meses para receber a pontuação do programa.</p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
@@ -3013,7 +3020,7 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   <p style="margin-top:24px; font-size:16px;">Em anexo <strong>base detalhada</strong>.</p>
 
-                  <p style="margin-top:16px; font-size:16px; font-weight:bold; color:#00a651;">Att. TOM do +TOP</p>
+                  <p style="margin-top:16px; font-size:16px; font-weight:bold; color:#00a651;">Att.<br>TOM do +TOP</p>
 
                 </td></tr>
               </table>
@@ -3218,9 +3225,13 @@ def preparar_aba_detalhamento(df_det, dados=None, regional_filtro=None):
     # ------------------------------------------------------------------
     # Flags calculáveis
     # ------------------------------------------------------------------
+    df_out["em_ferias"] = df["em_ferias"].fillna(False)
     base_calculo = df["base_calculo_geral"].fillna(True)
+    # CPFs em férias são considerados inativos, mesmo que o cadastro esteja Ativo
+    df_out["Status"] = np.where(df_out["em_ferias"], "Inativo", df_out["Status"])
     df_out["Ativo no +TOP?"] = np.where(
-        (df_out["Status"].eq("Ativo")) & (base_calculo.eq(True)), "Sim", "Não"
+        (df_out["Status"].eq("Ativo")) & (base_calculo.eq(True)) & (~df_out["em_ferias"]),
+        "Sim", "Não"
     )
 
     # Preenche campos vazios com informações disponíveis da hierarquia/cadastro
@@ -3233,7 +3244,7 @@ def preparar_aba_detalhamento(df_det, dados=None, regional_filtro=None):
     df_out["Nome loja"] = df_out["Nome loja"].fillna(df_out["Revenda"])
 
     # Remove colunas auxiliares que não devem ir para a base final
-    df_out = df_out.drop(columns=["Cargo na Hierarquia"], errors="ignore")
+    df_out = df_out.drop(columns=["Cargo na Hierarquia", "em_ferias"], errors="ignore")
 
     # ------------------------------------------------------------------
     # Aceite mensal
@@ -3564,6 +3575,7 @@ def _salvar_relatorio_excel_core(dados, caminho, regional_filtro=None):
         total_participantes = int(cad_reg_f["total"].sum())
         ativos = int(cad_reg_f["ativos"].sum())
         pre_cadastro = int(cad_reg_f["pre_cadastro"].sum())
+        inativos = int(cad_reg_f["inativos"].sum()) if "inativos" in cad_reg_f.columns else 0
         pct_ativos_total = round(ativos / total_participantes * 100, 1) if total_participantes else 0
 
         resumo_dados = {
@@ -3571,12 +3583,14 @@ def _salvar_relatorio_excel_core(dados, caminho, regional_filtro=None):
                 "Total de participantes",
                 "Ativos no +TOP",
                 "Pré-Cadastro",
+                "Inativos",
                 "% Ativos no total",
             ],
             "Valor": [
                 total_participantes,
                 ativos,
                 pre_cadastro,
+                inativos,
                 pct_ativos_total,
             ],
         }
