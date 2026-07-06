@@ -68,7 +68,7 @@ CONFIG_FILE = BASE_DIR / "config_email.json"
 
 # Colunas percentuais no Excel que devem receber number_format 0.0%
 PCT_COLS = {
-    "% Ativos", "% Férias", "% Realizado", "% Aceite", "% Ambos",
+    "% Ativos", "% Realizado", "% Aceite", "% Ambos",
 }
 
 # Cores do KV +TOP para formatação do Excel
@@ -1061,7 +1061,7 @@ def carregar_bases():
     logger.info(f"Aceites: aba '{aba_aceite}' ({len(df_aceite):,} registros)")
 
     # ------------------------------------------------------------------
-    # Detalhamento (consolidado das hierarquias + férias)
+    # Detalhamento (consolidado das hierarquias ativas)
     # ------------------------------------------------------------------
     df_det = None
     if df_hier is not None:
@@ -1070,16 +1070,6 @@ def carregar_bases():
         # Detalhamento reflita exatamente a base usada nos cálculos do e-mail.
         df_det = df_hier.copy()
         df_det["base_calculo_geral"] = True
-
-        # Adiciona CPFs em férias para permitir replicar o % Férias
-        if df_ferias_hier is not None and not df_ferias_hier.empty:
-            df_ferias_det = df_ferias_hier.copy()
-            df_ferias_det["base_calculo_geral"] = False
-            # Garante as mesmas colunas básicas para concatenação
-            for col in df_det.columns:
-                if col not in df_ferias_det.columns:
-                    df_ferias_det[col] = None
-            df_det = pd.concat([df_det, df_ferias_det[df_det.columns]], ignore_index=True)
 
         # Cruza com cadastro para nome, cidade, uf, bairro, status e regional
         df_det = df_det.merge(
@@ -1969,10 +1959,8 @@ def _renomear_cadastro_reg(df):
         "ativos": "Ativos no +TOP",
         "pre_cadastro": "Pré-Cadastro",
         "pct_ativos": "% Ativos",
-        "ferias": "Férias - Participantes ativos",
-        "pct_ferias": "% Férias",
     })
-    cols = ["Regional", "Total de participantes", "Ativos no +TOP", "Pré-Cadastro", "Férias - Participantes ativos", "% Férias", "% Ativos"]
+    cols = ["Regional", "Total de participantes", "Ativos no +TOP", "Pré-Cadastro", "% Ativos"]
     return df[[c for c in cols if c in df.columns]]
 
 
@@ -1984,10 +1972,8 @@ def _renomear_cadastro_rev(df):
         "ativos": "Ativos no +TOP",
         "pre_cadastro": "Pré-Cadastro",
         "pct_ativos": "% Ativos",
-        "ferias": "Férias - Participantes ativos",
-        "pct_ferias": "% Férias",
     })
-    cols = ["Regional", "Revenda", "Total de participantes", "Ativos no +TOP", "Pré-Cadastro", "Férias - Participantes ativos", "% Férias", "% Ativos"]
+    cols = ["Regional", "Revenda", "Total de participantes", "Ativos no +TOP", "Pré-Cadastro", "% Ativos"]
     return df[[c for c in cols if c in df.columns]]
 
 
@@ -2929,7 +2915,7 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   {_secao_html("CADASTROS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo para a cobertura de cadastros do Programa +TOP <span style='font-size:26px; color:#00a651;'>é de {META_CADASTRO:.0f}%</span>.</strong></p>"
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo para a cobertura de cadastros do Programa +TOP é de <span style='color:#00a651;'>{META_CADASTRO:.0f}%</span>.</strong></p>"
                       f"<p style='font-size:17px; margin:0; line-height:1.4;'>Até o momento, <strong><span style='color:#ef4e22;'>{f'{pct_geral:.1f}'.replace('.', ',')}% dos participantes estão ativos no +TOP</span></strong>.</p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
@@ -2949,12 +2935,12 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   {_secao_html("TREINAMENTOS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo é atingir, no mínimo, <span style='font-size:26px; color:#00a651;'>{META_TREINAMENTOS:.0f}%</span> dos participantes aprovados/ treinados</strong>.</p>"
+                      f"<p style='font-size:17px; margin:0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo é atingir, no mínimo, <span style='color:#00a651;'>{META_TREINAMENTOS:.0f}%</span> dos participantes aprovados/ treinados.</strong></p>"
                       f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'>Os dois conteúdos de <strong>{nome_mes_pt_br(ano_mes=dados.get('mes_referencia')).lower()}</strong> ficaram disponíveis até <strong>{pd.Period(dados.get('mes_referencia'), freq='M').end_time:%d/%m/%Y}</strong></p>"
                       f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong>Conteúdos:</strong><br>"
                       f"1. <strong>{nome_curso1}</strong> (SKU {dados['cursos_info'][4]})<br>"
                       f"2. <strong>{nome_curso2}</strong> (SKU {dados['cursos_info'][5]}).</p>"
-                      f"<p style='font-size:17px; margin:0; line-height:1.4;'>Até o momento, <strong><span style='color:#ef4e22;'>{f'{pct_trein:.1f}'.replace('.', ',')}% dos participantes realizaram os treinamentos obrigatórios no +TOP</span></strong>.</p>",
+                      f"<p style='font-size:17px; margin:0; line-height:1.4;'><strong><span style='color:#ef4e22;'>{f'{pct_trein:.1f}'.replace('.', ',')}% dos participantes realizaram os treinamentos obrigatórios no +TOP</span></strong>.</p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
                   {subsecao_titulo("Por Regional")}
@@ -2989,7 +2975,7 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   {_secao_html("ACEITES MENSAIS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo para os <span style='font-size:20px;'>aceites mensais*</span> de {nome_mes_pt_br(ano_mes=str(dados['mes_aceite']))} <span style='font-size:26px; color:#00a651;'>é de {META_ACEITES:.0f}%</span>.</strong></p>"
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo para os aceites mensais* de {nome_mes_pt_br(ano_mes=str(dados['mes_aceite']))} é de <span style='color:#00a651;'>{META_ACEITES:.0f}%</span>.</strong></p>"
                       f"<p style='font-size:17px; margin:0; line-height:1.4;'>Até o momento, <strong><span style='color:#ef4e22;'>{f'{pct_aceite:.1f}'.replace('.', ',')}% dos participantes deram aceite no +TOP</span></strong>.</p>"
                       f"<p style='font-size:11px; color:#666666; margin:8px 0 0 0; line-height:1.3;'>*é a validação/confirmação que o participante precisa dar todos os meses para receber a pontuação do programa.</p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
@@ -3233,13 +3219,9 @@ def preparar_aba_detalhamento(df_det, dados=None, regional_filtro=None):
     # Flags calculáveis
     # ------------------------------------------------------------------
     base_calculo = df["base_calculo_geral"].fillna(True)
-    df_out["Em Férias?"] = np.where(base_calculo.eq(False), "Sim", "Não")
-    # Quem está em férias não está ativo na plataforma para este relatório
     df_out["Ativo no +TOP?"] = np.where(
         (df_out["Status"].eq("Ativo")) & (base_calculo.eq(True)), "Sim", "Não"
     )
-    # Preenche Desligado para linhas de férias
-    df_out["Desligado"] = df_out["Desligado"].fillna(df["base_calculo_geral"].map({False: "FÉRIAS"}))
 
     # Preenche campos vazios com informações disponíveis da hierarquia/cadastro
     df_out["Cargo"] = df_out["Cargo"].fillna("Não informado")
@@ -3340,7 +3322,7 @@ def preparar_aba_detalhamento(df_det, dados=None, regional_filtro=None):
     colunas_inicio = [
         "Regional", "Revenda", "CNPJ", "Código Loja",
         "Nome", "Cargo",
-        "Status", "Ativo no +TOP?", "Desligado", "Em Férias?",
+        "Status", "Ativo no +TOP?", "Desligado",
         "Cidade", "UF", "Bairro loja", "Nome loja",
         "Aceite no Mês?", "Data Aceite",
     ]
@@ -3572,12 +3554,6 @@ def _salvar_relatorio_excel_core(dados, caminho, regional_filtro=None):
         cad_reg_f, cad_rev_f, trein_reg_f, trein_rev_f = cad_reg, cad_rev, trein_reg, trein_rev
         aceite_reg_f, aceite_rev_f = aceite_reg, aceite_rev
 
-    # Nomes dos cursos/SKU
-    sku1 = sku2 = None
-    nome1 = nome2 = "Curso"
-    if cursos_info is not None:
-        _, _, nome1, nome2, sku1, sku2 = cursos_info
-
     with pd.ExcelWriter(caminho, engine="openpyxl") as writer:
         # ------------------------------------------------------------------
         # ABA RESUMO (primeira)
@@ -3588,8 +3564,6 @@ def _salvar_relatorio_excel_core(dados, caminho, regional_filtro=None):
         total_participantes = int(cad_reg_f["total"].sum())
         ativos = int(cad_reg_f["ativos"].sum())
         pre_cadastro = int(cad_reg_f["pre_cadastro"].sum())
-        ferias = int(cad_reg_f["ferias"].sum())
-        pct_ferias = round(ferias / (total_participantes + ferias) * 100, 1) if (total_participantes + ferias) else 0
         pct_ativos_total = round(ativos / total_participantes * 100, 1) if total_participantes else 0
 
         resumo_dados = {
@@ -3597,23 +3571,19 @@ def _salvar_relatorio_excel_core(dados, caminho, regional_filtro=None):
                 "Total de participantes",
                 "Ativos no +TOP",
                 "Pré-Cadastro",
-                "Férias - Participantes ativos",
-                "% Férias",
                 "% Ativos no total",
             ],
             "Valor": [
                 total_participantes,
                 ativos,
                 pre_cadastro,
-                ferias,
-                pct_ferias,
                 pct_ativos_total,
             ],
         }
         df_resumo = pd.DataFrame(resumo_dados)
         # Formata % como texto para não aplicar number_format 0.0% nesses indicadores
         df_resumo["Valor"] = df_resumo.apply(
-            lambda r: f"{r['Valor']:.1f}%" if r["Indicador"] in ["% Férias", "% Ativos no total"] else r["Valor"],
+            lambda r: f"{r['Valor']:.1f}%" if r["Indicador"] in ["% Ativos no total"] else r["Valor"],
             axis=1,
         )
         resumo_linha = _escrever_secao_resumo(
@@ -3646,44 +3616,11 @@ def _salvar_relatorio_excel_core(dados, caminho, regional_filtro=None):
         if trein_rev_f is not None:
             _escrever_tabela(writer, _renomear_trein_rev(trein_rev_f), "Treinamento_Revenda")
 
-        if trein_por_curso is not None:
-            c1_reg = trein_por_curso.get("curso1_reg")
-            c1_rev = trein_por_curso.get("curso1_rev")
-            c2_reg = trein_por_curso.get("curso2_reg")
-            c2_rev = trein_por_curso.get("curso2_rev")
-            nome_aba_sku1 = sku1 or nome1
-            nome_aba_sku2 = sku2 or nome2
-            if c1_reg is not None and not c1_reg.empty:
-                c1_reg_f = c1_reg[c1_reg["regional_curta"] == regional_filtro] if regional_filtro else c1_reg
-                _escrever_tabela(writer, _renomear_trein_reg(c1_reg_f), f"Treinamento_{nome_aba_sku1}_Reg")
-            if c1_rev is not None and not c1_rev.empty:
-                c1_rev_f = c1_rev[c1_rev["regional_curta"] == regional_filtro] if regional_filtro else c1_rev
-                _escrever_tabela(writer, _renomear_trein_rev(c1_rev_f), f"Treinamento_{nome_aba_sku1}_Rev")
-            if c2_reg is not None and not c2_reg.empty:
-                c2_reg_f = c2_reg[c2_reg["regional_curta"] == regional_filtro] if regional_filtro else c2_reg
-                _escrever_tabela(writer, _renomear_trein_reg(c2_reg_f), f"Treinamento_{nome_aba_sku2}_Reg")
-            if c2_rev is not None and not c2_rev.empty:
-                c2_rev_f = c2_rev[c2_rev["regional_curta"] == regional_filtro] if regional_filtro else c2_rev
-                _escrever_tabela(writer, _renomear_trein_rev(c2_rev_f), f"Treinamento_{nome_aba_sku2}_Rev")
-
         _escrever_tabela(writer, _renomear_aceite_reg(aceite_reg_f), "Aceite_Regional")
 
         df_det_out = preparar_aba_detalhamento(df_det, dados=dados, regional_filtro=regional_filtro)
         if df_det_out is not None:
             _escrever_tabela(writer, df_det_out, "Detalhamento")
-
-        # Abas de participantes
-        df_trein_0, df_trein_1 = _listar_participantes_treinamento(dados, regional_filtro=regional_filtro)
-        if df_trein_0 is not None and not df_trein_0.empty:
-            _escrever_tabela(writer, df_trein_0, "Nao_realizaram")
-        if df_trein_1 is not None and not df_trein_1.empty:
-            _escrever_tabela(writer, df_trein_1, "Treinamento_1_Curso")
-
-        df_aceite_sim, df_aceite_nao = _listar_participantes_aceite(dados, regional_filtro=regional_filtro)
-        if df_aceite_sim is not None and not df_aceite_sim.empty:
-            _escrever_tabela(writer, df_aceite_sim, "Aceitaram")
-        if df_aceite_nao is not None and not df_aceite_nao.empty:
-            _escrever_tabela(writer, df_aceite_nao, "Nao_Aceitaram")
 
     logger.info(f"Relatório Excel salvo em: {caminho}")
 
