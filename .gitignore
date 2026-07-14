@@ -9,6 +9,9 @@ config_email.json
 *.xls
 !requirements.txt
 
+# Base consolidada de cadastros versionada (fonte correta dos cálculos)
+!envio_relatorio/bases/bases_cadastro_hierarquia/consolidado_hierarquia_com_cadastro_site.xlsx
+
 # Relatórios, logs e outputs gerados
 relatorios_gerados/
 logs/
@@ -47,6 +50,12 @@ desktop.ini
 *.doc
 *.pptx
 *.pdf
+
+# Resumo das regras de calculo do relatorio semanal
+!envio_relatorio/Resumo_Regras_Calculo_Relatorio_Semanal_TOP.docx
+
+# Documento de regras de negocio para validacao
+!envio_relatorio/Regras_de_Negocio_envio_relatorio_Validacao.docx
 
 # Bases antigas e arquivos grandes (não versionar)
 bases/Old/

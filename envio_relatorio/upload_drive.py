@@ -55,8 +55,8 @@ def main():
         print(f"ERRO: Pasta de relatórios não encontrada: {OUTPUT_DIR}")
         sys.exit(1)
 
-    data_str = date.today().strftime("%Y%m%d")
-    arquivos = sorted(OUTPUT_DIR.glob(f"relatorio_top_{data_str}*"))
+    data_str = date.today().strftime("%d%m%Y")
+    arquivos = sorted(OUTPUT_DIR.glob(f"base_detalhada_relatorio_semanal_programa_+TOP_{data_str}*"))
 
     if not arquivos:
         print(f"Nenhum arquivo encontrado para upload em {OUTPUT_DIR} com data {data_str}.")
