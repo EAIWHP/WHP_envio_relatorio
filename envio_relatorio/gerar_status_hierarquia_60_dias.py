@@ -68,6 +68,7 @@ MAPEAMENTO_REVENDA = {
     "LASER": "Laser Eletro",
     "LEBES": "Lebes",
     "LOJAS SOLAR": "Solar",
+    "LOJA SOLAR": "Solar",
     "MAGAZAN": "Magazan",
     "MILLENA": "Millena",
     "MM ATACADO": "MM Atacado",

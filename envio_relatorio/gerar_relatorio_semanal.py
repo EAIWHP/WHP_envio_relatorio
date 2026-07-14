@@ -156,6 +156,7 @@ MAPA_REVENDA_PRINCIPAL = {
     # Solar
     "SOLAR COMERCIO E AGROINDUSTRIA LTDA": "Solar",
     "SOLAR MOVEIS E ELETROS": "Solar Magazine",
+    "LOJA SOLAR": "Solar",
     # Outros nomes exatos da hierarquia para normalizar
     "GAZIN ATACADO": "Gazin Atacado",
     "GAZIN ONLINE": "Gazin Online",
@@ -2768,7 +2769,7 @@ def _destaques_cadastro_html(cad_rev, imagens_kv=None, imagens_tom=None):
 
 def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=False, regional_filtro=None):
     """Monta corpo do e-mail em HTML compativel com Gmail e Outlook."""
-    hoje = "30/06/2026"
+    hoje = date.today().strftime("%d/%m/%Y")
     titulo = f"Relatório Semanal Programa +TOP — {regional_filtro}" if regional_filtro else "Relatório Semanal Programa +TOP"
 
     alerta_teste = "<p style='color:#d9534f; font-weight:bold; margin:16px 0;'>[MODO TESTE - e-mail nao enviado]</p>" if teste else ""
@@ -2922,8 +2923,8 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   {_secao_html("CADASTROS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo para a cobertura de cadastros do Programa +TOP é de <span style='color:#00a651;'>{META_CADASTRO:.0f}%</span>.</strong></p>"
-                      f"<p style='font-size:17px; margin:0; line-height:1.4;'>Até o momento, <strong><span style='color:#ef4e22;'>{f'{pct_geral:.1f}'.replace('.', ',')}% dos participantes estão ativos no +TOP</span></strong>.</p>",
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong><span style='white-space:nowrap;'>Nosso objetivo para a cobertura de cadastros do Programa +TOP é de <span style='color:#00a651;'>{META_CADASTRO:.0f}%</span>.</span><br>"
+                      f"Até o momento, <span style='color:#ef4e22;'>{f'{pct_geral:.1f}'.replace('.', ',')}% dos participantes estão ativos no +TOP</span>.</strong></p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
                   {subsecao_titulo("Por Regional")}
@@ -2943,9 +2944,9 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                   {_secao_html("TREINAMENTOS")}
                   {_balao_tom_html(
                       f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo é atingir, no mínimo, <span style='color:#00a651;'>{META_TREINAMENTOS:.0f}%</span> dos participantes aprovados/ treinados.</strong></p>"
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong>Cursos:</strong><br>"
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong>Cursos obrigatórios:</strong><br>"
                       f"1. <strong>{nome_curso1}</strong> (SKU {dados['cursos_info'][4]})<br>"
-                      f"2. <strong>{nome_curso2}</strong> (SKU {dados['cursos_info'][5]}).</p>"
+                      f"2. <strong>{nome_curso2}</strong> (SKU {dados['cursos_info'][5]})</p>"
                       f"<p style='font-size:17px; margin:0; line-height:1.4;'><strong><span style='color:#ef4e22;'>{f'{pct_trein:.1f}'.replace('.', ',')}% dos participantes realizaram os treinamentos obrigatórios no +TOP</span></strong>.</p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
