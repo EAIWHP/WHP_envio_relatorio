@@ -2963,7 +2963,8 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   {_secao_html("CADASTROS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong>Queremos levar o +TOP ainda mais longe! A nossa meta mínima é de <span style='color:#00a651;'>{META_CADASTRO:.0f}%</span> de <span style='white-space:nowrap;'>cadastros ativos</span> e, até esta semana, já alcançamos <span style='color:#ef4e22;'>{f'{pct_geral:.1f}'.replace('.', ',')}%</span> da base engajada. Vamos juntos mobilizar as revendas para buscar o percentual restante!</strong></p>",
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong>Queremos levar o +TOP ainda mais longe! A nossa meta mínima é de <span style='color:#00a651;'>{META_CADASTRO:.0f}%</span> de <span style='white-space:nowrap;'>cadastros ativos</span> e, até esta semana, já alcançamos <span style='color:#ef4e22;'>{f'{pct_geral:.1f}'.replace('.', ',')}%</span> da base engajada.</strong></p>"
+                      f"<p style='font-size:17px; margin:0; line-height:1.4;'><strong>Vamos juntos mobilizar as revendas para buscar o percentual restante!</strong></p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
                   {subsecao_titulo("POR REGIONAL")}
@@ -3644,7 +3645,6 @@ def _salvar_relatorio_excel_core(dados, caminho, regional_filtro=None):
         total_participantes = int(cad_reg_f["total"].sum())
         ativos = int(cad_reg_f["ativos"].sum())
         pre_cadastro = int(cad_reg_f["pre_cadastro"].sum())
-        inativos = int(cad_reg_f["inativos"].sum()) if "inativos" in cad_reg_f.columns else 0
         pct_ativos_total = round(ativos / total_participantes * 100, 1) if total_participantes else 0
 
         resumo_dados = {
@@ -3652,14 +3652,12 @@ def _salvar_relatorio_excel_core(dados, caminho, regional_filtro=None):
                 "Total de participantes",
                 "Ativos no +TOP",
                 "Pré-Cadastro",
-                "Inativos",
                 "% Ativos no total",
             ],
             "Valor": [
                 total_participantes,
                 ativos,
                 pre_cadastro,
-                inativos,
                 pct_ativos_total,
             ],
         }
