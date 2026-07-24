@@ -2636,7 +2636,8 @@ def _header_html(titulo, hoje, imagens_kv=None):
     bg_style = f'background-image: url(cid:{fundo_cid}); background-size: cover; background-position: center;' if fundo_cid else 'background-color: #f5f5f5;'
 
     logo_html = f'<img src="cid:{logo_cid}" alt="Logo +TOP" width="220" style="display:block;">' if logo_cid else '<span style="font-size:24px; font-weight:bold;">+top</span>'
-    tom_html = f'<img src="cid:{tom_cid}" alt="Tom +TOP" width="90" style="display:block;" align="bottom">' if tom_cid else ''
+    # TOM posicionado à direita, próximo à faixa laranja (padding-bottom reduzido)
+    tom_html = f'<img src="cid:{tom_cid}" alt="Tom +TOP" width="120" style="display:block;" align="bottom">' if tom_cid else ''
 
     return f"""
     <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="font-family:Arial, Helvetica, sans-serif;">
@@ -2644,8 +2645,11 @@ def _header_html(titulo, hoje, imagens_kv=None):
         <td style="padding:0; font-family:Arial, Helvetica, sans-serif; {bg_style}">
           <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, Helvetica, sans-serif;">
             <tr>
-              <td style="padding:24px; font-family:Arial, Helvetica, sans-serif;" valign="middle">
+              <td style="padding:24px 24px 0 24px; font-family:Arial, Helvetica, sans-serif;" valign="top">
                 {logo_html}
+              </td>
+              <td align="right" style="padding:8px 24px 0 24px; font-family:Arial, Helvetica, sans-serif;" valign="bottom">
+                {tom_html}
               </td>
             </tr>
           </table>
@@ -2655,12 +2659,11 @@ def _header_html(titulo, hoje, imagens_kv=None):
         <td bgcolor="#ef4e22" style="padding:14px 24px; color:#ffffff; font-family:Arial, Helvetica, sans-serif;">
           <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, Helvetica, sans-serif;">
             <tr>
-              <td style="font-family:Arial, Helvetica, sans-serif;" valign="middle">
+              <td style="font-family:Arial, Helvetica, sans-serif;">
                 <h1 style="margin:0; font-size:18px; font-weight:bold; color:#ffffff; font-family:Arial, Helvetica, sans-serif;">{titulo}</h1>
-                <p style="margin:4px 0 0 0; font-size:12px; color:#ffffff; font-family:Arial, Helvetica, sans-serif;">{hoje}</p>
               </td>
-              <td align="right" style="font-family:Arial, Helvetica, sans-serif;" valign="middle">
-                {tom_html}
+              <td align="right" style="font-family:Arial, Helvetica, sans-serif;">
+                <p style="margin:0; font-size:12px; color:#ffffff; font-family:Arial, Helvetica, sans-serif;">{hoje}</p>
               </td>
             </tr>
           </table>
