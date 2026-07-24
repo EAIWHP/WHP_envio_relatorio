@@ -47,6 +47,9 @@ from email.mime.text import MIMEText
 from email.utils import formataddr
 from pathlib import Path
 
+# Validador pré-envio (importado no escopo para evitar dependência circular)
+from validar_envio_relatorio import ValidadorEnvioRelatorio
+
 import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -55,6 +58,15 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 
 matplotlib.use("Agg")  # backend não interativo para cron/servers
+
+# Padroniza fonte dos gráficos com a mesma família do e-mail (Arial)
+plt.rcParams["font.family"] = "sans-serif"
+plt.rcParams["font.sans-serif"] = ["Arial", "DejaVu Sans", "Liberation Sans", "Helvetica"]
+plt.rcParams["axes.titlesize"] = 14
+plt.rcParams["axes.labelsize"] = 11
+plt.rcParams["xtick.labelsize"] = 10
+plt.rcParams["ytick.labelsize"] = 10
+plt.rcParams["figure.titlesize"] = 14
 
 # ---------------------------------------------------------------------------
 # CONFIGURAÇÕES GLOBAIS
@@ -165,7 +177,7 @@ MAPA_REVENDA_PRINCIPAL = {
     "GUAIBIM": "Guaibim",
     "HAVAN": "Havan",
     "JMAHFUZ": "Jmahfuz",
-    "IMPERIO": "Imperio",
+    "IMPERIO": "Império",
     "LASER ELETRO": "Laser Eletro",
     "NOSSO LAR LOJAS DE DEPTOS LTDA": "Nosso Lar",
     "MILLENA MOVEIS": "Millena",
@@ -191,6 +203,8 @@ MAPA_REVENDA_PRINCIPAL = {
     "LOJAS BECKER LTDA": "Becker",
     "MOVEIS ESTRELA": "Estrela",
     "ZENIR": "Zenir",
+    "LIDER": "Líder",
+    "LÍDER": "Líder",
     # Filial da Zenir (Filial 68, CNPJ raiz 41.426.966) que veio na hierarquia
     # sem o prefixo "Zenir" na coluna REVENDA — agrupada manualmente na Zenir.
     "MESSEJANA 2": "Zenir",
@@ -214,6 +228,8 @@ NOMES_CURSOS = {
     "BRM62": "Geladeira Brastemp",
     "CRM56M": "Geladeira Consul",
     "CRM53M": "Geladeira Consul",
+    "BRM52": "Geladeira Brastemp Frost Free Duplex",
+    "CWN14": "Máquina de Lavar Consul",
 }
 
 logging.basicConfig(
@@ -447,6 +463,16 @@ def carregar_hierarquias():
         else:
             rev_vazia = df["revenda"].isna() | (df["revenda"].astype(str).str.strip() == "")
             df.loc[rev_vazia, "revenda"] = revenda_arquivo
+
+        # Correção: arquivo da Lider está com o nome MAGAZAN e a coluna REVENDA também como MAGAZAN.
+        # Força a revenda como Líder para manter consistência.
+        rev_arquivo_norm = (
+            revenda_arquivo.upper()
+            .replace("Á", "A").replace("É", "E").replace("Í", "I").replace("Ó", "O").replace("Ú", "U")
+            .replace("Ã", "A").replace("Ç", "C")
+        )
+        if revenda_arquivo and rev_arquivo_norm in ("LIDER", "MAGAZAN"):
+            df["revenda"] = "Líder"
 
         df["cpf_limp"] = df["cpf"].apply(limpar_cpf)
         # Normaliza colunas de flag SIM/NÃO para maiúsculo sem acento
@@ -767,11 +793,11 @@ def html_destaque(titulo, nome, regional, valor, sufixo="%", meta=None):
     """Gera conteúdo HTML de parabenização com farol e ordem regional -> revenda."""
     farol = farol_html(valor, meta, tamanho=18) if meta is not None else ""
     return (
-        f"<div style='font-size:18px; font-weight:bold; margin-bottom:4px;'>"
+        f"<div style='font-size:18px; font-weight:bold; margin-bottom:4px; font-family:Arial, Helvetica, sans-serif;'>"
         f"{farol} <strong>Parabéns.</strong></div>"
-        f"<div style='font-size:15px; font-weight:bold; margin-bottom:10px;'>{titulo}</div>"
-        f"A regional <strong>{regional}</strong> se destaca com a revenda <strong>{nome.upper()}</strong> "
-        f"com <strong>{valor:.1f}{sufixo}</strong>."
+        f"<div style='font-size:15px; font-weight:bold; margin-bottom:10px; font-family:Arial, Helvetica, sans-serif;'>{titulo}</div>"
+        f"<div style='font-family:Arial, Helvetica, sans-serif;'>A regional <strong>{regional}</strong> se destaca com a revenda <strong>{nome.upper()}</strong> "
+        f"com <strong>{valor:.1f}{sufixo}</strong>.</div>"
     )
 
 
@@ -792,12 +818,12 @@ def estilizar_tabela_html(df, destaque_coluna=None, destaque_menor_que_media=Non
     if df.empty:
         return "<p><em>Sem dados para exibir.</em></p>"
 
-    html = '<table style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 13px;">\n'
+    html = '<table style="border-collapse: collapse; width: 100%; font-family: Arial, Helvetica, sans-serif; font-size: 13px;">\n'
     html += "<thead><tr>"
     for col in df.columns:
         html += (
             f'<th bgcolor="#ef4e22" style="border: 1px solid #cccccc; padding: 8px; background-color: #ef4e22; '
-            f'color: white; text-align: center;">{col}</th>'
+            f'color: white; text-align: center; font-family: Arial, Helvetica, sans-serif;">{col}</th>'
         )
     html += "</tr></thead><tbody>\n"
 
@@ -844,7 +870,7 @@ def estilizar_tabela_html(df, destaque_coluna=None, destaque_menor_que_media=Non
             # Prefixa farol quando houver
             display = f"{farol_celula}{display}" if farol_celula else display
 
-            html += f'<td style="border: 1px solid #cccccc; padding: 6px; text-align: {align}; {bg}">{display}</td>'
+            html += f'<td style="border: 1px solid #cccccc; padding: 6px; text-align: {align}; font-family: Arial, Helvetica, sans-serif; {bg}">{display}</td>'
         html += "</tr>\n"
 
     html += "</tbody></table>"
@@ -868,15 +894,6 @@ def carregar_bases():
     df_cad_orig["cpf_limp"] = df_cad_orig["cpf/cnpj"].apply(limpar_cpf)
     df_cad_orig["revenda_original"] = df_cad_orig["grupo"].astype(str).str.strip()
     df_cad_orig["regional_original"] = df_cad_orig["regional"].astype(str).str.strip()
-
-    # Mapeamento completo de CPF -> status (incluindo Inativo/Bloqueado, antes do filtro)
-    # Usado para dividir a hierarquia em Ativos / Pré-Cadastro / Inativos
-    status_por_cpf_completo = (
-        df_cad_orig.dropna(subset=["cpf_limp", "status"])
-        .drop_duplicates(subset=["cpf_limp"], keep="first")
-        .set_index("cpf_limp")["status"]
-        .to_dict()
-    )
 
     # Mapeamento revenda -> regional a partir do cadastro base
     mapa_regional = mapeamento_revenda_regional(df_cad_orig)
@@ -1004,6 +1021,18 @@ def carregar_bases():
     df_cad = df_cad.dropna(subset=["regional_curta", "revenda"]).copy()
     df_cad = df_cad[df_cad["regional_curta"].str.lower() != "nan"].copy()
     df_cad = df_cad[df_cad["revenda"].str.lower() != "nan"].copy()
+
+    # Reconstrói o mapeamento CPF -> status APÓS todas as regras de cadastro
+    # (regra dos 90 dias, exclusão de revendas e status operacionais excluídos).
+    # Isso garante alinhamento com o painel ranking mensal.
+    status_por_cpf_completo = (
+        df_cad.dropna(subset=["cpf_limp", "status"])
+        .drop_duplicates(subset=["cpf_limp"], keep="first")
+        .set_index("cpf_limp")["status"]
+        .to_dict()
+    )
+    logger.info(f"Status completo atualizado: {len(status_por_cpf_completo):,} CPFs")
+
     logger.info(f"Cadastro: {len(df_cad):,} registros, {df_cad['cpf_limp'].nunique():,} CPFs únicos")
 
     # ------------------------------------------------------------------
@@ -1142,6 +1171,27 @@ def carregar_bases():
     else:
         logger.warning("emails_regionais.xlsx não encontrado. Envio por regional será desabilitado.")
 
+    # ------------------------------------------------------------------
+    # Últimas datas disponíveis em cada base (para exibição no e-mail/Excel)
+    # ------------------------------------------------------------------
+    data_ultimo_cadastro = None
+    if "data de inclusão" in df_cad.columns:
+        data_ultimo_cadastro = pd.to_datetime(df_cad["data de inclusão"], errors="coerce").max()
+
+    data_ultimo_treinamento = None
+    if "Conclusão" in df_trein.columns:
+        df_trein_obr = df_trein[
+            (df_trein["Estado"].astype(str).str.lower() == "concluido")
+            & (df_trein["Trilha"].astype(str).str.contains("OBRIGAT", case=False, na=False))
+            & (df_trein["Conclusão"].notna())
+        ]
+        if not df_trein_obr.empty:
+            data_ultimo_treinamento = df_trein_obr["Conclusão"].max()
+
+    data_ultimo_aceite = None
+    if "DataAceite" in df_aceite.columns:
+        data_ultimo_aceite = pd.to_datetime(df_aceite["DataAceite"], errors="coerce").max()
+
     return {
         "cadastro": df_cad,
         "treinamentos": df_trein,
@@ -1154,6 +1204,11 @@ def carregar_bases():
         "mes_referencia": ano_mes_hoje,
         "emails_regionais": df_emails_reg,
         "status_completo": status_por_cpf_completo,
+        "datas_ultimas": {
+            "cadastro": data_ultimo_cadastro,
+            "treinamento": data_ultimo_treinamento,
+            "aceite": data_ultimo_aceite,
+        },
     }
 
 
@@ -1575,6 +1630,10 @@ def gerar_grafico_barras(df, x_col, y_col, titulo, cor="#ef4e22", meta=None):
         logger.warning(f"Dados insuficientes para gerar gráfico: {titulo}")
         return None
 
+    # Garante fonte Arial em todos os elementos do gráfico
+    plt.rcParams["font.family"] = "sans-serif"
+    plt.rcParams["font.sans-serif"] = ["Arial"]
+
     # Ordena do maior para o menor (igual à tabela)
     df = df.sort_values(y_col, ascending=False).reset_index(drop=True)
 
@@ -1721,7 +1780,7 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
                 "ativos": "Ativos no +TOP",
                 "pct_ativos": "% Ativos",
             })
-            resultado["cadastros"]["alerta_titulo"] = "Top 10 revendas com menor % de ativos"
+            resultado["cadastros"]["alerta_titulo"] = "TOP 10 REVENDAS COM MENOR % DE ATIVOS"
             resultado["cadastros"]["alerta_subtitulo"] = ""
             resultado["cadastros"]["alerta_itens"] = itens_df
 
@@ -1779,7 +1838,7 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
                 "realizaram": "Realizado",
                 "pct_realizaram": "% Realizado",
             })
-            resultado["treinamentos"]["alerta_titulo"] = "Top 10 revendas com menor % de treinamentos concluídos"
+            resultado["treinamentos"]["alerta_titulo"] = "TOP 10 REVENDAS COM MENOR % DE TREINAMENTOS CONCLUÍDOS"
             resultado["treinamentos"]["alerta_subtitulo"] = ""
             resultado["treinamentos"]["alerta_itens"] = itens_df
 
@@ -1811,7 +1870,7 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
                     "aceitaram": "Aceitaram",
                     "pct_aceite": "% Aceite",
                 })
-                resultado["aceites"]["alerta_titulo"] = "Top 10 revendas com menor % de aceite"
+                resultado["aceites"]["alerta_titulo"] = "TOP 10 REVENDAS COM MENOR % DE ACEITE"
                 resultado["aceites"]["alerta_subtitulo"] = ""
                 resultado["aceites"]["alerta_itens"] = itens_df
 
@@ -2364,25 +2423,13 @@ def preparar_tabelas(dados):
 
 
 def _destaque_tom_ok_html(texto, imagens_kv=None, imagens_tom=None):
-    """Gera card verde de destaque com Tom fazendo joinha ao lado, ajustado ao tamanho do texto."""
+    """Gera card verde de destaque sem imagem do Tom (Tom mantido apenas no cabeçalho)."""
     if not texto:
         return ""
-    imagens_tom = imagens_tom or {}
-    imagens_kv = imagens_kv or {}
-    img_base64 = imagens_tom.get("ok")
-    cid = None
-    if img_base64:
-        cid = "tom_ok"
-    elif "tom" in imagens_kv:
-        cid = "kv_tom"
-    tom_html = f'<img src="cid:{cid}" alt="Tom +TOP" width="60" style="display:block;">' if cid else ""
     return f"""
-    <table cellpadding="0" cellspacing="0" border="0" style="margin:12px 0; width:auto; display:inline-table;">
+    <table cellpadding="0" cellspacing="0" border="0" style="margin:12px 0; width:100%; font-family:Arial, Helvetica, sans-serif;">
       <tr>
-        <td width="70" align="center" valign="middle" style="padding-right:6px;">
-          {tom_html}
-        </td>
-        <td valign="middle" style="padding:6px 10px; background-color:#d4edda; border-radius:8px; border:1px solid #00a651; color:#155724; font-size:13px; line-height:1.35;">
+        <td valign="middle" style="padding:6px 10px; background-color:#d4edda; border-radius:8px; border:1px solid #00a651; color:#155724; font-size:13px; line-height:1.35; font-family:Arial, Helvetica, sans-serif;">
           {texto}
         </td>
       </tr>
@@ -2392,41 +2439,14 @@ def _destaque_tom_ok_html(texto, imagens_kv=None, imagens_tom=None):
 
 def _pontos_atencao_header_html():
     """Retorna cabeçalho destacado para a seção de pontos de atenção."""
+
+
 def _balao_tom_html(texto, imagens_kv=None, imagens_tom=None, tipo_tom="tom", alinhamento="esquerda", largura_tom=90):
-    """Cria balão de fala com imagem do Tom ao lado (Tom 'falando' o texto)."""
-    imagens_kv = imagens_kv or {}
-    imagens_tom = imagens_tom or {}
-
-    # Prioriza imagem específica da pasta TOM, senão usa kv_tom
-    img_base64 = imagens_tom.get(tipo_tom)
-    cid = None
-    if img_base64:
-        cid = f"tom_{tipo_tom}"
-    elif "tom" in imagens_kv:
-        cid = "kv_tom"
-
-    tom_html = f'<img src="cid:{cid}" alt="Tom +TOP" width="{largura_tom}" style="display:block;">' if cid else ""
-
-    if alinhamento == "direita":
-        return f"""
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0;">
-          <tr>
-            <td valign="middle" style="padding:8px 12px; background-color:#ffffff; border-radius:12px; border:2px solid #00a651; color:#333333; font-size:15px; line-height:1.4;">
-              {texto}
-            </td>
-            <td width="{largura_tom + 10}" align="center" valign="middle" style="padding-left:10px;">
-              {tom_html}
-            </td>
-          </tr>
-        </table>
-        """
+    """Cria balão de destaque sem imagem do Tom (Tom mantido apenas no cabeçalho)."""
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0; font-family:Arial, Helvetica, sans-serif;">
       <tr>
-        <td width="{largura_tom + 10}" align="center" valign="middle" style="padding-right:10px;">
-          {tom_html}
-        </td>
-        <td valign="middle" style="padding:8px 12px; background-color:#ffffff; border-radius:12px; border:2px solid #00a651; color:#333333; font-size:15px; line-height:1.4;">
+        <td valign="middle" style="padding:8px 12px; background-color:#ffffff; border-radius:12px; border:2px solid #00a651; color:#333333; font-size:15px; line-height:1.4; font-family:Arial, Helvetica, sans-serif;">
           {texto}
         </td>
       </tr>
@@ -2437,11 +2457,11 @@ def _balao_tom_html(texto, imagens_kv=None, imagens_tom=None, tipo_tom="tom", al
 def _pontos_atencao_secao_html(titulo, subtitulo, tabela_html, imagens_kv=None, imagens_tom=None):
     """Monta bloco de pontos de atenção com título grande, subtítulo e tabela."""
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px; font-family:Arial, Helvetica, sans-serif;">
       <tr>
-        <td style="padding:14px; background-color:#fff3cd; border-left:5px solid #ef4e22; color:#856404;">
-          <div style="font-size:17px; font-weight:bold; margin-bottom:6px;">⚠️ {titulo}</div>
-          <div style="font-size:14px; margin-bottom:12px;">{subtitulo}</div>
+        <td style="padding:14px; background-color:#fff3cd; border-left:5px solid #ef4e22; color:#856404; font-family:Arial, Helvetica, sans-serif;">
+          <div style="font-size:17px; font-weight:bold; margin-bottom:6px; font-family:Arial, Helvetica, sans-serif;">⚠️ {titulo}</div>
+          <div style="font-size:14px; margin-bottom:12px; font-family:Arial, Helvetica, sans-serif;">{subtitulo}</div>
           {tabela_html}
         </td>
       </tr>
@@ -2455,9 +2475,9 @@ def _balao_insight_html(texto):
     if not texto:
         return ""
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0; font-family:Arial, Helvetica, sans-serif;">
       <tr>
-        <td style="padding:14px; background-color:#ffffff; border-radius:12px; border:2px solid #00a651; color:#333333; font-size:15px; line-height:1.5;">
+        <td style="padding:14px; background-color:#ffffff; border-radius:12px; border:2px solid #00a651; color:#333333; font-size:15px; line-height:1.5; font-family:Arial, Helvetica, sans-serif;">
           {texto}
         </td>
       </tr>
@@ -2468,9 +2488,9 @@ def _balao_insight_html(texto):
 def _secao_html(titulo):
     """Retorna titulo de secao em tabela, compativel com Outlook."""
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:28px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:28px; font-family:Arial, Helvetica, sans-serif;">
       <tr>
-        <td style="color:#ef4e22; font-size:18px; font-weight:bold; padding-bottom:8px;">
+        <td style="color:#ef4e22; font-size:18px; font-weight:bold; padding-bottom:8px; font-family:Arial, Helvetica, sans-serif;">
           {titulo}
         </td>
       </tr>
@@ -2492,10 +2512,10 @@ def _card_html(conteudo, tipo="insight"):
     bg, borda = cores.get(tipo, ("#f4f4f4", "#999999"))
 
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0; font-family:Arial, Helvetica, sans-serif;">
       <tr>
         <td width="4" bgcolor="{borda}" style="font-size:0; line-height:0;">&nbsp;</td>
-        <td bgcolor="{bg}" style="padding:16px; color:#333333; font-size:16px; line-height:1.6;">
+        <td bgcolor="{bg}" style="padding:16px; color:#333333; font-size:16px; line-height:1.6; font-family:Arial, Helvetica, sans-serif;">
           {conteudo}
         </td>
       </tr>
@@ -2507,9 +2527,9 @@ def _img_html(cid, alt):
     if not cid:
         return ""
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0; font-family:Arial, Helvetica, sans-serif;">
       <tr>
-        <td align="center">
+        <td align="center" style="font-family:Arial, Helvetica, sans-serif;">
           <img src="cid:{cid}" alt="{alt}" width="700" style="max-width:700px; width:100%; height:auto; display:block;">
         </td>
       </tr>
@@ -2522,8 +2542,8 @@ def carregar_imagens_kv():
     kv_dir = BASE_DIR / "ajustes_relatorio_envio" / "logo_kv" / "elementos_kv"
     imagens = {}
     arquivos = {
-        "logo": (kv_dir / "_top_logo.png", 200),
-        "tom": (kv_dir / "_top_tom_cubos1.png", 150),
+        "logo": (kv_dir / "_top_logo.png", 220),
+        "tom": (kv_dir / "_top_tom_cubos1.png", 120),
         "fundo": (kv_dir / "_top_fundo.png", 700),
     }
     for nome, (path, max_width) in arquivos.items():
@@ -2595,15 +2615,13 @@ def carregar_imagens_tom():
 
 
 def _metric_box(titulo, valor, meta=None):
-    meta_html = f"{meta:.0f}%" if meta is not None else ""
     farol = farol_html(valor, meta, tamanho=38) if meta is not None else ""
     return f"""
-    <td width="33%" align="center" valign="middle" bgcolor="#ffffff" style="padding:20px 24px; color:#333333; font-size:16px; font-weight:bold; border-radius:10px; border:3px solid #ef4e22;">
-      <div style="font-size:16px; margin-bottom:6px; color:#ef4e22;">{titulo}</div>
-      <div style="font-size:42px; margin-bottom:8px; color:#ef4e22; line-height:1; white-space:nowrap;">
+    <td width="33%" align="center" valign="middle" bgcolor="#ffffff" style="padding:20px 24px; color:#333333; font-size:16px; font-weight:bold; border-radius:10px; border:3px solid #ef4e22; font-family:Arial, Helvetica, sans-serif;">
+      <div style="font-size:16px; margin-bottom:6px; color:#ef4e22; font-family:Arial, Helvetica, sans-serif;">{titulo}</div>
+      <div style="font-size:42px; margin-bottom:8px; color:#ef4e22; line-height:1; white-space:nowrap; font-family:Arial, Helvetica, sans-serif;">
         {farol}&nbsp;<strong>{valor}%</strong>
       </div>
-      <div style="font-size:14px; color:#333333;">objetivo <strong>{meta_html}</strong></div>
     </td>
     """
 
@@ -2617,20 +2635,17 @@ def _header_html(titulo, hoje, imagens_kv=None):
 
     bg_style = f'background-image: url(cid:{fundo_cid}); background-size: cover; background-position: center;' if fundo_cid else 'background-color: #f5f5f5;'
 
-    logo_html = f'<img src="cid:{logo_cid}" alt="Logo +TOP" width="180" style="display:block;">' if logo_cid else '<span style="font-size:24px; font-weight:bold;">+top</span>'
-    tom_html = f'<img src="cid:{tom_cid}" alt="Tom +TOP" width="120" style="display:block;">' if tom_cid else ''
+    logo_html = f'<img src="cid:{logo_cid}" alt="Logo +TOP" width="220" style="display:block;">' if logo_cid else '<span style="font-size:24px; font-weight:bold;">+top</span>'
+    tom_html = f'<img src="cid:{tom_cid}" alt="Tom +TOP" width="90" style="display:block;" align="bottom">' if tom_cid else ''
 
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="font-family:Arial, Helvetica, sans-serif;">
       <tr>
         <td style="padding:0; font-family:Arial, Helvetica, sans-serif; {bg_style}">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, Helvetica, sans-serif;">
             <tr>
-              <td style="padding:24px;" valign="middle">
+              <td style="padding:24px; font-family:Arial, Helvetica, sans-serif;" valign="middle">
                 {logo_html}
-              </td>
-              <td align="right" style="padding:24px;" valign="bottom">
-                {tom_html}
               </td>
             </tr>
           </table>
@@ -2638,13 +2653,14 @@ def _header_html(titulo, hoje, imagens_kv=None):
       </tr>
       <tr>
         <td bgcolor="#ef4e22" style="padding:14px 24px; color:#ffffff; font-family:Arial, Helvetica, sans-serif;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, Helvetica, sans-serif;">
             <tr>
-              <td>
-                <h1 style="margin:0; font-size:18px; font-weight:bold; color:#ffffff;">{titulo}</h1>
+              <td style="font-family:Arial, Helvetica, sans-serif;" valign="middle">
+                <h1 style="margin:0; font-size:18px; font-weight:bold; color:#ffffff; font-family:Arial, Helvetica, sans-serif;">{titulo}</h1>
+                <p style="margin:4px 0 0 0; font-size:12px; color:#ffffff; font-family:Arial, Helvetica, sans-serif;">{hoje}</p>
               </td>
-              <td align="right">
-                <p style="margin:0; font-size:12px; color:#ffffff;">{hoje}</p>
+              <td align="right" style="font-family:Arial, Helvetica, sans-serif;" valign="middle">
+                {tom_html}
               </td>
             </tr>
           </table>
@@ -2699,13 +2715,8 @@ def _destaques_meta_html(
 
     imagens_tom = imagens_tom or {}
     imagens_kv = imagens_kv or {}
-    img_base64 = imagens_tom.get("ok")
-    cid = None
-    if img_base64:
-        cid = "tom_ok"
-    elif "tom" in imagens_kv:
-        cid = "kv_tom"
-    tom_html = f'<img src="cid:{cid}" alt="Tom +TOP" width="100" style="display:block;">' if cid else ""
+    # Tom removido do corpo do e-mail; mantido apenas no cabeçalho
+    tom_html = ""
 
     blocos_regional = []
     for regional in ordem_regional:
@@ -2732,17 +2743,14 @@ def _destaques_meta_html(
         f"<div style='font-size:15px; font-weight:bold; margin-bottom:12px;'>"
         f"{subtitulo}</div>"
         f"<div style='font-size:14px; margin-bottom:12px;'>"
-        f"As revendas abaixo atingiram ou superaram o objetivo de <strong>{meta:.0f}%</strong>:</div>"
+        f"As revendas abaixo atingiram ou superaram o objetivo mínimo de <strong>{meta:.0f}%</strong>:</div>"
         + "\n".join(blocos_regional)
     )
 
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0; font-family:Arial, Helvetica, sans-serif;">
       <tr>
-        <td width="110" align="center" valign="middle" style="padding-right:10px;">
-          {tom_html}
-        </td>
-        <td valign="middle" style="padding:14px 16px; background-color:#d4edda; border-radius:12px; border:1px solid #00a651; color:#155724; font-size:14px; line-height:1.6;">
+        <td valign="middle" style="padding:14px 16px; background-color:#d4edda; border-radius:12px; border:1px solid #00a651; color:#155724; font-size:14px; line-height:1.6; font-family:Arial, Helvetica, sans-serif;">
           {conteudo}
         </td>
       </tr>
@@ -2774,6 +2782,35 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
     alerta_teste = "<p style='color:#d9534f; font-weight:bold; margin:16px 0;'>[MODO TESTE - e-mail nao enviado]</p>" if teste else ""
 
+    # Período de análise e últimas datas das bases
+    def fmt_dt(dt):
+        if pd.isna(dt) or dt is None:
+            return "N/A"
+        if isinstance(dt, pd.Timestamp):
+            return dt.strftime("%d/%m/%Y")
+        if isinstance(dt, datetime):
+            return dt.strftime("%d/%m/%Y")
+        return str(dt)
+
+    periodo_inicio, periodo_fim = dados.get("periodo_analise", (None, None))
+    datas_ultimas = dados.get("datas_ultimas", {})
+    periodo_texto = ""
+    if periodo_inicio and periodo_fim:
+        periodo_texto = f"""
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 16px 0; font-family:Arial, Helvetica, sans-serif;">
+          <tr>
+            <td style="padding:14px 16px; background-color:#f9f9f9; border-left:4px solid #ef4e22; border-radius:0 8px 8px 0; color:#333333; font-size:14px; line-height:1.6; font-family:Arial, Helvetica, sans-serif;">
+              <strong>Período de análise:</strong> {periodo_inicio.strftime('%d/%m/%Y')} a {periodo_fim.strftime('%d/%m/%Y')}<br>
+              <span style="font-size:12px; color:#666666; font-family:Arial, Helvetica, sans-serif;">
+                Último dado de cadastros: <strong>{fmt_dt(datas_ultimas.get('cadastro'))}</strong> &nbsp;|&nbsp;
+                Último dado de treinamentos: <strong>{fmt_dt(datas_ultimas.get('treinamento'))}</strong> &nbsp;|&nbsp;
+                Último dado de aceites: <strong>{fmt_dt(datas_ultimas.get('aceite'))}</strong>
+              </span>
+            </td>
+          </tr>
+        </table>
+        """
+
     # Carrega imagens do KV e imagens específicas do Tom
     imagens_kv = carregar_imagens_kv()
     imagens_tom = carregar_imagens_tom()
@@ -2789,18 +2826,18 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
     pct_aceite = round(aceite_reg["aceitaram"].sum() / aceite_reg["total_ativos"].sum() * 100, 1) if not aceite_reg.empty else 0
 
     metricas = f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0; font-family:Arial, Helvetica, sans-serif;">
       <tr>
-        <td align="center">
-          <table cellpadding="0" cellspacing="8" border="0">
+        <td align="center" style="font-family:Arial, Helvetica, sans-serif;">
+          <table cellpadding="0" cellspacing="8" border="0" style="font-family:Arial, Helvetica, sans-serif;">
             <tr>
-              {_metric_box('Cadastros', pct_geral, META_CADASTRO)}
-              {_metric_box('Treinamentos', pct_trein, META_TREINAMENTOS)}
-              {_metric_box('Aceites', pct_aceite, META_ACEITES)}
+              {_metric_box('CADASTROS', pct_geral, META_CADASTRO)}
+              {_metric_box('TREINAMENTOS', pct_trein, META_TREINAMENTOS)}
+              {_metric_box('ACEITES', pct_aceite, META_ACEITES)}
             </tr>
           </table>
-          <p style="font-size:11px; color:#666666; margin-top:6px;">
-            🟢 Atingiu a meta &nbsp;|&nbsp; 🟡 Entre 70% e a meta &nbsp;|&nbsp; 🔴 Abaixo de 70% da meta
+          <p style="font-size:11px; color:#666666; margin-top:6px; font-family:Arial, Helvetica, sans-serif;">
+            🟢 Atingiu a meta mínima &nbsp;|&nbsp; 🟡 Entre 70% e a meta &nbsp;|&nbsp; 🔴 Abaixo de 70% da meta
           </p>
         </td>
       </tr>
@@ -2890,8 +2927,8 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
     def subsecao_titulo(texto):
         return f"""
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:18px;">
-          <tr><td style="color:#ef4e22; font-size:15px; font-weight:bold;">{texto}</td></tr>
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:18px; font-family:Arial, Helvetica, sans-serif;">
+          <tr><td style="color:#ef4e22; font-size:15px; font-weight:bold; font-family:Arial, Helvetica, sans-serif;">{texto}</td></tr>
         </table>
         """
 
@@ -2907,27 +2944,28 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
         <table role="presentation" width="700" cellspacing="0" cellpadding="0" border="0" align="center">
         <tr><td>
         <![endif]-->
-        <table role="presentation" width="100%" max-width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="max-width:700px; width:100%; background-color:#ffffff;">
+        <table role="presentation" width="100%" max-width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="max-width:700px; width:100%; background-color:#ffffff; font-family:Arial, Helvetica, sans-serif;">
           <tr>
-            <td>
+            <td style="font-family:Arial, Helvetica, sans-serif;">
 
               {_header_html(titulo, hoje, imagens_kv)}
 
               <!-- Conteudo -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff">
-                <tr><td style="padding:24px;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="font-family:Arial, Helvetica, sans-serif;">
+                <tr><td style="padding:24px; font-family:Arial, Helvetica, sans-serif;">
 
                   {alerta_teste}
+
+                  {periodo_texto}
 
                   {metricas}
 
                   {_secao_html("CADASTROS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong><span style='white-space:nowrap;'>Nosso objetivo para a cobertura de cadastros do Programa +TOP é de <span style='color:#00a651;'>{META_CADASTRO:.0f}%</span>.</span><br>"
-                      f"Até o momento, <span style='color:#ef4e22;'>{f'{pct_geral:.1f}'.replace('.', ',')}% dos participantes estão ativos no +TOP</span>.</strong></p>",
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong>Queremos levar o +TOP ainda mais longe! A nossa meta mínima é de <span style='color:#00a651;'>{META_CADASTRO:.0f}%</span> de <span style='white-space:nowrap;'>cadastros ativos</span> e, até esta semana, já alcançamos <span style='color:#ef4e22;'>{f'{pct_geral:.1f}'.replace('.', ',')}%</span> da base engajada. Vamos juntos mobilizar as revendas para buscar o percentual restante!</strong></p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
-                  {subsecao_titulo("Por Regional")}
+                  {subsecao_titulo("POR REGIONAL")}
                   {tabelas_usar['cad_reg']}
                   {_img_html("grafico_cadastros" if "cadastros" in graficos else None, "Gráfico Cadastros")}
                   {_destaques_cadastro_html(cad_rev, imagens_kv=imagens_kv, imagens_tom=imagens_tom)}
@@ -2938,19 +2976,19 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                       imagens_kv=imagens_kv,
                       imagens_tom=imagens_tom,
                   )}
-                  {subsecao_titulo("Top 10 revendas com maior % de ativos")}
+                  {subsecao_titulo("TOP 10 REVENDAS COM MAIOR % DE ATIVOS")}
                   {tabelas_usar['cad_rev']}
 
                   {_secao_html("TREINAMENTOS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo é atingir, no mínimo, <span style='color:#00a651;'>{META_TREINAMENTOS:.0f}%</span> dos participantes aprovados/ treinados.</strong></p>"
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong>Cursos obrigatórios:</strong><br>"
-                      f"1. <strong>{nome_curso1}</strong> (SKU {dados['cursos_info'][4]})<br>"
-                      f"2. <strong>{nome_curso2}</strong> (SKU {dados['cursos_info'][5]})</p>"
-                      f"<p style='font-size:17px; margin:0; line-height:1.4;'><strong><span style='color:#ef4e22;'>{f'{pct_trein:.1f}'.replace('.', ',')}% dos participantes realizaram os treinamentos obrigatórios no +TOP</span></strong>.</p>",
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong>Nossa meta é ter, no mínimo, <span style='color:#00a651;'>{META_TREINAMENTOS:.0f}%</span> dos participantes aprovados e capacitados nos 2 treinamentos do mês.</strong></p>"
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong>Até o momento, apenas <span style='color:#ef4e22;'>{f'{pct_trein:.1f}'.replace('.', ',')}%</span> concluíram os cursos obrigatórios:</strong></p>"
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'>🔹 <strong>{nome_curso1}</strong> (SKU {dados['cursos_info'][4]})<br>"
+                      f"🔹 <strong>{nome_curso2}</strong> (SKU {dados['cursos_info'][5]})</p>"
+                      f"<p style='font-size:17px; margin:0; line-height:1.4;'><strong>Ainda temos um longo caminho até a meta! Garantir essa capacitação é fundamental para dominar o argumento de vendas dos vendedores para alavancar o nosso Sell Out.</strong></p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
-                  {subsecao_titulo("Por Regional")}
+                  {subsecao_titulo("POR REGIONAL")}
                   {tabelas_usar['trein_base_reg'] if tabelas_usar.get('trein_base_reg') else '<p><em>Sem dados.</em></p>'}
                   {_img_html("grafico_treinamentos" if "treinamentos" in graficos else None, "Gráfico Treinamentos")}
                   {_pontos_atencao_secao_html(
@@ -2973,7 +3011,7 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                       col_num="realizaram",
                       col_den="total_ativos",
                   )}
-                  {subsecao_titulo("Top 10 revendas com maior % de treinamentos realizados")}
+                  {subsecao_titulo("TOP 10 REVENDAS COM MAIOR % DE TREINAMENTOS REALIZADOS")}
                   {tabelas_usar['trein_base_rev'] if tabelas_usar.get('trein_base_rev') else '<p><em>Sem dados.</em></p>'}
 
                   <p style="font-size:12px; color:#666666; font-style:italic; margin-top:8px;">
@@ -2982,12 +3020,11 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   {_secao_html("ACEITES MENSAIS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; white-space: nowrap;'><strong>Nosso objetivo para os aceites mensais* de {nome_mes_pt_br(ano_mes=str(dados['mes_aceite']))} é de <span style='color:#00a651;'>{META_ACEITES:.0f}%</span>.</strong></p>"
-                      f"<p style='font-size:17px; margin:0; line-height:1.4;'><strong><span style='color:#ef4e22;'>{f'{pct_aceite:.1f}'.replace('.', ',')}% dos participantes deram o aceite mensal no +TOP</span></strong>.</p>"
-                      f"<p style='font-size:11px; color:#666666; margin:8px 0 0 0; line-height:1.3;'>*é a validação/confirmação que o participante precisa dar todos os meses para receber a pontuação do programa.</p>",
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong>Nosso objetivo é atingir <span style='color:#00a651;'>{META_ACEITES:.0f}%</span> de aceites mensais em {nome_mes_pt_br(ano_mes=str(dados['mes_aceite']))}.</strong></p>"
+                      f"<p style='font-size:17px; margin:0; line-height:1.4;'><strong>Até o momento, <span style='color:#ef4e22;'>{f'{pct_aceite:.1f}'.replace('.', ',')}%</span> dos participantes realizaram o aceite no +TOP (validação mensal necessária para garantir os pontos do programa).</strong></p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
-                  {subsecao_titulo("Por Regional")}
+                  {subsecao_titulo("POR REGIONAL")}
                   {tabelas_usar['aceite_reg']}
                   {_img_html("grafico_aceites" if "aceites" in graficos else None, "Gráfico Aceites")}
                   {_pontos_atencao_secao_html(
@@ -3010,17 +3047,17 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                       col_num="aceitaram",
                       col_den="total_ativos",
                   )}
-                  {subsecao_titulo("Top 10 revendas com maior % de aceite")}
+                  {subsecao_titulo("TOP 10 REVENDAS COM MAIOR % DE ACEITE")}
                   {tabelas_usar['aceite_rev'] if tabelas_usar.get('aceite_rev') else '<p><em>Sem dados de aceites por revenda.</em></p>'}
 
-                  <p style="margin-top:28px; font-size:16px; color:#155724; background-color:#d4edda; padding:14px 16px; border-radius:10px; border:1px solid #00a651; line-height:1.5;">
-                    💪 <strong>Conto com o reforço das regionais para revertermos isso.</strong><br>
-                    Juntos, vamos fortalecer ainda mais o Programa +TOP!
+                  <p style="margin-top:28px; font-size:16px; color:#155724; background-color:#d4edda; padding:14px 16px; border-radius:10px; border:1px solid #00a651; line-height:1.5; font-family:Arial, Helvetica, sans-serif;">
+                    💪 <strong>Contamos com a atuação de cada regional para virarmos esse jogo e atingirmos nossas metas!</strong><br>
+                    Vamos juntos fazer do +TOP um sucesso ainda maior!
                   </p>
 
-                  <p style="margin-top:24px; font-size:16px;">Em anexo <strong>base detalhada</strong>.</p>
+                  <p style="margin-top:24px; font-size:16px; font-family:Arial, Helvetica, sans-serif;">📋 Confira a <strong>base detalhada</strong> no anexo e direcione as ações com os seus times.</p>
 
-                  <p style="margin-top:16px; font-size:16px; font-weight:bold; color:#00a651;">Att.<br>TOM do +TOP</p>
+                  <p style="margin-top:16px; font-size:16px; font-family:Arial, Helvetica, sans-serif;">Abraços,<br><strong style="color:#00a651;">Time do +TOP</strong></p>
 
                 </td></tr>
               </table>
@@ -3571,6 +3608,37 @@ def _salvar_relatorio_excel_core(dados, caminho, regional_filtro=None):
         # ------------------------------------------------------------------
         resumo_linha = 0
 
+        # Período de análise e últimas datas das bases
+        periodo_inicio, periodo_fim = dados.get("periodo_analise", (None, None))
+        datas_ultimas = dados.get("datas_ultimas", {})
+
+        def fmt_dt_excel(dt):
+            if pd.isna(dt) or dt is None:
+                return "N/A"
+            if isinstance(dt, pd.Timestamp):
+                return dt.strftime("%d/%m/%Y")
+            if isinstance(dt, datetime):
+                return dt.strftime("%d/%m/%Y")
+            return str(dt)
+
+        df_periodo = pd.DataFrame({
+            "Informação": [
+                "Período de análise",
+                "Último dado de cadastros",
+                "Último dado de treinamentos",
+                "Último dado de aceites",
+            ],
+            "Valor": [
+                f"{periodo_inicio.strftime('%d/%m/%Y')} a {periodo_fim.strftime('%d/%m/%Y')}" if periodo_inicio and periodo_fim else "N/A",
+                fmt_dt_excel(datas_ultimas.get("cadastro")),
+                fmt_dt_excel(datas_ultimas.get("treinamento")),
+                fmt_dt_excel(datas_ultimas.get("aceite")),
+            ],
+        })
+        resumo_linha = _escrever_secao_resumo(
+            writer, df_periodo, "Resumo", "Período e atualização dos dados", startrow=resumo_linha
+        )
+
         # Indicadores gerais de cadastro (sem divisão por regional)
         total_participantes = int(cad_reg_f["total"].sum())
         ativos = int(cad_reg_f["ativos"].sum())
@@ -3681,6 +3749,51 @@ def main():
             df_hier=bases.get("hierarquia"),
         )
 
+        # -------------------------------------------------
+        # VALIDAÇÃO PRÉ-ENVIO
+        # -------------------------------------------------
+        try:
+            validador = ValidadorEnvioRelatorio(
+                cadastro_df=df_cad,
+                hierarquia_df=bases.get("hierarquia"),
+                ferias_df=bases.get("ferias_hier"),
+                treinamentos_df=df_trein,
+                aceites_df=df_aceite,
+                cad_reg=cad_reg,
+                cad_rev=cad_rev,
+                trein_reg=trein_reg,
+                trein_rev=trein_rev,
+                aceite_reg=aceite_reg,
+                aceite_rev=aceite_rev,
+                base_trein=base_trein,
+                base_aceite=base_aceite,
+                mes_referencia=ano_mes,
+                mes_aceite=mes_aceite_ref,
+                cursos_info=cursos_info,
+                output_dir=OUTPUT_DIR,
+                log_dir=LOG_DIR,
+                logger_validador=logger,
+            )
+            ok, relatorio_validacao = validador.executar(gerar_excel=True)
+            if not ok:
+                logger.error("Validação pré-envio encontrou erros CRÍTICOS. Envio bloqueado.")
+                if relatorio_validacao.get("caminho_excel"):
+                    logger.error(f"Relatório de validação: {relatorio_validacao['caminho_excel']}")
+                sys.exit(1)
+
+            for alerta in relatorio_validacao.get("alertas", []):
+                logger.warning(f"[ALERTA] {alerta.regra}: {alerta.mensagem}")
+            logger.info("Validação pré-envio concluída: OK")
+        except Exception as e:
+            logger.exception("Erro ao executar validador pré-envio")
+            sys.exit(1)
+        # -------------------------------------------------
+
+        # Datas de corte/última atualização das bases
+        datas_ultimas = bases.get("datas_ultimas", {})
+        data_fim_periodo = date.today()  # data do relatório como fim do período
+        data_inicio_periodo = datetime.strptime(ano_mes, "%Y-%m").date().replace(day=1)
+
         dados = {
             "cadastros": (cad_reg, cad_rev),
             "cadastro_df": df_cad,
@@ -3698,6 +3811,8 @@ def main():
             "mes_referencia": ano_mes,
             "usou_ultima_aba": bases["usou_ultima_aba"],
             "hierarquia": bases.get("hierarquia"),
+            "periodo_analise": (data_inicio_periodo, data_fim_periodo),
+            "datas_ultimas": datas_ultimas,
         }
 
         # Snapshot e evolução
