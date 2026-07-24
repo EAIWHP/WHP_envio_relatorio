@@ -59,9 +59,9 @@ from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 
 matplotlib.use("Agg")  # backend não interativo para cron/servers
 
-# Padroniza fonte dos gráficos com a mesma família do e-mail (Arial)
+# Padroniza fonte dos gráficos com Arial (única fonte permitida no email)
 plt.rcParams["font.family"] = "sans-serif"
-plt.rcParams["font.sans-serif"] = ["Arial", "DejaVu Sans", "Liberation Sans", "Helvetica"]
+plt.rcParams["font.sans-serif"] = ["Arial"]
 plt.rcParams["axes.titlesize"] = 14
 plt.rcParams["axes.labelsize"] = 11
 plt.rcParams["xtick.labelsize"] = 10
@@ -793,10 +793,10 @@ def html_destaque(titulo, nome, regional, valor, sufixo="%", meta=None):
     """Gera conteúdo HTML de parabenização com farol e ordem regional -> revenda."""
     farol = farol_html(valor, meta, tamanho=18) if meta is not None else ""
     return (
-        f"<div style='font-size:18px; font-weight:bold; margin-bottom:4px; font-family:Arial, Helvetica, sans-serif;'>"
+        f"<div style='font-size:18px; font-weight:bold; margin-bottom:4px; font-family:Arial;'>"
         f"{farol} <strong>Parabéns.</strong></div>"
-        f"<div style='font-size:15px; font-weight:bold; margin-bottom:10px; font-family:Arial, Helvetica, sans-serif;'>{titulo}</div>"
-        f"<div style='font-family:Arial, Helvetica, sans-serif;'>A regional <strong>{regional}</strong> se destaca com a revenda <strong>{nome.upper()}</strong> "
+        f"<div style='font-size:15px; font-weight:bold; margin-bottom:10px; font-family:Arial;'>{titulo}</div>"
+        f"<div style='font-family:Arial;'>A regional <strong>{regional}</strong> se destaca com a revenda <strong>{nome.upper()}</strong> "
         f"com <strong>{valor:.1f}{sufixo}</strong>.</div>"
     )
 
@@ -818,12 +818,12 @@ def estilizar_tabela_html(df, destaque_coluna=None, destaque_menor_que_media=Non
     if df.empty:
         return "<p><em>Sem dados para exibir.</em></p>"
 
-    html = '<table style="border-collapse: collapse; width: 100%; font-family: Arial, Helvetica, sans-serif; font-size: 13px;">\n'
+    html = '<table style="border-collapse: collapse; width: 100%; font-family: Arial; font-size: 13px;">\n'
     html += "<thead><tr>"
     for col in df.columns:
         html += (
             f'<th bgcolor="#ef4e22" style="border: 1px solid #cccccc; padding: 8px; background-color: #ef4e22; '
-            f'color: white; text-align: center; font-family: Arial, Helvetica, sans-serif;">{col}</th>'
+            f'color: white; text-align: center; font-family: Arial;">{col}</th>'
         )
     html += "</tr></thead><tbody>\n"
 
@@ -870,7 +870,7 @@ def estilizar_tabela_html(df, destaque_coluna=None, destaque_menor_que_media=Non
             # Prefixa farol quando houver
             display = f"{farol_celula}{display}" if farol_celula else display
 
-            html += f'<td style="border: 1px solid #cccccc; padding: 6px; text-align: {align}; font-family: Arial, Helvetica, sans-serif; {bg}">{display}</td>'
+            html += f'<td style="border: 1px solid #cccccc; padding: 6px; text-align: {align}; font-family: Arial; {bg}">{display}</td>'
         html += "</tr>\n"
 
     html += "</tbody></table>"
@@ -2023,10 +2023,9 @@ def _renomear_cadastro_reg(df):
         "total": "Total de participantes",
         "ativos": "Ativos no +TOP",
         "pre_cadastro": "Pré-Cadastro",
-        "inativos": "Inativos",
         "pct_ativos": "% Ativos",
     })
-    cols = ["Regional", "Total de participantes", "Ativos no +TOP", "Pré-Cadastro", "Inativos", "% Ativos"]
+    cols = ["Regional", "Total de participantes", "Ativos no +TOP", "Pré-Cadastro", "% Ativos"]
     return df[[c for c in cols if c in df.columns]]
 
 
@@ -2037,10 +2036,9 @@ def _renomear_cadastro_rev(df):
         "total": "Total de participantes",
         "ativos": "Ativos no +TOP",
         "pre_cadastro": "Pré-Cadastro",
-        "inativos": "Inativos",
         "pct_ativos": "% Ativos",
     })
-    cols = ["Regional", "Revenda", "Total de participantes", "Ativos no +TOP", "Pré-Cadastro", "Inativos", "% Ativos"]
+    cols = ["Regional", "Revenda", "Total de participantes", "Ativos no +TOP", "Pré-Cadastro", "% Ativos"]
     return df[[c for c in cols if c in df.columns]]
 
 
@@ -2427,9 +2425,9 @@ def _destaque_tom_ok_html(texto, imagens_kv=None, imagens_tom=None):
     if not texto:
         return ""
     return f"""
-    <table cellpadding="0" cellspacing="0" border="0" style="margin:12px 0; width:100%; font-family:Arial, Helvetica, sans-serif;">
+    <table cellpadding="0" cellspacing="0" border="0" style="margin:12px 0; width:100%; font-family:Arial;">
       <tr>
-        <td valign="middle" style="padding:6px 10px; background-color:#d4edda; border-radius:8px; border:1px solid #00a651; color:#155724; font-size:13px; line-height:1.35; font-family:Arial, Helvetica, sans-serif;">
+        <td valign="middle" style="padding:6px 10px; background-color:#d4edda; border-radius:8px; border:1px solid #00a651; color:#155724; font-size:13px; line-height:1.35; font-family:Arial;">
           {texto}
         </td>
       </tr>
@@ -2444,9 +2442,9 @@ def _pontos_atencao_header_html():
 def _balao_tom_html(texto, imagens_kv=None, imagens_tom=None, tipo_tom="tom", alinhamento="esquerda", largura_tom=90):
     """Cria balão de destaque sem imagem do Tom (Tom mantido apenas no cabeçalho)."""
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0; font-family:Arial, Helvetica, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0; font-family:Arial;">
       <tr>
-        <td valign="middle" style="padding:8px 12px; background-color:#ffffff; border-radius:12px; border:2px solid #00a651; color:#333333; font-size:15px; line-height:1.4; font-family:Arial, Helvetica, sans-serif;">
+        <td valign="middle" style="padding:8px 12px; background-color:#ffffff; border-radius:12px; border:2px solid #00a651; color:#333333; font-size:15px; line-height:1.4; font-family:Arial;">
           {texto}
         </td>
       </tr>
@@ -2457,11 +2455,11 @@ def _balao_tom_html(texto, imagens_kv=None, imagens_tom=None, tipo_tom="tom", al
 def _pontos_atencao_secao_html(titulo, subtitulo, tabela_html, imagens_kv=None, imagens_tom=None):
     """Monta bloco de pontos de atenção com título grande, subtítulo e tabela."""
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px; font-family:Arial, Helvetica, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px; font-family:Arial;">
       <tr>
-        <td style="padding:14px; background-color:#fff3cd; border-left:5px solid #ef4e22; color:#856404; font-family:Arial, Helvetica, sans-serif;">
-          <div style="font-size:17px; font-weight:bold; margin-bottom:6px; font-family:Arial, Helvetica, sans-serif;">⚠️ {titulo}</div>
-          <div style="font-size:14px; margin-bottom:12px; font-family:Arial, Helvetica, sans-serif;">{subtitulo}</div>
+        <td style="padding:14px; background-color:#fff3cd; border-left:5px solid #ef4e22; color:#856404; font-family:Arial;">
+          <div style="font-size:17px; font-weight:bold; margin-bottom:6px; font-family:Arial;">⚠️ {titulo}</div>
+          <div style="font-size:14px; margin-bottom:12px; font-family:Arial;">{subtitulo}</div>
           {tabela_html}
         </td>
       </tr>
@@ -2475,9 +2473,9 @@ def _balao_insight_html(texto):
     if not texto:
         return ""
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0; font-family:Arial, Helvetica, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0; font-family:Arial;">
       <tr>
-        <td style="padding:14px; background-color:#ffffff; border-radius:12px; border:2px solid #00a651; color:#333333; font-size:15px; line-height:1.5; font-family:Arial, Helvetica, sans-serif;">
+        <td style="padding:14px; background-color:#ffffff; border-radius:12px; border:2px solid #00a651; color:#333333; font-size:15px; line-height:1.5; font-family:Arial;">
           {texto}
         </td>
       </tr>
@@ -2488,9 +2486,9 @@ def _balao_insight_html(texto):
 def _secao_html(titulo):
     """Retorna titulo de secao em tabela, compativel com Outlook."""
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:28px; font-family:Arial, Helvetica, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:28px; font-family:Arial;">
       <tr>
-        <td style="color:#ef4e22; font-size:18px; font-weight:bold; padding-bottom:8px; font-family:Arial, Helvetica, sans-serif;">
+        <td style="color:#ef4e22; font-size:18px; font-weight:bold; padding-bottom:8px; font-family:Arial;">
           {titulo}
         </td>
       </tr>
@@ -2512,10 +2510,10 @@ def _card_html(conteudo, tipo="insight"):
     bg, borda = cores.get(tipo, ("#f4f4f4", "#999999"))
 
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0; font-family:Arial, Helvetica, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0; font-family:Arial;">
       <tr>
         <td width="4" bgcolor="{borda}" style="font-size:0; line-height:0;">&nbsp;</td>
-        <td bgcolor="{bg}" style="padding:16px; color:#333333; font-size:16px; line-height:1.6; font-family:Arial, Helvetica, sans-serif;">
+        <td bgcolor="{bg}" style="padding:16px; color:#333333; font-size:16px; line-height:1.6; font-family:Arial;">
           {conteudo}
         </td>
       </tr>
@@ -2527,9 +2525,9 @@ def _img_html(cid, alt):
     if not cid:
         return ""
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0; font-family:Arial, Helvetica, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0; font-family:Arial;">
       <tr>
-        <td align="center" style="font-family:Arial, Helvetica, sans-serif;">
+        <td align="center" style="font-family:Arial;">
           <img src="cid:{cid}" alt="{alt}" width="700" style="max-width:700px; width:100%; height:auto; display:block;">
         </td>
       </tr>
@@ -2617,9 +2615,9 @@ def carregar_imagens_tom():
 def _metric_box(titulo, valor, meta=None):
     farol = farol_html(valor, meta, tamanho=38) if meta is not None else ""
     return f"""
-    <td width="33%" align="center" valign="middle" bgcolor="#ffffff" style="padding:20px 24px; color:#333333; font-size:16px; font-weight:bold; border-radius:10px; border:3px solid #ef4e22; font-family:Arial, Helvetica, sans-serif;">
-      <div style="font-size:16px; margin-bottom:6px; color:#ef4e22; font-family:Arial, Helvetica, sans-serif;">{titulo}</div>
-      <div style="font-size:42px; margin-bottom:8px; color:#ef4e22; line-height:1; white-space:nowrap; font-family:Arial, Helvetica, sans-serif;">
+    <td width="33%" align="center" valign="middle" bgcolor="#ffffff" style="padding:20px 24px; color:#333333; font-size:16px; font-weight:bold; border-radius:10px; border:3px solid #ef4e22; font-family:Arial;">
+      <div style="font-size:16px; margin-bottom:6px; color:#ef4e22; font-family:Arial;">{titulo}</div>
+      <div style="font-size:42px; margin-bottom:8px; color:#ef4e22; line-height:1; white-space:nowrap; font-family:Arial;">
         {farol}&nbsp;<strong>{valor}%</strong>
       </div>
     </td>
@@ -2640,15 +2638,15 @@ def _header_html(titulo, hoje, imagens_kv=None):
     tom_html = f'<img src="cid:{tom_cid}" alt="Tom +TOP" width="120" style="display:block;" align="bottom">' if tom_cid else ''
 
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="font-family:Arial, Helvetica, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="font-family:Arial;">
       <tr>
-        <td style="padding:0; font-family:Arial, Helvetica, sans-serif; {bg_style}">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, Helvetica, sans-serif;">
+        <td style="padding:0; font-family:Arial; {bg_style}">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial;">
             <tr>
-              <td style="padding:24px 24px 0 24px; font-family:Arial, Helvetica, sans-serif;" valign="top">
+              <td style="padding:24px 24px 0 24px; font-family:Arial;" valign="top">
                 {logo_html}
               </td>
-              <td align="right" style="padding:8px 24px 0 24px; font-family:Arial, Helvetica, sans-serif;" valign="bottom">
+              <td align="right" style="padding:8px 24px 0 24px; font-family:Arial;" valign="bottom">
                 {tom_html}
               </td>
             </tr>
@@ -2656,14 +2654,14 @@ def _header_html(titulo, hoje, imagens_kv=None):
         </td>
       </tr>
       <tr>
-        <td bgcolor="#ef4e22" style="padding:14px 24px; color:#ffffff; font-family:Arial, Helvetica, sans-serif;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, Helvetica, sans-serif;">
+        <td bgcolor="#ef4e22" style="padding:14px 24px; color:#ffffff; font-family:Arial;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial;">
             <tr>
-              <td style="font-family:Arial, Helvetica, sans-serif;">
-                <h1 style="margin:0; font-size:18px; font-weight:bold; color:#ffffff; font-family:Arial, Helvetica, sans-serif;">{titulo}</h1>
+              <td style="font-family:Arial;">
+                <h1 style="margin:0; font-size:18px; font-weight:bold; color:#ffffff; font-family:Arial;">{titulo}</h1>
               </td>
-              <td align="right" style="font-family:Arial, Helvetica, sans-serif;">
-                <p style="margin:0; font-size:12px; color:#ffffff; font-family:Arial, Helvetica, sans-serif;">{hoje}</p>
+              <td align="right" style="font-family:Arial;">
+                <p style="margin:0; font-size:12px; color:#ffffff; font-family:Arial;">{hoje}</p>
               </td>
             </tr>
           </table>
@@ -2751,9 +2749,9 @@ def _destaques_meta_html(
     )
 
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0; font-family:Arial, Helvetica, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0; font-family:Arial;">
       <tr>
-        <td valign="middle" style="padding:14px 16px; background-color:#d4edda; border-radius:12px; border:1px solid #00a651; color:#155724; font-size:14px; line-height:1.6; font-family:Arial, Helvetica, sans-serif;">
+        <td valign="middle" style="padding:14px 16px; background-color:#d4edda; border-radius:12px; border:1px solid #00a651; color:#155724; font-size:14px; line-height:1.6; font-family:Arial;">
           {conteudo}
         </td>
       </tr>
@@ -2800,11 +2798,11 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
     periodo_texto = ""
     if periodo_inicio and periodo_fim:
         periodo_texto = f"""
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 16px 0; font-family:Arial, Helvetica, sans-serif;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 16px 0; font-family:Arial;">
           <tr>
-            <td style="padding:14px 16px; background-color:#f9f9f9; border-left:4px solid #ef4e22; border-radius:0 8px 8px 0; color:#333333; font-size:14px; line-height:1.6; font-family:Arial, Helvetica, sans-serif;">
+            <td style="padding:14px 16px; background-color:#f9f9f9; border-left:4px solid #ef4e22; border-radius:0 8px 8px 0; color:#333333; font-size:14px; line-height:1.6; font-family:Arial;">
               <strong>Período de análise:</strong> {periodo_inicio.strftime('%d/%m/%Y')} a {periodo_fim.strftime('%d/%m/%Y')}<br>
-              <span style="font-size:12px; color:#666666; font-family:Arial, Helvetica, sans-serif;">
+              <span style="font-size:12px; color:#666666; font-family:Arial;">
                 Último dado de cadastros: <strong>{fmt_dt(datas_ultimas.get('cadastro'))}</strong> &nbsp;|&nbsp;
                 Último dado de treinamentos: <strong>{fmt_dt(datas_ultimas.get('treinamento'))}</strong> &nbsp;|&nbsp;
                 Último dado de aceites: <strong>{fmt_dt(datas_ultimas.get('aceite'))}</strong>
@@ -2829,17 +2827,17 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
     pct_aceite = round(aceite_reg["aceitaram"].sum() / aceite_reg["total_ativos"].sum() * 100, 1) if not aceite_reg.empty else 0
 
     metricas = f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0; font-family:Arial, Helvetica, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0; font-family:Arial;">
       <tr>
-        <td align="center" style="font-family:Arial, Helvetica, sans-serif;">
-          <table cellpadding="0" cellspacing="8" border="0" style="font-family:Arial, Helvetica, sans-serif;">
+        <td align="center" style="font-family:Arial;">
+          <table cellpadding="0" cellspacing="8" border="0" style="font-family:Arial;">
             <tr>
               {_metric_box('CADASTROS', pct_geral, META_CADASTRO)}
               {_metric_box('TREINAMENTOS', pct_trein, META_TREINAMENTOS)}
               {_metric_box('ACEITES', pct_aceite, META_ACEITES)}
             </tr>
           </table>
-          <p style="font-size:11px; color:#666666; margin-top:6px; font-family:Arial, Helvetica, sans-serif;">
+          <p style="font-size:11px; color:#666666; margin-top:6px; font-family:Arial;">
             🟢 Atingiu a meta mínima &nbsp;|&nbsp; 🟡 Entre 70% e a meta &nbsp;|&nbsp; 🔴 Abaixo de 70% da meta
           </p>
         </td>
@@ -2930,8 +2928,8 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
     def subsecao_titulo(texto):
         return f"""
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:18px; font-family:Arial, Helvetica, sans-serif;">
-          <tr><td style="color:#ef4e22; font-size:15px; font-weight:bold; font-family:Arial, Helvetica, sans-serif;">{texto}</td></tr>
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:18px; font-family:Arial;">
+          <tr><td style="color:#ef4e22; font-size:15px; font-weight:bold; font-family:Arial;">{texto}</td></tr>
         </table>
         """
 
@@ -2942,20 +2940,20 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{titulo}</title>
     </head>
-    <body style="margin:0; padding:20px; background-color:#f5f5f5; font-family:Arial, Helvetica, sans-serif; color:#333333; line-height:1.6;">
+    <body style="margin:0; padding:20px; background-color:#f5f5f5; font-family:Arial; color:#333333; line-height:1.6;">
         <!--[if mso]>
         <table role="presentation" width="700" cellspacing="0" cellpadding="0" border="0" align="center">
         <tr><td>
         <![endif]-->
-        <table role="presentation" width="100%" max-width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="max-width:700px; width:100%; background-color:#ffffff; font-family:Arial, Helvetica, sans-serif;">
+        <table role="presentation" width="100%" max-width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="max-width:700px; width:100%; background-color:#ffffff; font-family:Arial;">
           <tr>
-            <td style="font-family:Arial, Helvetica, sans-serif;">
+            <td style="font-family:Arial;">
 
               {_header_html(titulo, hoje, imagens_kv)}
 
               <!-- Conteudo -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="font-family:Arial, Helvetica, sans-serif;">
-                <tr><td style="padding:24px; font-family:Arial, Helvetica, sans-serif;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="font-family:Arial;">
+                <tr><td style="padding:24px; font-family:Arial;">
 
                   {alerta_teste}
 
@@ -3053,14 +3051,14 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                   {subsecao_titulo("TOP 10 REVENDAS COM MAIOR % DE ACEITE")}
                   {tabelas_usar['aceite_rev'] if tabelas_usar.get('aceite_rev') else '<p><em>Sem dados de aceites por revenda.</em></p>'}
 
-                  <p style="margin-top:28px; font-size:16px; color:#155724; background-color:#d4edda; padding:14px 16px; border-radius:10px; border:1px solid #00a651; line-height:1.5; font-family:Arial, Helvetica, sans-serif;">
+                  <p style="margin-top:28px; font-size:16px; color:#155724; background-color:#d4edda; padding:14px 16px; border-radius:10px; border:1px solid #00a651; line-height:1.5; font-family:Arial;">
                     💪 <strong>Contamos com a atuação de cada regional para virarmos esse jogo e atingirmos nossas metas!</strong><br>
                     Vamos juntos fazer do +TOP um sucesso ainda maior!
                   </p>
 
-                  <p style="margin-top:24px; font-size:16px; font-family:Arial, Helvetica, sans-serif;">📋 Confira a <strong>base detalhada</strong> no anexo e direcione as ações com os seus times.</p>
+                  <p style="margin-top:24px; font-size:16px; font-family:Arial;">📋 Confira a <strong>base detalhada</strong> no anexo e direcione as ações com os seus times.</p>
 
-                  <p style="margin-top:16px; font-size:16px; font-family:Arial, Helvetica, sans-serif;">Abraços,<br><strong style="color:#00a651;">Time do +TOP</strong></p>
+                  <p style="margin-top:16px; font-size:16px; font-family:Arial;">Abraços,<br><strong style="color:#00a651;">Time do +TOP</strong></p>
 
                 </td></tr>
               </table>
