@@ -3057,7 +3057,7 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                     Vamos juntos fazer do +TOP um sucesso ainda maior!
                   </p>
 
-                  <p style="margin-top:24px; font-size:16px; font-family:Arial;">📋 Confira a <strong>base detalhada</strong> no anexo e direcione as ações com os seus times.</p>
+                  <p style="margin-top:24px; font-size:16px; font-family:Arial;">📋 No anexo, você encontra a <strong>base detalhada</strong> de todas as revendas participantes do Programa. Utilize essas informações para direcionar as ações com seus times.</p>
 
                   <p style="margin-top:16px; font-size:16px; font-family:Arial;">Abraços,<br><strong style="color:#00a651; font-family:Arial;">Time do +TOP</strong></p>
 
