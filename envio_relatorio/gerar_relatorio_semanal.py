@@ -867,8 +867,8 @@ def estilizar_tabela_html(df, destaque_coluna=None, destaque_menor_que_media=Non
             if "%" in col and is_num and not str(display).endswith("%"):
                 display = f"{display}%"
 
-            # Prefixa farol quando houver
-            display = f"{farol_celula}{display}" if farol_celula else display
+            # Posiciona farol à direita do valor
+            display = f"{display}{farol_celula}" if farol_celula else display
 
             html += f'<td style="border: 1px solid #cccccc; padding: 6px; text-align: {align}; font-family: Arial; {bg}">{display}</td>'
         html += "</tr>\n"
