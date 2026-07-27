@@ -782,11 +782,11 @@ def farol_html(valor, meta, tamanho=16):
     vermelho (abaixo de 70% da meta - critico).
     """
     if valor >= meta:
-        return f'<span style="font-size:{tamanho}px;">🟢</span>'
+        return f'<span style="font-size:{tamanho}px; font-family:Arial;">🟢</span>'
     elif valor >= meta * 0.7:
-        return f'<span style="font-size:{tamanho}px;">🟡</span>'
+        return f'<span style="font-size:{tamanho}px; font-family:Arial;">🟡</span>'
     else:
-        return f'<span style="font-size:{tamanho}px;">🔴</span>'
+        return f'<span style="font-size:{tamanho}px; font-family:Arial;">🔴</span>'
 
 
 def html_destaque(titulo, nome, regional, valor, sufixo="%", meta=None):
@@ -816,7 +816,7 @@ def estilizar_tabela_html(df, destaque_coluna=None, destaque_menor_que_media=Non
     destaque de valores abaixo da media.
     """
     if df.empty:
-        return "<p><em>Sem dados para exibir.</em></p>"
+        return "<p style='font-family:Arial;'><em>Sem dados para exibir.</em></p>"
 
     html = '<table style="border-collapse: collapse; width: 100%; font-family: Arial; font-size: 13px;">\n'
     html += "<thead><tr>"
@@ -1780,7 +1780,7 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
                 "ativos": "Ativos no +TOP",
                 "pct_ativos": "% Ativos",
             })
-            resultado["cadastros"]["alerta_titulo"] = "TOP 10 REVENDAS COM MENOR % DE ATIVOS"
+            resultado["cadastros"]["alerta_titulo"] = "Top 10 revendas com menor % de ativos"
             resultado["cadastros"]["alerta_subtitulo"] = ""
             resultado["cadastros"]["alerta_itens"] = itens_df
 
@@ -1838,7 +1838,7 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
                 "realizaram": "Realizado",
                 "pct_realizaram": "% Realizado",
             })
-            resultado["treinamentos"]["alerta_titulo"] = "TOP 10 REVENDAS COM MENOR % DE TREINAMENTOS CONCLUÍDOS"
+            resultado["treinamentos"]["alerta_titulo"] = "Top 10 revendas com menor % de treinamentos concluídos"
             resultado["treinamentos"]["alerta_subtitulo"] = ""
             resultado["treinamentos"]["alerta_itens"] = itens_df
 
@@ -1870,7 +1870,7 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
                     "aceitaram": "Aceitaram",
                     "pct_aceite": "% Aceite",
                 })
-                resultado["aceites"]["alerta_titulo"] = "TOP 10 REVENDAS COM MENOR % DE ACEITE"
+                resultado["aceites"]["alerta_titulo"] = "Top 10 revendas com menor % de aceite"
                 resultado["aceites"]["alerta_subtitulo"] = ""
                 resultado["aceites"]["alerta_itens"] = itens_df
 
@@ -2633,7 +2633,7 @@ def _header_html(titulo, hoje, imagens_kv=None):
 
     bg_style = f'background-image: url(cid:{fundo_cid}); background-size: cover; background-position: center;' if fundo_cid else 'background-color: #f5f5f5;'
 
-    logo_html = f'<img src="cid:{logo_cid}" alt="Logo +TOP" width="220" style="display:block;">' if logo_cid else '<span style="font-size:24px; font-weight:bold;">+top</span>'
+    logo_html = f'<img src="cid:{logo_cid}" alt="Logo +TOP" width="220" style="display:block;">' if logo_cid else '<span style="font-size:24px; font-weight:bold; font-family:Arial;">+top</span>'
     # TOM posicionado à direita, próximo à faixa laranja (padding-bottom reduzido)
     tom_html = f'<img src="cid:{tom_cid}" alt="Tom +TOP" width="120" style="display:block;" align="bottom">' if tom_cid else ''
 
@@ -2729,21 +2729,21 @@ def _destaques_meta_html(
             )
 
         bloco = (
-            f"<div style='margin-bottom:16px;'>"
-            f"<div style='font-size:16px; font-weight:bold; margin-bottom:6px;'>"
+            f"<div style='margin-bottom:16px; font-family:Arial;'>"
+            f"<div style='font-size:16px; font-weight:bold; margin-bottom:6px; font-family:Arial;'>"
             f"🟢 Regional <strong>{regional}</strong></div>"
-            f"<div style='font-size:14px; line-height:1.7;'>"
+            f"<div style='font-size:14px; line-height:1.7; font-family:Arial;'>"
             + "<br>".join(linhas_rev)
             + "</div></div>"
         )
         blocos_regional.append(bloco)
 
     conteudo = (
-        f"<div style='font-size:18px; font-weight:bold; margin-bottom:4px;'>"
+        f"<div style='font-size:18px; font-weight:bold; margin-bottom:4px; font-family:Arial;'>"
         f"🎉 {titulo}</div>"
-        f"<div style='font-size:15px; font-weight:bold; margin-bottom:12px;'>"
+        f"<div style='font-size:15px; font-weight:bold; margin-bottom:12px; font-family:Arial;'>"
         f"{subtitulo}</div>"
-        f"<div style='font-size:14px; margin-bottom:12px;'>"
+        f"<div style='font-size:14px; margin-bottom:12px; font-family:Arial;'>"
         f"As revendas abaixo atingiram ou superaram o objetivo mínimo de <strong>{meta:.0f}%</strong>:</div>"
         + "\n".join(blocos_regional)
     )
@@ -2781,7 +2781,7 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
     hoje = date.today().strftime("%d/%m/%Y")
     titulo = f"Relatório Semanal Programa +TOP — {regional_filtro}" if regional_filtro else "Relatório Semanal Programa +TOP"
 
-    alerta_teste = "<p style='color:#d9534f; font-weight:bold; margin:16px 0;'>[MODO TESTE - e-mail nao enviado]</p>" if teste else ""
+    alerta_teste = "<p style='color:#d9534f; font-weight:bold; margin:16px 0; font-family:Arial;'>[MODO TESTE - e-mail nao enviado]</p>" if teste else ""
 
     # Período de análise e últimas datas das bases
     def fmt_dt(dt):
@@ -2963,11 +2963,11 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   {_secao_html("CADASTROS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong>Queremos levar o +TOP ainda mais longe! A nossa meta mínima é de <span style='color:#00a651;'>{META_CADASTRO:.0f}%</span> de <span style='white-space:nowrap;'>cadastros ativos</span> e, até esta semana, já alcançamos <span style='color:#ef4e22;'>{f'{pct_geral:.1f}'.replace('.', ',')}%</span> da base engajada.</strong></p>"
-                      f"<p style='font-size:17px; margin:0; line-height:1.4;'><strong>Vamos juntos mobilizar as revendas para buscar o percentual restante!</strong></p>",
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; font-family:Arial;'><strong>Queremos levar o +TOP ainda mais longe! A nossa meta mínima é de <span style='color:#00a651; font-family:Arial;'>{META_CADASTRO:.0f}%</span> de <span style='white-space:nowrap; font-family:Arial;'>cadastros ativos</span> e, até esta semana, já alcançamos <span style='color:#ef4e22; font-family:Arial;'>{f'{pct_geral:.1f}'.replace('.', ',')}%</span> da base engajada.</strong></p>"
+                      f"<p style='font-size:17px; margin:0; line-height:1.4; font-family:Arial;'><strong>Vamos juntos mobilizar as revendas para buscar o percentual restante!</strong></p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
-                  {subsecao_titulo("POR REGIONAL")}
+                  {subsecao_titulo("Por regional")}
                   {tabelas_usar['cad_reg']}
                   {_img_html("grafico_cadastros" if "cadastros" in graficos else None, "Gráfico Cadastros")}
                   {_destaques_cadastro_html(cad_rev, imagens_kv=imagens_kv, imagens_tom=imagens_tom)}
@@ -2978,19 +2978,19 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                       imagens_kv=imagens_kv,
                       imagens_tom=imagens_tom,
                   )}
-                  {subsecao_titulo("TOP 10 REVENDAS COM MAIOR % DE ATIVOS")}
+                  {subsecao_titulo("Top 10 revendas com maior % de ativos")}
                   {tabelas_usar['cad_rev']}
 
                   {_secao_html("TREINAMENTOS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong>Nossa meta é ter, no mínimo, <span style='color:#00a651;'>{META_TREINAMENTOS:.0f}%</span> dos participantes aprovados e capacitados nos 2 treinamentos do mês.</strong></p>"
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong>Até o momento, apenas <span style='color:#ef4e22;'>{f'{pct_trein:.1f}'.replace('.', ',')}%</span> concluíram os cursos obrigatórios:</strong></p>"
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'>🔹 <strong>{nome_curso1}</strong> (SKU {dados['cursos_info'][4]})<br>"
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; font-family:Arial;'><strong>Nossa meta é ter, no mínimo, <span style='color:#00a651; font-family:Arial;'>{META_TREINAMENTOS:.0f}%</span> dos participantes aprovados e capacitados nos 2 treinamentos do mês.</strong></p>"
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; font-family:Arial;'><strong>Até o momento, apenas <span style='color:#ef4e22; font-family:Arial;'>{f'{pct_trein:.1f}'.replace('.', ',')}%</span> concluíram os cursos obrigatórios:</strong></p>"
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; font-family:Arial;'>🔹 <strong>{nome_curso1}</strong> (SKU {dados['cursos_info'][4]})<br>"
                       f"🔹 <strong>{nome_curso2}</strong> (SKU {dados['cursos_info'][5]})</p>"
-                      f"<p style='font-size:17px; margin:0; line-height:1.4;'><strong>Ainda temos um longo caminho até a meta! Garantir essa capacitação é fundamental para dominar o argumento de vendas dos vendedores para alavancar o nosso Sell Out.</strong></p>",
+                      f"<p style='font-size:17px; margin:0; line-height:1.4; font-family:Arial;'><strong>Ainda temos um longo caminho até a meta! Garantir essa capacitação é fundamental para dominar o argumento de vendas dos vendedores para alavancar o nosso Sell Out.</strong></p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
-                  {subsecao_titulo("POR REGIONAL")}
+                  {subsecao_titulo("Por regional")}
                   {tabelas_usar['trein_base_reg'] if tabelas_usar.get('trein_base_reg') else '<p><em>Sem dados.</em></p>'}
                   {_img_html("grafico_treinamentos" if "treinamentos" in graficos else None, "Gráfico Treinamentos")}
                   {_pontos_atencao_secao_html(
@@ -3013,20 +3013,20 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                       col_num="realizaram",
                       col_den="total_ativos",
                   )}
-                  {subsecao_titulo("TOP 10 REVENDAS COM MAIOR % DE TREINAMENTOS REALIZADOS")}
+                  {subsecao_titulo("Top 10 revendas com maior % de treinamentos realizados")}
                   {tabelas_usar['trein_base_rev'] if tabelas_usar.get('trein_base_rev') else '<p><em>Sem dados.</em></p>'}
 
-                  <p style="font-size:12px; color:#666666; font-style:italic; margin-top:8px;">
+                  <p style="font-size:12px; color:#666666; font-style:italic; margin-top:8px; font-family:Arial;">
                     Dados de treinamentos são sempre D-1.
                   </p>
 
                   {_secao_html("ACEITES MENSAIS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4;'><strong>Nosso objetivo é atingir <span style='color:#00a651;'>{META_ACEITES:.0f}%</span> de aceites mensais em {nome_mes_pt_br(ano_mes=str(dados['mes_aceite']))}.</strong></p>"
-                      f"<p style='font-size:17px; margin:0; line-height:1.4;'><strong>Até o momento, <span style='color:#ef4e22;'>{f'{pct_aceite:.1f}'.replace('.', ',')}%</span> dos participantes realizaram o aceite no +TOP (validação mensal necessária para garantir os pontos do programa).</strong></p>",
+                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; font-family:Arial;'><strong>Nosso objetivo é atingir <span style='color:#00a651; font-family:Arial;'>{META_ACEITES:.0f}%</span> de aceites mensais em {nome_mes_pt_br(ano_mes=str(dados['mes_aceite']))}.</strong></p>"
+                      f"<p style='font-size:17px; margin:0; line-height:1.4; font-family:Arial;'><strong>Até o momento, <span style='color:#ef4e22; font-family:Arial;'>{f'{pct_aceite:.1f}'.replace('.', ',')}%</span> dos participantes realizaram o aceite no +TOP (validação mensal necessária para garantir os pontos do programa).</strong></p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
-                  {subsecao_titulo("POR REGIONAL")}
+                  {subsecao_titulo("Por regional")}
                   {tabelas_usar['aceite_reg']}
                   {_img_html("grafico_aceites" if "aceites" in graficos else None, "Gráfico Aceites")}
                   {_pontos_atencao_secao_html(
@@ -3049,7 +3049,7 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                       col_num="aceitaram",
                       col_den="total_ativos",
                   )}
-                  {subsecao_titulo("TOP 10 REVENDAS COM MAIOR % DE ACEITE")}
+                  {subsecao_titulo("Top 10 revendas com maior % de aceite")}
                   {tabelas_usar['aceite_rev'] if tabelas_usar.get('aceite_rev') else '<p><em>Sem dados de aceites por revenda.</em></p>'}
 
                   <p style="margin-top:28px; font-size:16px; color:#155724; background-color:#d4edda; padding:14px 16px; border-radius:10px; border:1px solid #00a651; line-height:1.5; font-family:Arial;">
@@ -3059,7 +3059,7 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   <p style="margin-top:24px; font-size:16px; font-family:Arial;">📋 Confira a <strong>base detalhada</strong> no anexo e direcione as ações com os seus times.</p>
 
-                  <p style="margin-top:16px; font-size:16px; font-family:Arial;">Abraços,<br><strong style="color:#00a651;">Time do +TOP</strong></p>
+                  <p style="margin-top:16px; font-size:16px; font-family:Arial;">Abraços,<br><strong style="color:#00a651; font-family:Arial;">Time do +TOP</strong></p>
 
                 </td></tr>
               </table>

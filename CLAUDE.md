@@ -3,7 +3,7 @@
 **Projeto:** Whirlpool - Programa + TOP  
 **Caminho:** `/home/thamiresvieira/projetos/Programa_mais_top`  
 **Ferramenta:** Microsoft Power BI  
-**Última atualização documentação:** 08/06/2026 (v1.3)  
+**Última atualização documentação:** 23/07/2026 (v1.4)  
 **Data registro:** 2026-06-03  
 
 **Responsáveis:**
@@ -355,6 +355,141 @@ O regulamento oficial do Programa +TOP foi analisado e cruzado com a documentaç
 > - Pontuação do Gerente (10%) ❌ **NÃO está no dashboard**
 >
 > O dashboard serve para **acompanhamento operacional**, mas **NÃO** representa a pontuação final de pagamento.
+
+---
+
+## 📧 Relatório Semanal Programa +TOP
+
+**Script:** `Programa_mais_top/envio_relatorio/gerar_relatorio_semanal.py`
+
+**Objetivo:** enviar toda semana um email consolidado com indicadores de cadastros, treinamentos e aceites do Programa +TOP, junto com uma base detalhada em Excel.
+
+### Bases utilizadas
+
+- `envio_relatorio/bases/cadastro.xlsx`
+- `envio_relatorio/bases/Base_treinamentos.xlsx`
+- `envio_relatorio/bases/WHP_Aceite_Mensal_*.xlsx`
+- `envio_relatorio/bases/bases_cadastro_hierarquia/*.xlsx` (hierarquias mensais oficiais)
+- `envio_relatorio/bases/emails_regionais.xlsx` (opcional, para envio por regional)
+
+### Layout e textos (atualizado em 23/07/2026)
+
+- **Cabeçalho:** imagem do +TOP + Tom com cubos Brastemp/Consul.
+- **KPIs no topo:** cards sem o texto "objetivo X%", títulos em caixa alta (`CADASTROS`, `TREINAMENTOS`, `ACEITES`) e legenda "Atingiu a meta mínima".
+- **Fonte:** Arial em todo o email e nos gráficos matplotlib.
+- **Tom:** mantido apenas no cabeçalho; removido do corpo do email.
+- **Textos dos balões:**
+  - Cadastros: mensagem de mobilização com "meta mínima de 85%".
+  - Treinamentos: meta mínima de 70%, cursos obrigatórios listados e chamada para capacitação.
+  - Aceites: objetivo de 70% de aceites mensais, com apenas a porcentagem atual em laranja.
+- **Cards "Parabéns!":** "atingiram ou superaram o objetivo mínimo de {X}%".
+- **Encerramento:** "Contamos com a atuação de cada regional para virarmos esse jogo..." + "Time do +TOP".
+
+### Normalização de nomes de revendas
+
+O `MAPA_REVENDA_PRINCIPAL` converte os nomes das hierarquias para o formato de exibição em title case/minúsculo (ex: `Líder`, `Império`, `Casas da Água`, `Gazin Atacado`).
+
+> **Nota:** o arquivo `LIDER - HIERARQUIA JUNHO.xlsx` vem com o nome e a coluna `REVENDA` preenchidos como `MAGAZAN`; o script força a revenda como `Líder`, normalizando acentos na comparação.
+
+### Execução
+
+```bash
+cd /home/thamiresvieira/projetos/Programa_mais_top/envio_relatorio
+python3 gerar_relatorio_semanal.py          # envio oficial
+python3 gerar_relatorio_semanal.py --teste  # gera local sem enviar
+```
+
+---
+
+## 📊 Relatórios Individuais por Gerente Regional
+
+**Criado em:** 16/07/2026  
+**Documentação completa:** `DOCUMENTACAO_RELATORIOS_GERENTES_REGIONAIS.md`
+
+### O que é
+
+Geração automática de um relatório Excel individual para cada **Gerente Regional** identificado nas hierarquias mensais oficiais (`GERENTE REGIONAL = SIM`).
+
+### Fonte de dados
+
+> **Importante:** utiliza **as mesmas bases** do projeto `envio_relatorio`. Não criar bases paralelas.
+
+- `envio_relatorio/bases/cadastro.xlsx`
+- `envio_relatorio/bases/hierarquia_rodrigo/*.xlsx`
+- `envio_relatorio/bases/Base_treinamentos.xlsx`
+- `envio_relatorio/bases/WHP_Aceite_Mensal_*.xlsx`
+- `envio_relatorio/bases/PROD_WHP_Participantes_banco.xlsx`
+
+### Saída
+
+```text
+Programa_mais_top/relatorios_gerentes_regionais/
+```
+
+### Script
+
+```text
+Programa_mais_top/envio_relatorio/gerar_relatorios_gerentes_regionais.py
+```
+
+### Estrutura do relatório (modelo)
+
+Arquivo modelo:
+
+```text
+Programa_mais_top/relatorio_regional_luis_carlos/relatorio_regional_luis_carlos_gazin_varejo_20260702_123050.xlsx
+```
+
+- **Aba Resumo:** dados do gerente + indicadores gerais (quantidade de lojas, total de CPFs distintos, ativos, % ativos, treinamentos, etc.)
+- **Aba Lojas:** uma linha por loja sob responsabilidade do gerente, com Código da Loja, CNPJ, Total de CPFs, Ativos, % Ativos e quantidade de concluintes por treinamento.
+- **Aba Detalhamento:** todos os vínculos CPF + loja da equipe, com CPF, nome, cargo, status de cadastro e flags de treinamento.
+  - Se um mesmo CPF estiver em mais de uma loja, aparece em uma linha para cada loja.
+  - O **Total da Equipe** no Resumo conta CPFs distintos; a soma dos CPFs na aba Lojas pode ser maior por causa de colaboradores em múltiplas lojas.
+
+### Status da validação (17/07/2026)
+
+| Métrica | Valor |
+|---------|-------|
+| Gerentes regionais esperados | 186 |
+| Arquivos na pasta | 186 |
+| Arquivos encontrados para gerentes esperados | 186 |
+| Gerentes sem arquivo | 0 |
+| Arquivos órfãos | 0 |
+| Relatórios OK (estrutura + consistência dos totais) | 186 |
+| Arquivos divergentes do modelo | 0 |
+
+**Scripts:**
+
+```text
+Programa_mais_top/envio_relatorio/gerar_relatorios_gerentes_regionais.py
+Programa_mais_top/envio_relatorio/validar_relatorios_gerentes_regionais.py
+```
+
+**Arquivo de validação completa:**
+
+```text
+Programa_mais_top/validacao_completa_relatorios_regionais.xlsx
+```
+
+**Nomenclatura dos arquivos:**
+
+```text
+relatorio_regional_{revenda}_{primeiro_nome}_{primeiro_sobrenome}_{DD_MM_AAAA}.xlsx
+```
+
+Exemplo: `relatorio_regional_becker_adilso_pasolini_16_07_2026.xlsx`
+
+> A data usa underline (`_`) como separador porque a barra (`/`) não é permitida em nomes de arquivo (caractere reservado de caminho).
+
+**Resultado:** todos os relatórios estão alinhados com o modelo.  
+**Nota:** o arquivo `LIDER - HIERARQUIA JUNHO.xlsx` vem com o nome e a coluna `REVENDA` preenchidos como `MAGAZAN`; o script `gerar_relatorio_semanal.py` foi ajustado para forçar a revenda como `Líder` (com acento e title case).
+
+### Regras de filtro aplicadas (17/07/2026)
+
+- **Desligados:** se um CPF tiver qualquer registro com `DESLIGADO = SIM`, `FÉRIAS`, `BENEFÍCIO` ou diferente de `NÃO` em qualquer arquivo de hierarquia, ele é removido por completo dos relatórios.
+- **Próprio gerente regional:** o CPF do próprio gerente regional é removido da equipe e não entra nos cálculos de Total da Equipe, Ativos, Treinamentos nem na aba Lojas.
+- **CPF/CNPJ como texto:** salvos no Excel com formato de texto (`@`) e zeros à esquerda preservados.
+- **Status "Não cadastrado":** CPFs que existem na hierarquia mas não no cadastro base recebem o status "Não cadastrado".
 
 ---
 
