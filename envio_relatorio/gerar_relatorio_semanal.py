@@ -181,6 +181,7 @@ MAPA_REVENDA_PRINCIPAL = {
     "LASER ELETRO": "Laser Eletro",
     "NOSSO LAR LOJAS DE DEPTOS LTDA": "Nosso Lar",
     "MILLENA MOVEIS": "Millena",
+    "MILLENA": "Millena",
     "BECKER": "Becker",
     "BEMOL": "Bemol",
     "COLOMBO": "Colombo",
@@ -192,6 +193,9 @@ MAPA_REVENDA_PRINCIPAL = {
     "TAQI": "Taqi",
     "TELE RIO": "Tele Rio",
     "TELERIO": "Tele Rio",
+    "LASER": "Laser Eletro",
+    "LASER ELETRO": "Laser Eletro",
+    "NOSSO LAR": "Nosso Lar",
     "ZEMA": "Zema",
     "ELETROZEMA": "Zema",
     "KOERICH": "Koerich",
@@ -618,18 +622,28 @@ def mapeamento_revenda_regional(df_cad):
 
 
 def regional_por_revenda(revenda, mapa_regional):
-    """Busca regional no mapa de forma case-insensitiva e tratando CDA -> Casas da Água."""
+    """Busca regional no mapa de forma case-insensitive e tratando acentos/CDA."""
     if pd.isna(revenda):
         return None
     rev = str(revenda).strip()
     if not rev or rev.lower() == "nan":
         return None
-    if rev in mapa_regional:
-        return mapa_regional[rev]
-    rev_upper = rev.upper()
+
+    def _normalizar_busca(s):
+        s = str(s).strip().upper()
+        s = s.replace("Á", "A").replace("É", "E").replace("Í", "I").replace("Ó", "O").replace("Ú", "U")
+        s = s.replace("Â", "A").replace("Ê", "E").replace("Ô", "O")
+        s = s.replace("Ã", "A").replace("Ç", "C")
+        s = s.replace("'", "").replace("  ", " ")
+        return s
+
+    rev_norm = _normalizar_busca(rev)
+
+    # Match exato normalizado
     for k, v in mapa_regional.items():
-        if str(k).strip().upper() == rev_upper:
+        if _normalizar_busca(k) == rev_norm:
             return v
+
     # Fallback para Casas da Água via CDA (com ou sem acento)
     rev_lower = rev.lower().replace("á", "a").replace("ã", "a").replace("ç", "c")
     if rev_lower == "casas da agua" and "CDA" in mapa_regional:
@@ -782,21 +796,21 @@ def farol_html(valor, meta, tamanho=16):
     vermelho (abaixo de 70% da meta - critico).
     """
     if valor >= meta:
-        return f'<span style="font-size:{tamanho}px; font-family:Arial;">🟢</span>'
+        return f'<span style="font-size:{tamanho}px; font-family:Arial, Helvetica, sans-serif;">🟢</span>'
     elif valor >= meta * 0.7:
-        return f'<span style="font-size:{tamanho}px; font-family:Arial;">🟡</span>'
+        return f'<span style="font-size:{tamanho}px; font-family:Arial, Helvetica, sans-serif;">🟡</span>'
     else:
-        return f'<span style="font-size:{tamanho}px; font-family:Arial;">🔴</span>'
+        return f'<span style="font-size:{tamanho}px; font-family:Arial, Helvetica, sans-serif;">🔴</span>'
 
 
 def html_destaque(titulo, nome, regional, valor, sufixo="%", meta=None):
     """Gera conteúdo HTML de parabenização com farol e ordem regional -> revenda."""
     farol = farol_html(valor, meta, tamanho=18) if meta is not None else ""
     return (
-        f"<div style='font-size:18px; font-weight:bold; margin-bottom:4px; font-family:Arial;'>"
+        f"<div style='font-size:16px; font-weight:bold; margin-bottom:4px; font-family:Arial, Helvetica, sans-serif;'>"
         f"{farol} <strong>Parabéns.</strong></div>"
-        f"<div style='font-size:15px; font-weight:bold; margin-bottom:10px; font-family:Arial;'>{titulo}</div>"
-        f"<div style='font-family:Arial;'>A regional <strong>{regional}</strong> se destaca com a revenda <strong>{nome.upper()}</strong> "
+        f"<div style='font-size:16px; font-weight:bold; margin-bottom:10px; font-family:Arial, Helvetica, sans-serif;'>{titulo}</div>"
+        f"<div style='font-size:16px; font-family:Arial, Helvetica, sans-serif;'>A regional <strong>{regional}</strong> se destaca com a revenda <strong>{nome.upper()}</strong> "
         f"com <strong>{valor:.1f}{sufixo}</strong>.</div>"
     )
 
@@ -812,18 +826,19 @@ def estilizar_tabela_html(df, destaque_coluna=None, destaque_menor_que_media=Non
                           formato_inteiro=True, semaforo_coluna=None, meta_semaforo=None):
     """
     Gera tabela HTML estilizada a partir de DataFrame.
-    Suporta semaforo (verde/laranja/amarelo) para colunas percentuais e
-    destaque de valores abaixo da media.
+    Suporta semaforo (verde/laranja/amarelo) para colunas percentuais,
+    destaque de valores abaixo da media e coluna de variacao semanal
+    com setas coloridas.
     """
     if df.empty:
-        return "<p style='font-family:Arial;'><em>Sem dados para exibir.</em></p>"
+        return "<p style='font-family:Arial, Helvetica, sans-serif;'><em>Sem dados para exibir.</em></p>"
 
-    html = '<table style="border-collapse: collapse; width: 100%; font-family: Arial; font-size: 13px;">\n'
+    html = '<table style="border-collapse: collapse; width: 100%; font-family: Arial, Helvetica, sans-serif; font-size: 14px;">\n'
     html += "<thead><tr>"
     for col in df.columns:
         html += (
-            f'<th bgcolor="#ef4e22" style="border: 1px solid #cccccc; padding: 8px; background-color: #ef4e22; '
-            f'color: white; text-align: center; font-family: Arial;">{col}</th>'
+            f'<th bgcolor="#ef4e22" style="border: 1px solid #cccccc; padding: 10px 8px; background-color: #ef4e22; '
+            f'color: white; text-align: center; font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: bold;">{col}</th>'
         )
     html += "</tr></thead><tbody>\n"
 
@@ -832,10 +847,11 @@ def estilizar_tabela_html(df, destaque_coluna=None, destaque_menor_que_media=Non
         for col in df.columns:
             val = row[col]
             is_num = pd.api.types.is_number(val) and not pd.isna(val)
-            align = "right" if is_num else "left"
+            is_variacao = str(col).strip().upper().startswith("VARIAÇÃO")
+            align = "right" if is_num or is_variacao else "left"
 
             # Semaforo para colunas percentuais (verde / amarelo / vermelho)
-            bg = "background-color: #ffffff;"
+            bg = "background-color: #ffffff; color: #333333;"
             farol_celula = ""
             if semaforo_coluna and col == semaforo_coluna and is_num and meta_semaforo is not None:
                 v = float(val)
@@ -856,7 +872,17 @@ def estilizar_tabela_html(df, destaque_coluna=None, destaque_menor_que_media=Non
                     farol_celula = '🔴 '
 
             # Formatacao
-            if is_num and formato_inteiro:
+            if is_variacao:
+                # Preenche vazios/NaN como 0.0%
+                if is_num:
+                    v = float(val)
+                else:
+                    v = 0.0
+                seta = "↑" if v > 0 else ("↓" if v < 0 else "→")
+                cor_var = "#00a651" if v > 0 else ("#dc3545" if v < 0 else "#666666")
+                unidade = "%" if any(p in str(col).upper() for p in ["%", "VENDAS", "PONTUAÇÃO", "PONTOS"]) else "p.p."
+                display = f"<span style='color:{cor_var}; font-weight:bold;'>{v:+.1f} {unidade} {seta}</span>"
+            elif is_num and formato_inteiro:
                 display = formatar_inteiro(val)
             elif is_num:
                 display = f"{val:.1f}" if isinstance(val, float) else str(val)
@@ -864,13 +890,13 @@ def estilizar_tabela_html(df, destaque_coluna=None, destaque_menor_que_media=Non
                 display = "" if pd.isna(val) else str(val)
 
             # Adiciona % nas colunas percentuais quando nao estiver presente
-            if "%" in col and is_num and not str(display).endswith("%"):
+            if "%" in col and is_num and not str(display).endswith("%") and not is_variacao:
                 display = f"{display}%"
 
             # Posiciona farol à direita do valor
             display = f"{display}{farol_celula}" if farol_celula else display
 
-            html += f'<td style="border: 1px solid #cccccc; padding: 6px; text-align: {align}; font-family: Arial; {bg}">{display}</td>'
+            html += f'<td style="border: 1px solid #cccccc; padding: 8px; text-align: {align}; font-family: Arial, Helvetica, sans-serif; font-size: 14px; {bg}">{display}</td>'
         html += "</tr>\n"
 
     html += "</tbody></table>"
@@ -1557,13 +1583,215 @@ def calcular_aceites(df_aceite, df_cad, ano_mes, aba_aceite, usou_ultima_aba=Fal
 
 
 # ---------------------------------------------------------------------------
+# VENDAS E PONTUAÇÃO (variação mês atual × mês anterior)
+# ---------------------------------------------------------------------------
+VENDAS_PROCESSADAS_DIR = BASE_DIR.parent / "bases" / "Vendas Processadas"
+
+
+def _expandir_revenda_composta(df):
+    """Divide linhas com revenda composta (ex: 'MM VAREJO / MM ATACADO') em duas."""
+    if df is None or df.empty:
+        return df
+    novas_linhas = []
+    for _, row in df.iterrows():
+        rev = str(row.get("revenda", "")).strip()
+        if " / " in rev:
+            partes = [p.strip() for p in rev.split(" / ")]
+            n = len(partes)
+            for parte in partes:
+                r = row.copy()
+                r["revenda"] = parte
+                # divide valores numericos proporcionalmente
+                for col in ["Vendas", "Pontuação"]:
+                    if col in r and pd.notna(r[col]):
+                        r[col] = float(r[col]) / n
+                novas_linhas.append(r)
+        elif "/" in rev and "MM VAREJO" in rev.upper() and "MM ATACADO" in rev.upper():
+            partes = [p.strip() for p in rev.split("/")]
+            n = len(partes)
+            for parte in partes:
+                r = row.copy()
+                r["revenda"] = parte
+                for col in ["Vendas", "Pontuação"]:
+                    if col in r and pd.notna(r[col]):
+                        r[col] = float(r[col]) / n
+                novas_linhas.append(r)
+        else:
+            novas_linhas.append(row)
+    return pd.DataFrame(novas_linhas).reset_index(drop=True)
+
+
+def _agregar_vendas_por_revenda(df, mapa_regional=None):
+    """Agrega vendas/pontuação por regional_curta + revenda."""
+    if df is None or df.empty:
+        return pd.DataFrame(columns=["regional_curta", "revenda", "Vendas", "Pontuação"])
+
+    df = df.copy()
+    # Normaliza nomes de colunas para case-insensitive
+    col_map = {str(c).strip().lower(): c for c in df.columns}
+    col_revenda = col_map.get("revenda")
+    col_vendas = col_map.get("vendas", "Vendas")
+    col_pontos = col_map.get("pontuação", "Pontuação")
+    col_pontos_alt = col_map.get("pontuacao", "Pontuação")
+    if col_revenda is None:
+        logger.warning("Arquivo de vendas não possui coluna 'Revenda'. Ignorado.")
+        return pd.DataFrame(columns=["regional_curta", "revenda", "Vendas", "Pontuação"])
+
+    df["revenda"] = df[col_revenda].apply(normalizar_revenda_hierarquia)
+    df = _expandir_revenda_composta(df)
+
+    # Inferir regional a partir do cadastro quando disponível
+    if mapa_regional is not None:
+        df["regional_curta"] = df["revenda"].apply(lambda r: regional_curta(regional_por_revenda(r, mapa_regional)))
+    else:
+        df["regional_curta"] = None
+
+    # Fallback: tenta usar coluna Regional do arquivo (raramente preenchida)
+    col_regional = col_map.get("regional")
+    if col_regional is not None:
+        df["regional_curta"] = df["regional_curta"].fillna(df[col_regional].apply(regional_curta))
+
+    # Remove revendas sem regional conhecida ou sem nome
+    df = df.dropna(subset=["revenda"])
+    df = df[df["revenda"].astype(str).str.strip() != ""]
+
+    # Renomeia colunas de vendas/pontuação para padronizar
+    rename_cols = {col_vendas: "Vendas", col_pontos: "Pontuação"}
+    if col_pontos_alt in df.columns and col_pontos not in df.columns:
+        rename_cols[col_pontos_alt] = "Pontuação"
+    df = df.rename(columns=rename_cols)
+
+    agg = df.groupby(["regional_curta", "revenda"], as_index=False).agg(
+        Vendas=("Vendas", "sum"),
+        Pontuação=("Pontuação", "sum"),
+    )
+    agg["Vendas"] = agg["Vendas"].fillna(0)
+    agg["Pontuação"] = agg["Pontuação"].fillna(0)
+    return agg
+
+
+def carregar_vendas_meses(mapa_regional=None):
+    """
+    Carrega os dois meses mais recentes de Vendas Processadas.
+    Retorna (df_mes_atual, df_mes_anterior, label_atual, label_anterior).
+    """
+    if not VENDAS_PROCESSADAS_DIR.exists():
+        logger.warning(f"Pasta de vendas processadas não encontrada: {VENDAS_PROCESSADAS_DIR}")
+        return None, None, None, None
+
+    arquivos = sorted(VENDAS_PROCESSADAS_DIR.glob("*.xlsx"))
+    # Filtra padrao YYYY_MM.xlsx
+    arquivos_validos = [a for a in arquivos if re.match(r"\d{4}_\d{2}\.xlsx$", a.name, re.IGNORECASE)]
+    if len(arquivos_validos) < 2:
+        logger.warning("Menos de 2 arquivos de vendas encontrados. Variação não será calculada.")
+        return None, None, None, None
+
+    # Ordena por nome (YYYY_MM) do mais recente para o mais antigo
+    arquivos_validos = sorted(arquivos_validos, key=lambda a: a.stem, reverse=True)
+    arq_atual, arq_anterior = arquivos_validos[0], arquivos_validos[1]
+
+    try:
+        df_atual_raw = pd.read_excel(arq_atual)
+        df_anterior_raw = pd.read_excel(arq_anterior)
+    except Exception as e:
+        logger.error(f"Falha ao ler arquivos de vendas: {e}")
+        return None, None, None, None
+
+    ano_atual, mes_atual = arq_atual.stem.split("_")
+    ano_anterior, mes_anterior = arq_anterior.stem.split("_")
+    meses_pt = {
+        "01": "Janeiro", "02": "Fevereiro", "03": "Março", "04": "Abril",
+        "05": "Maio", "06": "Junho", "07": "Julho", "08": "Agosto",
+        "09": "Setembro", "10": "Outubro", "11": "Novembro", "12": "Dezembro",
+    }
+    label_atual = f"{meses_pt[mes_atual]}/{ano_atual}"
+    label_anterior = f"{meses_pt[mes_anterior]}/{ano_anterior}"
+
+    df_atual = _agregar_vendas_por_revenda(df_atual_raw, mapa_regional)
+    df_anterior = _agregar_vendas_por_revenda(df_anterior_raw, mapa_regional)
+
+    logger.info(
+        f"Vendas carregadas: {arq_atual.name} ({len(df_atual)} revendas) e "
+        f"{arq_anterior.name} ({len(df_anterior)} revendas)"
+    )
+    return df_atual, df_anterior, label_atual, label_anterior
+
+
+def calcular_variacao_vendas_revenda(df_atual, df_anterior):
+    """Calcula variação percentual de vendas e pontuação por revenda."""
+    if df_atual is None or df_anterior is None or df_atual.empty or df_anterior.empty:
+        return pd.DataFrame()
+
+    df = df_atual.merge(
+        df_anterior,
+        on=["regional_curta", "revenda"],
+        how="outer",
+        suffixes=("_atual", "_anterior"),
+    )
+
+    for col in ["Vendas_atual", "Vendas_anterior", "Pontuação_atual", "Pontuação_anterior"]:
+        df[col] = pd.to_numeric(df.get(col, 0), errors="coerce").fillna(0)
+
+    df["Variação % Vendas"] = np.where(
+        df["Vendas_anterior"] == 0,
+        np.where(df["Vendas_atual"] > 0, np.nan, 0),
+        ((df["Vendas_atual"] - df["Vendas_anterior"]) / df["Vendas_anterior"] * 100).round(1),
+    )
+    df["Variação % Pontuação"] = np.where(
+        df["Pontuação_anterior"] == 0,
+        np.where(df["Pontuação_atual"] > 0, np.nan, 0),
+        ((df["Pontuação_atual"] - df["Pontuação_anterior"]) / df["Pontuação_anterior"] * 100).round(1),
+    )
+
+    df = df.dropna(subset=["regional_curta", "revenda"])
+    df["regional_curta"] = df["regional_curta"].apply(regional_title_case)
+    return df
+
+
+def preparar_tabela_vendas_revenda(df_var):
+    """Prepara tabela Top 10 revendas por pontuação atual para exibição no e-mail."""
+    if df_var is None or df_var.empty:
+        return pd.DataFrame()
+
+    df = df_var.copy()
+    df = df.sort_values("Pontuação_atual", ascending=False).head(10)
+    df = df.rename(columns={
+        "regional_curta": "Regional",
+        "revenda": "Revenda",
+        "Vendas_atual": "Vendas Atual",
+        "Vendas_anterior": "Vendas Anterior",
+        "Pontuação_atual": "Pontos Atual",
+        "Pontuação_anterior": "Pontos Anterior",
+    })
+    # Ordem desejada
+    cols = [
+        "Regional", "Revenda",
+        "Vendas Atual", "Vendas Anterior", "Variação % Vendas",
+        "Pontos Atual", "Pontos Anterior", "Variação % Pontuação",
+    ]
+    return df[[c for c in cols if c in df.columns]]
+
+
+# ---------------------------------------------------------------------------
 # SNAPSHOT SEMANAL
 # ---------------------------------------------------------------------------
 def salvar_snapshot(dados):
-    """Salva snapshot dos indicadores atuais para comparação futura."""
-    cad_reg, _ = dados["cadastros"]
-    trein_reg, _ = dados["treinamentos"]
+    """Salva snapshot dos indicadores atuais (regional e por revenda) para comparação futura."""
+    cad_reg, cad_rev = dados["cadastros"]
+    trein_reg, trein_rev = dados["treinamentos"]
     aceite_reg = dados["aceites"]
+    aceite_rev = dados.get("aceites_rev")
+
+    def _dict_revenda(df, cols):
+        """Converte DataFrame por revenda em dict indexado por 'Regional|Revenda'."""
+        if df is None or df.empty:
+            return {}
+        df = df.copy()
+        reg_col = "regional" if "regional" in df.columns else "regional_curta"
+        if reg_col not in df.columns or "revenda" not in df.columns:
+            return {}
+        df["_chave"] = df[reg_col].astype(str) + "|" + df["revenda"].astype(str)
+        return df.set_index("_chave")[cols].to_dict("index")
 
     snapshot = {
         "data": date.today().isoformat(),
@@ -1571,6 +1799,9 @@ def salvar_snapshot(dados):
         "cadastros": cad_reg.set_index("regional_curta")[["ativos", "total", "pct_ativos"]].to_dict("index"),
         "treinamentos": trein_reg.set_index("regional_curta")[["realizaram", "total_ativos", "pct_realizaram"]].to_dict("index") if trein_reg is not None else {},
         "aceites": aceite_reg.set_index("regional")[["aceitaram", "total_ativos", "pct_aceite"]].to_dict("index"),
+        "cadastros_rev": _dict_revenda(cad_rev, ["ativos", "total", "pct_ativos"]),
+        "treinamentos_rev": _dict_revenda(trein_rev, ["realizaram", "total_ativos", "pct_realizaram"]),
+        "aceites_rev": _dict_revenda(aceite_rev, ["aceitaram", "total_ativos", "pct_aceite"]),
     }
 
     snapshot_path = SNAPSHOT_DIR / f"snapshot_{date.today():%Y%m%d}.json"
@@ -1593,6 +1824,46 @@ def carregar_snapshot_anterior():
         return json.load(f)
 
 
+def carregar_snapshot_mes_anterior(mes_referencia):
+    """
+    Carrega o snapshot mais recente do mês imediatamente anterior ao informado.
+    Usado para calcular variação mês atual × mês anterior por regional.
+    Filtra pela data real do snapshot (snap['data']), não apenas por mes_referencia,
+    para evitar que snapshots de julho marcados como mes_referencia=2026-06 sejam
+    usados no lugar do snapshot de 30/06.
+    """
+    try:
+        ano, mes = int(mes_referencia.split("-")[0]), int(mes_referencia.split("-")[1])
+        if mes == 1:
+            mes_ant = 12
+            ano_ant = ano - 1
+        else:
+            mes_ant = mes - 1
+            ano_ant = ano
+        mes_ant_str = f"{ano_ant:04d}-{mes_ant:02d}"
+    except Exception:
+        return None
+
+    snapshots = sorted(SNAPSHOT_DIR.glob("snapshot_*.json"))
+    candidatos = []
+    for s in snapshots:
+        try:
+            with open(s, "r", encoding="utf-8") as f:
+                snap = json.load(f)
+            data_snap = snap.get("data", "")
+            # Usa a data real do snapshot para garantir que seja do mês anterior
+            if str(data_snap).startswith(mes_ant_str):
+                candidatos.append((s, snap))
+        except Exception:
+            continue
+
+    if not candidatos:
+        return None
+
+    # Retorna o snapshot mais recente do mês anterior
+    return candidatos[-1][1]
+
+
 def calcular_evolucao(snapshot_atual, snapshot_anterior):
     """Calcula evolução dos indicadores por regional em relação ao snapshot anterior."""
     if snapshot_anterior is None:
@@ -1613,6 +1884,251 @@ def calcular_evolucao(snapshot_atual, snapshot_anterior):
         })
 
     return pd.DataFrame(evolucao).sort_values("var_pct", ascending=True)
+
+
+def complementar_snapshot_por_revenda(snapshot, mes_referencia, mapa_regional=None):
+    """
+    Se o snapshot do mês anterior não possuir dados por revenda, tenta complementá-los
+    a partir do relatório Excel mais recente do mês anterior e das bases históricas.
+    """
+    if snapshot is None:
+        return None
+
+    tem_tudo = (
+        len(snapshot.get("cadastros_rev", {})) > 0
+        and len(snapshot.get("treinamentos_rev", {})) > 0
+        and len(snapshot.get("aceites_rev", {})) > 0
+    )
+    if tem_tudo:
+        return snapshot
+
+    try:
+        ano, mes = int(mes_referencia.split("-")[0]), int(mes_referencia.split("-")[1])
+        if mes == 1:
+            mes_ant = 12
+            ano_ant = ano - 1
+        else:
+            mes_ant = mes - 1
+            ano_ant = ano
+        mes_ant_str = f"{ano_ant:04d}-{mes_ant:02d}"
+    except Exception:
+        return snapshot
+
+    # Localiza o relatório Excel mais recente do mês anterior
+    relatorios = sorted(Path(OUTPUT_DIR).glob("relatorio_top_*.xlsx"))
+    candidatos = []
+    for r in relatorios:
+        try:
+            # extrai data do nome YYYYMMDD
+            data_str = r.stem.split("_")[-1]
+            if len(data_str) == 8:
+                ano_rel = int(data_str[:4])
+                mes_rel = int(data_str[4:6])
+                if f"{ano_rel:04d}-{mes_rel:02d}" == mes_ant_str:
+                    candidatos.append(r)
+        except Exception:
+            continue
+
+    if not candidatos:
+        return snapshot
+
+    relatorio_anterior = candidatos[-1]
+    logger.info(f"Complementando snapshot por revenda a partir de {relatorio_anterior.name}")
+
+    try:
+        xl = pd.ExcelFile(relatorio_anterior)
+    except Exception as e:
+        logger.warning(f"Não foi possível ler relatório anterior: {e}")
+        return snapshot
+
+    # Cadastro por revenda
+    if "Cadastro_Revenda" in xl.sheet_names and not snapshot.get("cadastros_rev"):
+        df_cad_rev = pd.read_excel(relatorio_anterior, sheet_name="Cadastro_Revenda")
+        df_cad_rev.columns = [str(c).strip() for c in df_cad_rev.columns]
+        if {"Regional", "Revenda", "Ativos na Plataforma"}.issubset(set(df_cad_rev.columns)):
+            cad_rev_snap = {}
+            for _, row in df_cad_rev.iterrows():
+                chave = f"{regional_title_case(str(row['Regional']))}|{_normalizar_chave_revenda(str(row['Revenda']))}"
+                cad_rev_snap[chave] = {
+                    "ativos": int(row.get("Ativos na Plataforma", 0) or 0),
+                    "total": int(row.get("Total na Hierarquia", row.get("Ativos na Plataforma", 0)) or 0),
+                    "pct_ativos": float(row.get("% Ativos", 0) or 0),
+                }
+            snapshot["cadastros_rev"] = cad_rev_snap
+            logger.info(f"Cadastro por revenda complementado: {len(cad_rev_snap)} revendas")
+
+    # Treinamentos por revenda
+    if "Treinamento_Revenda" in xl.sheet_names and not snapshot.get("treinamentos_rev"):
+        df_trein_rev = pd.read_excel(relatorio_anterior, sheet_name="Treinamento_Revenda")
+        df_trein_rev.columns = [str(c).strip() for c in df_trein_rev.columns]
+        if {"Regional", "Revenda", "Realizado"}.issubset(set(df_trein_rev.columns)):
+            trein_rev_snap = {}
+            for _, row in df_trein_rev.iterrows():
+                chave = f"{regional_title_case(str(row['Regional']))}|{_normalizar_chave_revenda(str(row['Revenda']))}"
+                trein_rev_snap[chave] = {
+                    "realizaram": int(row.get("Realizado", 0) or 0),
+                    "total_ativos": int(row.get("Total na Hierarquia", row.get("Realizado", 0)) or 0),
+                    "pct_realizaram": float(row.get("% Realizado", 0) or 0),
+                }
+            snapshot["treinamentos_rev"] = trein_rev_snap
+            logger.info(f"Treinamentos por revenda complementado: {len(trein_rev_snap)} revendas")
+
+    # Aceites por revenda — tenta base histórica de aceite mensal do mês anterior
+    if not snapshot.get("aceites_rev"):
+        meses_nomes = {
+            1: "Janeiro", 2: "Fevereiro", 3: "Março", 4: "Abril", 5: "Maio", 6: "Junho",
+            7: "Julho", 8: "Agosto", 9: "Setembro", 10: "Outubro", 11: "Novembro", 12: "Dezembro",
+        }
+        # Padrão real das pastas: "Bases de Junho_26" (ano com 2 dígitos)
+        hist_dir = BASE_DIR.parent / "bases" / "Historico hierarquias" / f"Bases de {meses_nomes[mes_ant]}_{str(ano_ant)[-2:]}"
+        # Fallback para padrão com ano completo
+        if not hist_dir.exists():
+            hist_dir = BASE_DIR.parent / "bases" / "Historico hierarquias" / f"Bases de {meses_nomes[mes_ant]}_{ano_ant}"
+
+        aceite_file = None
+        if hist_dir.exists():
+            aceite_dir = hist_dir / "ACEITE MENSAL"
+            if aceite_dir.exists():
+                for f in aceite_dir.glob("*.xlsx"):
+                    if "corrigida" in f.name.lower() or "06" in f.name:
+                        aceite_file = f
+                        break
+                if aceite_file is None:
+                    aceite_file = next((f for f in aceite_dir.glob("*.xlsx") if not f.name.startswith("~")), None)
+
+        if aceite_file and aceite_file.exists():
+            try:
+                df_aceite_ant = pd.read_excel(aceite_file, sheet_name=0)
+                df_aceite_ant.columns = [str(c).strip() for c in df_aceite_ant.columns]
+                if "CPF" in df_aceite_ant.columns and "Revenda" in df_aceite_ant.columns:
+                    df_aceite_ant["cpf_limp"] = df_aceite_ant["CPF"].astype(str).str.replace(r"[^0-9]", "", regex=True)
+                    # Mapeia revenda para regional
+                    if mapa_regional:
+                        def _regional_sem_conta(r):
+                            r = str(r).strip().upper()
+                            if r.startswith("CONTA "):
+                                r = r[6:].strip()
+                            return regional_title_case(r)
+                        df_aceite_ant["regional"] = df_aceite_ant["Revenda"].apply(
+                            lambda r: _regional_sem_conta(regional_por_revenda(r, mapa_regional) or "")
+                        )
+                    else:
+                        df_aceite_ant["regional"] = ""
+
+                    agg = df_aceite_ant.groupby(["regional", "Revenda"])["cpf_limp"].nunique().reset_index()
+                    agg.columns = ["regional", "revenda", "aceitaram"]
+                    aceite_rev_snap = {}
+                    for _, row in agg.iterrows():
+                        if pd.isna(row["regional"]) or str(row["regional"]).strip() == "":
+                            continue
+                        reg_norm = regional_title_case(str(row["regional"]))
+                        rev_norm = _normalizar_chave_revenda(str(row["revenda"]))
+                        chave = f"{reg_norm}|{rev_norm}"
+                        aceite_rev_snap[chave] = {
+                            "aceitaram": int(row["aceitaram"]),
+                            "total_ativos": 0,
+                            "pct_aceite": 0,
+                        }
+                    snapshot["aceites_rev"] = aceite_rev_snap
+                    logger.info(f"Aceites por revenda complementado: {len(aceite_rev_snap)} revendas")
+            except Exception as e:
+                logger.warning(f"Erro ao ler base histórica de aceites: {e}")
+
+    return snapshot
+
+
+def calcular_variacao_revenda(df_atual, snapshot_anterior, tipo="cadastros", col_pct="pct_ativos"):
+    """
+    Calcula variação de pontos percentuais por revenda contra um snapshot anterior.
+    Pode ser usada para comparação semanal ou mensal, conforme o snapshot passado.
+    tipo: 'cadastros', 'treinamentos' ou 'aceites'.
+    Retorna DataFrame com colunas [regional_curta, revenda, variacao].
+    """
+    if snapshot_anterior is None or df_atual is None or df_atual.empty:
+        return pd.DataFrame(columns=["regional_curta", "revenda", "variacao"])
+
+    chave_snapshot = f"{tipo}_rev"
+    if chave_snapshot not in snapshot_anterior:
+        return pd.DataFrame(columns=["regional_curta", "revenda", "variacao"])
+
+    snap_rev = snapshot_anterior[chave_snapshot]
+
+    def _chave(row):
+        reg_col = "regional" if "regional" in row.index else "regional_curta"
+        return f"{row[reg_col]}|{row['revenda']}"
+
+    variacoes = []
+    for _, row in df_atual.iterrows():
+        chave = _chave(row)
+        pct_atual = float(row.get(col_pct, 0))
+        pct_anterior = float(snap_rev.get(chave, {}).get(col_pct, 0))
+        variacoes.append({
+            "regional_curta": row.get("regional" if "regional" in row.index else "regional_curta"),
+            "revenda": row.get("revenda"),
+            "variacao": round(pct_atual - pct_anterior, 1),
+        })
+
+    df_var = pd.DataFrame(variacoes)
+    if df_var.empty:
+        return pd.DataFrame(columns=["regional_curta", "revenda", "variacao"])
+    return df_var
+
+
+def _normalizar_chave_regional(s):
+    """Normaliza o nome da regional para comparação entre DataFrame e snapshot."""
+    return str(s).upper().replace("-", " ").replace("  ", " ").strip()
+
+
+def _normalizar_chave_revenda(s):
+    """Normaliza o nome da revenda para comparação entre DataFrame e snapshot."""
+    return nome_revenda_exibicao(str(s)).strip().upper()
+
+
+def calcular_variacao_quantidade_snapshot(df_atual, snapshot_anterior, chave_snapshot,
+                                           col_quantidade, col_regional="regional_curta",
+                                           col_revenda=None):
+    """
+    Calcula variação percentual da quantidade (col_quantidade) entre o mês atual
+    e um snapshot anterior. Pode ser usada por regional (col_revenda=None) ou por
+    revenda (informar col_revenda).
+
+    Retorna uma Series com a mesma ordem do df_atual, pronta para ser atribuída
+    como nova coluna de variação.
+    """
+    if snapshot_anterior is None or df_atual is None or df_atual.empty:
+        return pd.Series([np.nan] * len(df_atual), index=df_atual.index)
+
+    snap = snapshot_anterior.get(chave_snapshot, {})
+    if not snap:
+        return pd.Series([np.nan] * len(df_atual), index=df_atual.index)
+
+    # Normaliza chaves do snapshot para match insensível a hífen/espaço/acento/case
+    snap_norm = {}
+    for k, v in snap.items():
+        if isinstance(k, str) and "|" in k:
+            reg, rev = k.split("|", 1)
+            snap_norm[f"{_normalizar_chave_regional(reg)}|{_normalizar_chave_revenda(rev)}"] = v
+        else:
+            snap_norm[_normalizar_chave_regional(k)] = v
+
+    def _chave(row):
+        if col_revenda is not None:
+            return f"{_normalizar_chave_regional(row[col_regional])}|{_normalizar_chave_revenda(row[col_revenda])}"
+        return _normalizar_chave_regional(row[col_regional])
+
+    anteriores = []
+    for _, row in df_atual.iterrows():
+        chave = _chave(row)
+        anteriores.append(float(snap_norm.get(chave, {}).get(col_quantidade, 0)))
+
+    s_anterior = pd.Series(anteriores, index=df_atual.index)
+    s_atual = pd.to_numeric(df_atual[col_quantidade], errors="coerce").fillna(0)
+
+    return np.where(
+        s_anterior == 0,
+        np.where(s_atual > 0, np.nan, 0),
+        ((s_atual - s_anterior) / s_anterior * 100).round(1),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -1771,15 +2287,21 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
             limite=10, maior_melhor=False
         )
         if not piores_cad.empty:
-            itens_df = piores_cad[["regional_curta", "revenda", "total", "ativos", "pct_ativos"]].copy()
+            cols = ["regional_curta", "revenda", "total", "ativos", "pct_ativos"]
+            if "variacao" in piores_cad.columns:
+                cols.append("variacao")
+            itens_df = piores_cad[cols].copy()
             itens_df["revenda"] = itens_df["revenda"].str.title()
-            itens_df = itens_df.rename(columns={
+            rename = {
                 "regional_curta": "Regional",
                 "revenda": "Revenda",
                 "total": "Total de participantes",
                 "ativos": "Ativos no +TOP",
                 "pct_ativos": "% Ativos",
-            })
+            }
+            if "variacao" in itens_df.columns:
+                rename["variacao"] = "Variação %"
+            itens_df = itens_df.rename(columns=rename)
             resultado["cadastros"]["alerta_titulo"] = "Top 10 revendas com menor % de ativos"
             resultado["cadastros"]["alerta_subtitulo"] = ""
             resultado["cadastros"]["alerta_itens"] = itens_df
@@ -1829,15 +2351,21 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
             limite=10, maior_melhor=False
         )
         if not piores_rev.empty:
-            itens_df = piores_rev[["regional_curta", "revenda", "total_ativos", "realizaram", "pct_realizaram"]].copy()
+            cols = ["regional_curta", "revenda", "total_ativos", "realizaram", "pct_realizaram"]
+            if "variacao" in piores_rev.columns:
+                cols.append("variacao")
+            itens_df = piores_rev[cols].copy()
             itens_df["revenda"] = itens_df["revenda"].str.title()
-            itens_df = itens_df.rename(columns={
+            rename = {
                 "regional_curta": "Regional",
                 "revenda": "Revenda",
                 "total_ativos": "Total de participantes",
                 "realizaram": "Realizado",
                 "pct_realizaram": "% Realizado",
-            })
+            }
+            if "variacao" in itens_df.columns:
+                rename["variacao"] = "Variação %"
+            itens_df = itens_df.rename(columns=rename)
             resultado["treinamentos"]["alerta_titulo"] = "Top 10 revendas com menor % de treinamentos concluídos"
             resultado["treinamentos"]["alerta_subtitulo"] = ""
             resultado["treinamentos"]["alerta_itens"] = itens_df
@@ -1862,14 +2390,20 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
                 limite=10, maior_melhor=False
             )
             if not piores_aceite.empty:
-                itens_df = piores_aceite[["regional", "revenda", "total_ativos", "aceitaram", "pct_aceite"]].copy()
-                itens_df = itens_df.rename(columns={
+                cols = ["regional", "revenda", "total_ativos", "aceitaram", "pct_aceite"]
+                if "variacao" in piores_aceite.columns:
+                    cols.append("variacao")
+                itens_df = piores_aceite[cols].copy()
+                rename = {
                     "regional": "Regional",
                     "revenda": "Revenda",
                     "total_ativos": "Total de participantes",
                     "aceitaram": "Aceitaram",
                     "pct_aceite": "% Aceite",
-                })
+                }
+                if "variacao" in itens_df.columns:
+                    rename["variacao"] = "Variação %"
+                itens_df = itens_df.rename(columns=rename)
                 resultado["aceites"]["alerta_titulo"] = "Top 10 revendas com menor % de aceite"
                 resultado["aceites"]["alerta_subtitulo"] = ""
                 resultado["aceites"]["alerta_itens"] = itens_df
@@ -2024,8 +2558,9 @@ def _renomear_cadastro_reg(df):
         "ativos": "Ativos no +TOP",
         "pre_cadastro": "Pré-Cadastro",
         "pct_ativos": "% Ativos",
+        "variacao_pct_ativos": "Variação %",
     })
-    cols = ["Regional", "Total de participantes", "Ativos no +TOP", "Pré-Cadastro", "% Ativos"]
+    cols = ["Regional", "Total de participantes", "Ativos no +TOP", "Pré-Cadastro", "% Ativos", "Variação %"]
     return df[[c for c in cols if c in df.columns]]
 
 
@@ -2037,8 +2572,9 @@ def _renomear_cadastro_rev(df):
         "ativos": "Ativos no +TOP",
         "pre_cadastro": "Pré-Cadastro",
         "pct_ativos": "% Ativos",
+        "variacao": "Variação %",
     })
-    cols = ["Regional", "Revenda", "Total de participantes", "Ativos no +TOP", "Pré-Cadastro", "% Ativos"]
+    cols = ["Regional", "Revenda", "Total de participantes", "Ativos no +TOP", "Pré-Cadastro", "% Ativos", "Variação %"]
     return df[[c for c in cols if c in df.columns]]
 
 
@@ -2049,6 +2585,7 @@ def _renomear_trein_reg(df):
         "realizaram": "Realizado",
         "nao_realizaram": "Não Realizado",
         "pct_realizaram": "% Realizado",
+        "variacao": "Variação %",
     })
 
 
@@ -2060,6 +2597,7 @@ def _renomear_trein_rev(df):
         "realizaram": "Realizado",
         "nao_realizaram": "Não Realizado",
         "pct_realizaram": "% Realizado",
+        "variacao": "Variação %",
     })
 
 
@@ -2070,6 +2608,7 @@ def _renomear_aceite_reg(df):
         "aceitaram": "Aceitaram",
         "nao_aceitaram": "Não Aceitaram",
         "pct_aceite": "% Aceite",
+        "variacao": "Variação %",
     })
 
 
@@ -2082,8 +2621,9 @@ def _renomear_aceite_rev(df):
         "aceitaram": "Aceitaram",
         "nao_aceitaram": "Não Aceitaram",
         "pct_aceite": "% Aceite",
+        "variacao": "Variação %",
     })
-    cols = ["Regional", "Revenda", "Total de participantes", "Aceitaram", "Não Aceitaram", "% Aceite"]
+    cols = ["Regional", "Revenda", "Total de participantes", "Aceitaram", "Não Aceitaram", "% Aceite", "Variação %"]
     return df[[c for c in cols if c in df.columns]]
 
 
@@ -2226,9 +2766,12 @@ def preparar_tabela_base_treinamentos(cad_df, trein_df, nivel="regional"):
 
     if trein_df is not None and not trein_df.empty:
         trein_cols = chaves + ["realizaram"]
+        if "variacao" in trein_df.columns:
+            trein_cols.append("variacao")
         df = df.merge(trein_df[trein_cols], on=chaves, how="left")
     else:
         df["realizaram"] = 0
+        df["variacao"] = np.nan
 
     df["realizaram"] = df["realizaram"].fillna(0).astype(int)
     df["nao_realizaram"] = df["total"] - df["realizaram"]
@@ -2240,6 +2783,7 @@ def preparar_tabela_base_treinamentos(cad_df, trein_df, nivel="regional"):
         "realizaram": "Realizado",
         "nao_realizaram": "Não Realizado",
         "pct_realizaram": "% Ambos",
+        "variacao": "Variação %",
     }
     if nivel == "revenda":
         rename["revenda"] = "Revenda"
@@ -2252,6 +2796,8 @@ def preparar_tabela_base_treinamentos(cad_df, trein_df, nivel="regional"):
         "Total de participantes", "Realizado",
         "Não Realizado", "% Ambos"
     ])
+    if "Variação %" in df.columns:
+        cols.append("Variação %")
     return df[cols].sort_values("% Ambos", ascending=False)
 
 
@@ -2265,11 +2811,14 @@ def preparar_tabela_base_aceites(cad_df, aceite_df, nivel="regional"):
     if aceite_df is not None and not aceite_df.empty:
         aceite_chaves = ["regional"] if nivel == "regional" else ["regional", "revenda"]
         aceite_cols = aceite_chaves + ["aceitaram"]
+        if "variacao" in aceite_df.columns:
+            aceite_cols.append("variacao")
         df_aceite = aceite_df[aceite_cols].copy()
         df_aceite = df_aceite.rename(columns={"regional": "regional_curta"})
         df = df.merge(df_aceite, on=chaves, how="left")
     else:
         df["aceitaram"] = 0
+        df["variacao"] = np.nan
 
     df["aceitaram"] = df["aceitaram"].fillna(0).astype(int)
     df["nao_aceitaram"] = df["total"] - df["aceitaram"]
@@ -2281,6 +2830,7 @@ def preparar_tabela_base_aceites(cad_df, aceite_df, nivel="regional"):
         "aceitaram": "Aceitaram",
         "nao_aceitaram": "Não Aceitaram",
         "pct_aceite": "% Aceite",
+        "variacao": "Variação %",
     }
     if nivel == "revenda":
         rename["revenda"] = "Revenda"
@@ -2292,6 +2842,8 @@ def preparar_tabela_base_aceites(cad_df, aceite_df, nivel="regional"):
     cols.extend([
         "Total de participantes", "Aceitaram", "Não Aceitaram", "% Aceite"
     ])
+    if "Variação %" in df.columns:
+        cols.append("Variação %")
     return df[cols].sort_values("% Aceite", ascending=False)
 
 
@@ -2417,6 +2969,10 @@ def preparar_tabelas(dados):
         tabelas["trein_c2_reg"] = estilizar_tabela_html(_renomear_trein_reg(c2_reg)) if c2_reg is not None and not c2_reg.empty else ""
         tabelas["trein_c2_rev"] = estilizar_tabela_html(_renomear_trein_rev(c2_rev)) if c2_rev is not None and not c2_rev.empty else ""
 
+    # Tabela de vendas/pontuação com variação mês atual × mês anterior
+    vendas_variacao = dados.get("vendas_variacao")
+    tabelas["vendas_rev"] = estilizar_tabela_html(preparar_tabela_vendas_revenda(vendas_variacao))
+
     return tabelas
 
 
@@ -2425,9 +2981,9 @@ def _destaque_tom_ok_html(texto, imagens_kv=None, imagens_tom=None):
     if not texto:
         return ""
     return f"""
-    <table cellpadding="0" cellspacing="0" border="0" style="margin:12px 0; width:100%; font-family:Arial;">
+    <table cellpadding="0" cellspacing="0" border="0" style="margin:12px 0; width:100%; font-family:Arial, Helvetica, sans-serif;">
       <tr>
-        <td valign="middle" style="padding:6px 10px; background-color:#d4edda; border-radius:8px; border:1px solid #00a651; color:#155724; font-size:13px; line-height:1.35; font-family:Arial;">
+        <td valign="middle" style="padding:10px 12px; background-color:#d4edda; border-radius:8px; border:1px solid #00a651; color:#155724; font-size:16px; line-height:1.4; font-family:Arial, Helvetica, sans-serif;">
           {texto}
         </td>
       </tr>
@@ -2440,11 +2996,12 @@ def _pontos_atencao_header_html():
 
 
 def _balao_tom_html(texto, imagens_kv=None, imagens_tom=None, tipo_tom="tom", alinhamento="esquerda", largura_tom=90):
-    """Cria balão de destaque sem imagem do Tom (Tom mantido apenas no cabeçalho)."""
+    """Cria balão de destaque sem imagem do Tom (Tom mantido apenas no cabeçalho).
+    Todos os textos internos usam Arial 16px para manter uniformidade de tamanho."""
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0; font-family:Arial;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0; font-family:Arial, Helvetica, sans-serif;">
       <tr>
-        <td valign="middle" style="padding:8px 12px; background-color:#ffffff; border-radius:12px; border:2px solid #00a651; color:#333333; font-size:15px; line-height:1.4; font-family:Arial;">
+        <td valign="middle" style="padding:16px; background-color:#ffffff; border-radius:12px; border:2px solid #00a651; color:#333333; font-size:16px; line-height:1.5; font-family:Arial, Helvetica, sans-serif;">
           {texto}
         </td>
       </tr>
@@ -2455,11 +3012,11 @@ def _balao_tom_html(texto, imagens_kv=None, imagens_tom=None, tipo_tom="tom", al
 def _pontos_atencao_secao_html(titulo, subtitulo, tabela_html, imagens_kv=None, imagens_tom=None):
     """Monta bloco de pontos de atenção com título grande, subtítulo e tabela."""
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px; font-family:Arial;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px; font-family:Arial, Helvetica, sans-serif;">
       <tr>
-        <td style="padding:14px; background-color:#fff3cd; border-left:5px solid #ef4e22; color:#856404; font-family:Arial;">
-          <div style="font-size:17px; font-weight:bold; margin-bottom:6px; font-family:Arial;">⚠️ {titulo}</div>
-          <div style="font-size:14px; margin-bottom:12px; font-family:Arial;">{subtitulo}</div>
+        <td style="padding:14px; background-color:#fff3cd; border-left:5px solid #ef4e22; color:#856404; font-family:Arial, Helvetica, sans-serif;">
+          <div style="font-size:16px; font-weight:bold; margin-bottom:6px; font-family:Arial, Helvetica, sans-serif;">⚠️ {titulo}</div>
+          <div style="font-size:16px; margin-bottom:12px; font-family:Arial, Helvetica, sans-serif;">{subtitulo}</div>
           {tabela_html}
         </td>
       </tr>
@@ -2473,9 +3030,9 @@ def _balao_insight_html(texto):
     if not texto:
         return ""
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0; font-family:Arial;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:12px 0; font-family:Arial, Helvetica, sans-serif;">
       <tr>
-        <td style="padding:14px; background-color:#ffffff; border-radius:12px; border:2px solid #00a651; color:#333333; font-size:15px; line-height:1.5; font-family:Arial;">
+        <td style="padding:14px; background-color:#ffffff; border-radius:12px; border:2px solid #00a651; color:#333333; font-size:16px; line-height:1.5; font-family:Arial, Helvetica, sans-serif;">
           {texto}
         </td>
       </tr>
@@ -2486,9 +3043,9 @@ def _balao_insight_html(texto):
 def _secao_html(titulo):
     """Retorna titulo de secao em tabela, compativel com Outlook."""
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:28px; font-family:Arial;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:28px; font-family:Arial, Helvetica, sans-serif;">
       <tr>
-        <td style="color:#ef4e22; font-size:18px; font-weight:bold; padding-bottom:8px; font-family:Arial;">
+        <td style="color:#ef4e22; font-size:16px; font-weight:bold; padding-bottom:8px; font-family:Arial, Helvetica, sans-serif;">
           {titulo}
         </td>
       </tr>
@@ -2510,10 +3067,10 @@ def _card_html(conteudo, tipo="insight"):
     bg, borda = cores.get(tipo, ("#f4f4f4", "#999999"))
 
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0; font-family:Arial;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0; font-family:Arial, Helvetica, sans-serif;">
       <tr>
         <td width="4" bgcolor="{borda}" style="font-size:0; line-height:0;">&nbsp;</td>
-        <td bgcolor="{bg}" style="padding:16px; color:#333333; font-size:16px; line-height:1.6; font-family:Arial;">
+        <td bgcolor="{bg}" style="padding:16px; color:#333333; font-size:16px; line-height:1.6; font-family:Arial, Helvetica, sans-serif;">
           {conteudo}
         </td>
       </tr>
@@ -2525,9 +3082,9 @@ def _img_html(cid, alt):
     if not cid:
         return ""
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0; font-family:Arial;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0; font-family:Arial, Helvetica, sans-serif;">
       <tr>
-        <td align="center" style="font-family:Arial;">
+        <td align="center" style="font-family:Arial, Helvetica, sans-serif;">
           <img src="cid:{cid}" alt="{alt}" width="700" style="max-width:700px; width:100%; height:auto; display:block;">
         </td>
       </tr>
@@ -2615,9 +3172,9 @@ def carregar_imagens_tom():
 def _metric_box(titulo, valor, meta=None):
     farol = farol_html(valor, meta, tamanho=38) if meta is not None else ""
     return f"""
-    <td width="33%" align="center" valign="middle" bgcolor="#ffffff" style="padding:20px 24px; color:#333333; font-size:16px; font-weight:bold; border-radius:10px; border:3px solid #ef4e22; font-family:Arial;">
-      <div style="font-size:16px; margin-bottom:6px; color:#ef4e22; font-family:Arial;">{titulo}</div>
-      <div style="font-size:42px; margin-bottom:8px; color:#ef4e22; line-height:1; white-space:nowrap; font-family:Arial;">
+    <td width="33%" align="center" valign="middle" bgcolor="#ffffff" style="padding:20px 24px; color:#333333; font-size:16px; font-weight:bold; border-radius:10px; border:3px solid #ef4e22; font-family:Arial, Helvetica, sans-serif;">
+      <div style="font-size:16px; margin-bottom:6px; color:#ef4e22; font-family:Arial, Helvetica, sans-serif;">{titulo}</div>
+      <div style="font-size:42px; margin-bottom:8px; color:#ef4e22; line-height:1; white-space:nowrap; font-family:Arial, Helvetica, sans-serif;">
         {farol}&nbsp;<strong>{valor}%</strong>
       </div>
     </td>
@@ -2633,20 +3190,20 @@ def _header_html(titulo, hoje, imagens_kv=None):
 
     bg_style = f'background-image: url(cid:{fundo_cid}); background-size: cover; background-position: center;' if fundo_cid else 'background-color: #f5f5f5;'
 
-    logo_html = f'<img src="cid:{logo_cid}" alt="Logo +TOP" width="220" style="display:block;">' if logo_cid else '<span style="font-size:24px; font-weight:bold; font-family:Arial;">+top</span>'
+    logo_html = f'<img src="cid:{logo_cid}" alt="Logo +TOP" width="220" style="display:block;">' if logo_cid else '<span style="font-size:24px; font-weight:bold; font-family:Arial, Helvetica, sans-serif;">+top</span>'
     # TOM posicionado à direita, próximo à faixa laranja (padding-bottom reduzido)
     tom_html = f'<img src="cid:{tom_cid}" alt="Tom +TOP" width="120" style="display:block;" align="bottom">' if tom_cid else ''
 
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="font-family:Arial;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="font-family:Arial, Helvetica, sans-serif;">
       <tr>
-        <td style="padding:0; font-family:Arial; {bg_style}">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial;">
+        <td style="padding:0; font-family:Arial, Helvetica, sans-serif; {bg_style}">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, Helvetica, sans-serif;">
             <tr>
-              <td style="padding:24px 24px 0 24px; font-family:Arial;" valign="top">
+              <td style="padding:24px 24px 0 24px; font-family:Arial, Helvetica, sans-serif;" valign="top">
                 {logo_html}
               </td>
-              <td align="right" style="padding:8px 24px 0 24px; font-family:Arial;" valign="bottom">
+              <td align="right" style="padding:8px 24px 0 24px; font-family:Arial, Helvetica, sans-serif;" valign="bottom">
                 {tom_html}
               </td>
             </tr>
@@ -2654,14 +3211,14 @@ def _header_html(titulo, hoje, imagens_kv=None):
         </td>
       </tr>
       <tr>
-        <td bgcolor="#ef4e22" style="padding:14px 24px; color:#ffffff; font-family:Arial;">
-          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial;">
+        <td bgcolor="#ef4e22" style="padding:14px 24px; color:#ffffff; font-family:Arial, Helvetica, sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="font-family:Arial, Helvetica, sans-serif;">
             <tr>
-              <td style="font-family:Arial;">
-                <h1 style="margin:0; font-size:18px; font-weight:bold; color:#ffffff; font-family:Arial;">{titulo}</h1>
+              <td style="font-family:Arial, Helvetica, sans-serif;">
+                <h1 style="margin:0; font-size:18px; font-weight:bold; color:#ffffff; font-family:Arial, Helvetica, sans-serif;">{titulo}</h1>
               </td>
-              <td align="right" style="font-family:Arial;">
-                <p style="margin:0; font-size:12px; color:#ffffff; font-family:Arial;">{hoje}</p>
+              <td align="right" style="font-family:Arial, Helvetica, sans-serif;">
+                <p style="margin:0; font-size:12px; color:#ffffff; font-family:Arial, Helvetica, sans-serif;">{hoje}</p>
               </td>
             </tr>
           </table>
@@ -2729,29 +3286,29 @@ def _destaques_meta_html(
             )
 
         bloco = (
-            f"<div style='margin-bottom:16px; font-family:Arial;'>"
-            f"<div style='font-size:16px; font-weight:bold; margin-bottom:6px; font-family:Arial;'>"
+            f"<div style='margin-bottom:16px; font-family:Arial, Helvetica, sans-serif;'>"
+            f"<div style='font-size:16px; font-weight:bold; margin-bottom:6px; font-family:Arial, Helvetica, sans-serif;'>"
             f"🟢 Regional <strong>{regional}</strong></div>"
-            f"<div style='font-size:14px; line-height:1.7; font-family:Arial;'>"
+            f"<div style='font-size:16px; line-height:1.7; font-family:Arial, Helvetica, sans-serif;'>"
             + "<br>".join(linhas_rev)
             + "</div></div>"
         )
         blocos_regional.append(bloco)
 
     conteudo = (
-        f"<div style='font-size:18px; font-weight:bold; margin-bottom:4px; font-family:Arial;'>"
+        f"<div style='font-size:16px; font-weight:bold; margin-bottom:4px; font-family:Arial, Helvetica, sans-serif;'>"
         f"🎉 {titulo}</div>"
-        f"<div style='font-size:15px; font-weight:bold; margin-bottom:12px; font-family:Arial;'>"
+        f"<div style='font-size:16px; font-weight:bold; margin-bottom:12px; font-family:Arial, Helvetica, sans-serif;'>"
         f"{subtitulo}</div>"
-        f"<div style='font-size:14px; margin-bottom:12px; font-family:Arial;'>"
+        f"<div style='font-size:16px; margin-bottom:12px; font-family:Arial, Helvetica, sans-serif;'>"
         f"As revendas abaixo atingiram ou superaram o objetivo mínimo de <strong>{meta:.0f}%</strong>:</div>"
         + "\n".join(blocos_regional)
     )
 
     return f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0; font-family:Arial;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0; font-family:Arial, Helvetica, sans-serif;">
       <tr>
-        <td valign="middle" style="padding:14px 16px; background-color:#d4edda; border-radius:12px; border:1px solid #00a651; color:#155724; font-size:14px; line-height:1.6; font-family:Arial;">
+        <td valign="middle" style="padding:14px 16px; background-color:#d4edda; border-radius:12px; border:1px solid #00a651; color:#155724; font-size:16px; line-height:1.6; font-family:Arial, Helvetica, sans-serif;">
           {conteudo}
         </td>
       </tr>
@@ -2781,7 +3338,7 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
     hoje = date.today().strftime("%d/%m/%Y")
     titulo = f"Relatório Semanal Programa +TOP — {regional_filtro}" if regional_filtro else "Relatório Semanal Programa +TOP"
 
-    alerta_teste = "<p style='color:#d9534f; font-weight:bold; margin:16px 0; font-family:Arial;'>[MODO TESTE - e-mail nao enviado]</p>" if teste else ""
+    alerta_teste = "<p style='color:#d9534f; font-weight:bold; margin:16px 0; font-family:Arial, Helvetica, sans-serif;'>[MODO TESTE - e-mail nao enviado]</p>" if teste else ""
 
     # Período de análise e últimas datas das bases
     def fmt_dt(dt):
@@ -2798,11 +3355,11 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
     periodo_texto = ""
     if periodo_inicio and periodo_fim:
         periodo_texto = f"""
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 16px 0; font-family:Arial;">
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 16px 0; font-family:Arial, Helvetica, sans-serif;">
           <tr>
-            <td style="padding:14px 16px; background-color:#f9f9f9; border-left:4px solid #ef4e22; border-radius:0 8px 8px 0; color:#333333; font-size:14px; line-height:1.6; font-family:Arial;">
+            <td style="padding:14px 16px; background-color:#f9f9f9; border-left:4px solid #ef4e22; border-radius:0 8px 8px 0; color:#333333; font-size:14px; line-height:1.6; font-family:Arial, Helvetica, sans-serif;">
               <strong>Período de análise:</strong> {periodo_inicio.strftime('%d/%m/%Y')} a {periodo_fim.strftime('%d/%m/%Y')}<br>
-              <span style="font-size:12px; color:#666666; font-family:Arial;">
+              <span style="font-size:12px; color:#666666; font-family:Arial, Helvetica, sans-serif;">
                 Último dado de cadastros: <strong>{fmt_dt(datas_ultimas.get('cadastro'))}</strong> &nbsp;|&nbsp;
                 Último dado de treinamentos: <strong>{fmt_dt(datas_ultimas.get('treinamento'))}</strong> &nbsp;|&nbsp;
                 Último dado de aceites: <strong>{fmt_dt(datas_ultimas.get('aceite'))}</strong>
@@ -2827,17 +3384,17 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
     pct_aceite = round(aceite_reg["aceitaram"].sum() / aceite_reg["total_ativos"].sum() * 100, 1) if not aceite_reg.empty else 0
 
     metricas = f"""
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0; font-family:Arial;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:20px 0; font-family:Arial, Helvetica, sans-serif;">
       <tr>
-        <td align="center" style="font-family:Arial;">
-          <table cellpadding="0" cellspacing="8" border="0" style="font-family:Arial;">
+        <td align="center" style="font-family:Arial, Helvetica, sans-serif;">
+          <table cellpadding="0" cellspacing="8" border="0" style="font-family:Arial, Helvetica, sans-serif;">
             <tr>
               {_metric_box('CADASTROS', pct_geral, META_CADASTRO)}
               {_metric_box('TREINAMENTOS', pct_trein, META_TREINAMENTOS)}
               {_metric_box('ACEITES', pct_aceite, META_ACEITES)}
             </tr>
           </table>
-          <p style="font-size:11px; color:#666666; margin-top:6px; font-family:Arial;">
+          <p style="font-size:11px; color:#666666; margin-top:6px; font-family:Arial, Helvetica, sans-serif;">
             🟢 Atingiu a meta mínima &nbsp;|&nbsp; 🟡 Entre 70% e a meta &nbsp;|&nbsp; 🔴 Abaixo de 70% da meta
           </p>
         </td>
@@ -2862,6 +3419,7 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
             "trein_c2_rev": "",
             "aceite_reg": estilizar_tabela_html(_renomear_aceite_reg(aceite_reg[aceite_reg["regional"] == regional_filtro])),
             "aceite_rev": "",
+            "vendas_rev": "",
         }
         # Tabelas consolidadas filtradas por regional
         cons_reg_f = preparar_tabela_consolidada(
@@ -2905,6 +3463,12 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
         )
         tabelas_usar["aceite_base_reg"] = estilizar_tabela_html(aceite_base_reg_f)
         tabelas_usar["aceite_base_rev"] = estilizar_tabela_html(aceite_base_rev_f)
+
+        # Tabela de vendas filtrada por regional
+        vendas_variacao = dados.get("vendas_variacao")
+        if vendas_variacao is not None and not vendas_variacao.empty:
+            vendas_rev_f = vendas_variacao[vendas_variacao["Regional"] == regional_filtro]
+            tabelas_usar["vendas_rev"] = estilizar_tabela_html(preparar_tabela_vendas_revenda(vendas_rev_f))
         trein_por_curso = dados.get("treinamentos_por_curso")
         trein_reg = dados["treinamentos"][0]
         trein_rev = dados["treinamentos"][1]
@@ -2928,8 +3492,8 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
     def subsecao_titulo(texto):
         return f"""
-        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:18px; font-family:Arial;">
-          <tr><td style="color:#ef4e22; font-size:15px; font-weight:bold; font-family:Arial;">{texto}</td></tr>
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:18px; font-family:Arial, Helvetica, sans-serif;">
+          <tr><td style="color:#ef4e22; font-size:16px; font-weight:bold; font-family:Arial, Helvetica, sans-serif;">{texto}</td></tr>
         </table>
         """
 
@@ -2940,20 +3504,20 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{titulo}</title>
     </head>
-    <body style="margin:0; padding:20px; background-color:#f5f5f5; font-family:Arial; color:#333333; line-height:1.6;">
+    <body style="margin:0; padding:20px; background-color:#f5f5f5; font-family:Arial, Helvetica, sans-serif; color:#333333; line-height:1.6;">
         <!--[if mso]>
         <table role="presentation" width="700" cellspacing="0" cellpadding="0" border="0" align="center">
         <tr><td>
         <![endif]-->
-        <table role="presentation" width="100%" max-width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="max-width:700px; width:100%; background-color:#ffffff; font-family:Arial;">
+        <table role="presentation" width="100%" max-width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="max-width:700px; width:100%; background-color:#ffffff; font-family:Arial, Helvetica, sans-serif;">
           <tr>
-            <td style="font-family:Arial;">
+            <td style="font-family:Arial, Helvetica, sans-serif;">
 
               {_header_html(titulo, hoje, imagens_kv)}
 
               <!-- Conteudo -->
-              <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="font-family:Arial;">
-                <tr><td style="padding:24px; font-family:Arial;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff" style="font-family:Arial, Helvetica, sans-serif;">
+                <tr><td style="padding:24px; font-family:Arial, Helvetica, sans-serif;">
 
                   {alerta_teste}
 
@@ -2963,8 +3527,8 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   {_secao_html("CADASTROS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; font-family:Arial;'><strong>Queremos levar o +TOP ainda mais longe! A nossa meta mínima é de <span style='color:#00a651; font-family:Arial;'>{META_CADASTRO:.0f}%</span> de <span style='white-space:nowrap; font-family:Arial;'>cadastros ativos</span> e, até esta semana, já alcançamos <span style='color:#ef4e22; font-family:Arial;'>{f'{pct_geral:.1f}'.replace('.', ',')}%</span> da base engajada.</strong></p>"
-                      f"<p style='font-size:17px; margin:0; line-height:1.4; font-family:Arial;'><strong>Vamos juntos mobilizar as revendas para buscar o percentual restante!</strong></p>",
+                      f"<p style='font-size:16px; margin:0 0 10px 0; line-height:1.5; font-family:Arial, Helvetica, sans-serif;'><strong>Queremos levar o +TOP ainda mais longe! A nossa meta mínima é de <span style='color:#00a651; font-family:Arial, Helvetica, sans-serif;'>{META_CADASTRO:.0f}%</span> de <span style='white-space:nowrap; font-family:Arial, Helvetica, sans-serif;'>cadastros ativos</span> e, até esta semana, já alcançamos <span style='color:#ef4e22; font-family:Arial, Helvetica, sans-serif;'>{f'{pct_geral:.1f}'.replace('.', ',')}%</span> da base engajada.</strong></p>"
+                      f"<p style='font-size:16px; margin:0; line-height:1.5; font-family:Arial, Helvetica, sans-serif;'><strong>Vamos juntos mobilizar as revendas para buscar o percentual restante!</strong></p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
                   {subsecao_titulo("Por regional")}
@@ -2983,11 +3547,11 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
 
                   {_secao_html("TREINAMENTOS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; font-family:Arial;'><strong>Nossa meta é ter, no mínimo, <span style='color:#00a651; font-family:Arial;'>{META_TREINAMENTOS:.0f}%</span> dos participantes aprovados e capacitados nos 2 treinamentos do mês.</strong></p>"
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; font-family:Arial;'><strong>Até o momento, apenas <span style='color:#ef4e22; font-family:Arial;'>{f'{pct_trein:.1f}'.replace('.', ',')}%</span> concluíram os cursos obrigatórios:</strong></p>"
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; font-family:Arial;'>🔹 <strong>{nome_curso1}</strong> (SKU {dados['cursos_info'][4]})<br>"
+                      f"<p style='font-size:16px; margin:0 0 10px 0; line-height:1.5; font-family:Arial, Helvetica, sans-serif;'><strong>Nossa meta é ter, no mínimo, <span style='color:#00a651; font-family:Arial, Helvetica, sans-serif;'>{META_TREINAMENTOS:.0f}%</span> dos participantes aprovados e capacitados nos 2 treinamentos do mês.</strong></p>"
+                      f"<p style='font-size:16px; margin:0 0 10px 0; line-height:1.5; font-family:Arial, Helvetica, sans-serif;'><strong>Até o momento, apenas <span style='color:#ef4e22; font-family:Arial, Helvetica, sans-serif;'>{f'{pct_trein:.1f}'.replace('.', ',')}%</span> concluíram os cursos obrigatórios:</strong></p>"
+                      f"<p style='font-size:16px; margin:0 0 10px 0; line-height:1.5; font-family:Arial, Helvetica, sans-serif;'>🔹 <strong>{nome_curso1}</strong> (SKU {dados['cursos_info'][4]})<br>"
                       f"🔹 <strong>{nome_curso2}</strong> (SKU {dados['cursos_info'][5]})</p>"
-                      f"<p style='font-size:17px; margin:0; line-height:1.4; font-family:Arial;'><strong>Ainda temos um longo caminho até a meta! Garantir essa capacitação é fundamental para dominar o argumento de vendas dos vendedores para alavancar o nosso Sell Out.</strong></p>",
+                      f"<p style='font-size:16px; margin:0; line-height:1.5; font-family:Arial, Helvetica, sans-serif;'><strong>Ainda temos um longo caminho até a meta! Garantir essa capacitação é fundamental para dominar o argumento de vendas dos vendedores para alavancar o nosso Sell Out.</strong></p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
                   {subsecao_titulo("Por regional")}
@@ -3016,14 +3580,14 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                   {subsecao_titulo("Top 10 revendas com maior % de treinamentos realizados")}
                   {tabelas_usar['trein_base_rev'] if tabelas_usar.get('trein_base_rev') else '<p><em>Sem dados.</em></p>'}
 
-                  <p style="font-size:12px; color:#666666; font-style:italic; margin-top:8px; font-family:Arial;">
+                  <p style="font-size:12px; color:#666666; font-style:italic; margin-top:8px; font-family:Arial, Helvetica, sans-serif;">
                     Dados de treinamentos são sempre D-1.
                   </p>
 
                   {_secao_html("ACEITES MENSAIS")}
                   {_balao_tom_html(
-                      f"<p style='font-size:17px; margin:0 0 10px 0; line-height:1.4; font-family:Arial;'><strong>Nosso objetivo é atingir <span style='color:#00a651; font-family:Arial;'>{META_ACEITES:.0f}%</span> de aceites mensais em {nome_mes_pt_br(ano_mes=str(dados['mes_aceite']))}.</strong></p>"
-                      f"<p style='font-size:17px; margin:0; line-height:1.4; font-family:Arial;'><strong>Até o momento, <span style='color:#ef4e22; font-family:Arial;'>{f'{pct_aceite:.1f}'.replace('.', ',')}%</span> dos participantes realizaram o aceite no +TOP (validação mensal necessária para garantir os pontos do programa).</strong></p>",
+                      f"<p style='font-size:16px; margin:0 0 10px 0; line-height:1.5; font-family:Arial, Helvetica, sans-serif;'><strong>Nosso objetivo é atingir <span style='color:#00a651; font-family:Arial, Helvetica, sans-serif;'>{META_ACEITES:.0f}%</span> de aceites mensais em {nome_mes_pt_br(ano_mes=str(dados['mes_aceite']))}.</strong></p>"
+                      f"<p style='font-size:16px; margin:0; line-height:1.5; font-family:Arial, Helvetica, sans-serif;'><strong>Até o momento, <span style='color:#ef4e22; font-family:Arial, Helvetica, sans-serif;'>{f'{pct_aceite:.1f}'.replace('.', ',')}%</span> dos participantes realizaram o aceite no +TOP (validação mensal necessária para garantir os pontos do programa).</strong></p>",
                       imagens_kv=imagens_kv, imagens_tom=imagens_tom, tipo_tom="apontando", alinhamento="esquerda"
                   )}
                   {subsecao_titulo("Por regional")}
@@ -3052,14 +3616,14 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                   {subsecao_titulo("Top 10 revendas com maior % de aceite")}
                   {tabelas_usar['aceite_rev'] if tabelas_usar.get('aceite_rev') else '<p><em>Sem dados de aceites por revenda.</em></p>'}
 
-                  <p style="margin-top:28px; font-size:16px; color:#155724; background-color:#d4edda; padding:14px 16px; border-radius:10px; border:1px solid #00a651; line-height:1.5; font-family:Arial;">
+                  <p style="margin-top:28px; font-size:16px; color:#155724; background-color:#d4edda; padding:14px 16px; border-radius:10px; border:1px solid #00a651; line-height:1.5; font-family:Arial, Helvetica, sans-serif;">
                     💪 <strong>Contamos com a atuação de cada regional para virarmos esse jogo e atingirmos nossas metas!</strong><br>
                     Vamos juntos fazer do +TOP um sucesso ainda maior!
                   </p>
 
-                  <p style="margin-top:24px; font-size:16px; font-family:Arial;">📋 No anexo, você encontra a <strong>base detalhada</strong> de todas as revendas participantes do Programa. Utilize essas informações para direcionar as ações com seus times.</p>
+                  <p style="margin-top:24px; font-size:16px; font-family:Arial, Helvetica, sans-serif;">📋 No anexo, você encontra a <strong>base detalhada</strong> de todas as revendas participantes do Programa. Utilize essas informações para direcionar as ações com seus times.</p>
 
-                  <p style="margin-top:16px; font-size:16px; font-family:Arial;">Abraços,<br><strong style="color:#00a651; font-family:Arial;">Time do +TOP</strong></p>
+                  <p style="margin-top:16px; font-size:16px; font-family:Arial, Helvetica, sans-serif;">Abraços,<br><strong style="color:#00a651; font-family:Arial, Helvetica, sans-serif;">Time do +TOP</strong></p>
 
                 </td></tr>
               </table>
@@ -3748,6 +4312,72 @@ def main():
             df_hier=bases.get("hierarquia"),
         )
 
+        # Vendas/pontuação para variação mês atual × mês anterior
+        # (carregamento mantido caso seja necessário no futuro, mas não exibido no e-mail)
+        mapa_regional_vendas = mapeamento_revenda_regional(df_cad)
+        vendas_atual, vendas_anterior, label_vendas_atual, label_vendas_anterior = carregar_vendas_meses(mapa_regional_vendas)
+        vendas_variacao = calcular_variacao_vendas_revenda(vendas_atual, vendas_anterior)
+        if vendas_variacao is not None and not vendas_variacao.empty:
+            logger.info(
+                f"Variação de vendas calculada: {len(vendas_variacao)} revendas "
+                f"({label_vendas_atual} vs {label_vendas_anterior})"
+            )
+
+        # Carrega snapshot do mês anterior para calcular variação de cadastros por regional
+        snapshot_mes_anterior = carregar_snapshot_mes_anterior(ano_mes)
+        if snapshot_mes_anterior:
+            mapa_regional = mapeamento_revenda_regional(df_cad)
+            snapshot_mes_anterior = complementar_snapshot_por_revenda(snapshot_mes_anterior, ano_mes, mapa_regional)
+
+        if snapshot_mes_anterior and "cadastros" in snapshot_mes_anterior:
+            ant_regional = {
+                _normalizar_chave_regional(reg): vals
+                for reg, vals in snapshot_mes_anterior["cadastros"].items()
+            }
+            cad_reg["ativos_anterior"] = (
+                cad_reg["regional_curta"].map(lambda r: ant_regional.get(_normalizar_chave_regional(r), {}).get("ativos", 0))
+            )
+            cad_reg["variacao_pct_ativos"] = np.where(
+                cad_reg["ativos_anterior"] == 0,
+                np.where(cad_reg["ativos"] > 0, np.nan, 0),
+                ((cad_reg["ativos"] - cad_reg["ativos_anterior"]) / cad_reg["ativos_anterior"] * 100).round(1),
+            )
+            cad_reg = cad_reg.drop(columns=["ativos_anterior"])
+            logger.info("Variação de cadastros por regional calculada via snapshot anterior.")
+        else:
+            logger.warning("Snapshot do mês anterior não encontrado. Variação de cadastros não calculada.")
+            cad_reg["variacao_pct_ativos"] = np.nan
+
+        # Variação de treinamentos (quantidade de realizaram) mês atual × mês anterior
+        if snapshot_mes_anterior:
+            trein_reg["variacao"] = calcular_variacao_quantidade_snapshot(
+                trein_reg, snapshot_mes_anterior, "treinamentos", "realizaram",
+                col_regional="regional_curta"
+            )
+            trein_rev["variacao"] = calcular_variacao_quantidade_snapshot(
+                trein_rev, snapshot_mes_anterior, "treinamentos_rev", "realizaram",
+                col_regional="regional_curta", col_revenda="revenda"
+            )
+            logger.info("Variação de treinamentos calculada via snapshot anterior.")
+        else:
+            trein_reg["variacao"] = np.nan
+            trein_rev["variacao"] = np.nan
+
+        # Variação de aceites (quantidade de aceitaram) mês atual × mês anterior
+        if snapshot_mes_anterior:
+            aceite_reg["variacao"] = calcular_variacao_quantidade_snapshot(
+                aceite_reg, snapshot_mes_anterior, "aceites", "aceitaram",
+                col_regional="regional"
+            )
+            aceite_rev["variacao"] = calcular_variacao_quantidade_snapshot(
+                aceite_rev, snapshot_mes_anterior, "aceites_rev", "aceitaram",
+                col_regional="regional_curta", col_revenda="revenda"
+            )
+            logger.info("Variação de aceites calculada via snapshot anterior.")
+        else:
+            aceite_reg["variacao"] = np.nan
+            aceite_rev["variacao"] = np.nan
+
         # -------------------------------------------------
         # VALIDAÇÃO PRÉ-ENVIO
         # -------------------------------------------------
@@ -3816,6 +4446,30 @@ def main():
 
         # Snapshot e evolução
         snapshot_anterior = carregar_snapshot_anterior()
+
+        # Calcula variação percentual da quantidade por revenda (mês atual × mês anterior)
+        cad_rev["variacao"] = calcular_variacao_quantidade_snapshot(
+            cad_rev, snapshot_mes_anterior, "cadastros_rev", "ativos",
+            col_regional="regional_curta", col_revenda="revenda"
+        )
+
+        if trein_rev is not None and not trein_rev.empty:
+            trein_rev["variacao"] = calcular_variacao_quantidade_snapshot(
+                trein_rev, snapshot_mes_anterior, "treinamentos_rev", "realizaram",
+                col_regional="regional_curta", col_revenda="revenda"
+            )
+
+        if aceite_rev is not None and not aceite_rev.empty:
+            aceite_rev["variacao"] = calcular_variacao_quantidade_snapshot(
+                aceite_rev, snapshot_mes_anterior, "aceites_rev", "aceitaram",
+                col_regional="regional_curta", col_revenda="revenda"
+            )
+
+        # Atualiza dados com variações calculadas
+        dados["cadastros"] = (cad_reg, cad_rev)
+        dados["treinamentos"] = (trein_reg, trein_rev)
+        dados["aceites_rev"] = aceite_rev
+
         salvar_snapshot(dados)
         evolucao = calcular_evolucao(
             {
