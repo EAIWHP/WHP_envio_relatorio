@@ -2306,13 +2306,6 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
             resultado["cadastros"]["alerta_subtitulo"] = ""
             resultado["cadastros"]["alerta_itens"] = itens_df
 
-        # Apenas 1 destaque geral (a melhor revenda do programa, que atingiu a meta)
-        dest = identificar_destaque(cad_rev, "pct_ativos", "revenda", maior_melhor=True, min_base=0, meta=META_CADASTRO)
-        if dest:
-            resultado["cadastros"]["destaque"] = html_destaque(
-                "Melhor % de ativos.", dest["nome"], dest["regional"], dest["valor"], meta=META_CADASTRO
-            )
-
     # --- Evolucao semanal ---
     if evolucao is not None and not evolucao.empty:
         partes = []
@@ -2456,20 +2449,6 @@ def gerar_insights_regional(
                 "Revendas da regional abaixo da média geral do programa. Precisam de reforço.<br>" + "<br>".join(linhas)
             )
 
-        resultado["cadastros"]["destaque"] = _destaques_meta_html(
-            cad_rev_f,
-            meta=META_CADASTRO,
-            col_pct="pct_ativos",
-            col_regional="regional_curta",
-            col_revenda="revenda",
-            titulo="Parabéns!",
-            subtitulo="Melhor % de ativos.",
-            imagens_kv=imagens_kv,
-            imagens_tom=imagens_tom,
-            col_num="ativos",
-            col_den="total",
-        )
-
     if evolucao is not None and not evolucao.empty:
         evo_f = evolucao[evolucao["regional"] == regional_filtro]
         if not evo_f.empty:
@@ -2507,20 +2486,6 @@ def gerar_insights_regional(
                 "Revendas da regional com treinamentos abaixo da media.<br>" + "<br>".join(linhas)
             )
 
-        resultado["treinamentos"]["destaque"] = _destaques_meta_html(
-            trein_rev_f,
-            meta=META_TREINAMENTOS,
-            col_pct="pct_realizaram",
-            col_regional="regional_curta",
-            col_revenda="revenda",
-            titulo="Parabéns!",
-            subtitulo="Melhor % de treinamentos concluídos.",
-            imagens_kv=imagens_kv,
-            imagens_tom=imagens_tom,
-            col_num="realizaram",
-            col_den="total_ativos",
-        )
-
     if not aceite_reg_f.empty:
         r = aceite_reg_f.iloc[0]
         media_aceite = round(aceite_reg["aceitaram"].sum() / aceite_reg["total_ativos"].sum() * 100, 1)
@@ -2531,19 +2496,12 @@ def gerar_insights_regional(
         )
 
         if aceite_rev_f is not None and not aceite_rev_f.empty:
-            resultado["aceites"]["destaque"] = _destaques_meta_html(
-                aceite_rev_f,
-                meta=META_ACEITES,
-                col_pct="pct_aceite",
-                col_regional="regional",
-                col_revenda="revenda",
-                titulo="Parabéns!",
-                subtitulo="Melhor % de aceite mensal.",
-                imagens_kv=imagens_kv,
-                imagens_tom=imagens_tom,
-                col_num="aceitaram",
-                col_den="total_ativos",
-            )
+            abaixo_media_aceite = aceite_rev_f[aceite_rev_f["pct_aceite"] < media_aceite].sort_values("pct_aceite", ascending=False).head(10)
+            if not abaixo_media_aceite.empty:
+                linhas = [f"{r['revenda'].upper()} {r['pct_aceite']:.0f}%" for _, r in abaixo_media_aceite.iterrows()]
+                resultado["aceites"]["alerta"] = (
+                    "Revendas da regional com aceite abaixo da media.<br>" + "<br>".join(linhas)
+                )
 
     return resultado
 
@@ -3533,8 +3491,6 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                   )}
                   {subsecao_titulo("Por regional")}
                   {tabelas_usar['cad_reg']}
-                  {_img_html("grafico_cadastros" if "cadastros" in graficos else None, "Gráfico Cadastros")}
-                  {_destaques_cadastro_html(cad_rev, imagens_kv=imagens_kv, imagens_tom=imagens_tom)}
                   {_pontos_atencao_secao_html(
                       insights.get("cadastros", {}).get("alerta_titulo", ""),
                       insights.get("cadastros", {}).get("alerta_subtitulo", ""),
@@ -3542,8 +3498,6 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                       imagens_kv=imagens_kv,
                       imagens_tom=imagens_tom,
                   )}
-                  {subsecao_titulo("Top 10 revendas com maior % de ativos")}
-                  {tabelas_usar['cad_rev']}
 
                   {_secao_html("TREINAMENTOS")}
                   {_balao_tom_html(
@@ -3556,7 +3510,6 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                   )}
                   {subsecao_titulo("Por regional")}
                   {tabelas_usar['trein_base_reg'] if tabelas_usar.get('trein_base_reg') else '<p><em>Sem dados.</em></p>'}
-                  {_img_html("grafico_treinamentos" if "treinamentos" in graficos else None, "Gráfico Treinamentos")}
                   {_pontos_atencao_secao_html(
                       insights.get("treinamentos", {}).get("alerta_titulo", ""),
                       insights.get("treinamentos", {}).get("alerta_subtitulo", ""),
@@ -3564,20 +3517,7 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                       imagens_kv=imagens_kv,
                       imagens_tom=imagens_tom,
                   )}
-                  {_destaques_meta_html(
-                      trein_rev,
-                      meta=META_TREINAMENTOS,
-                      col_pct="pct_realizaram",
-                      col_regional="regional_curta",
-                      col_revenda="revenda",
-                      titulo="Parabéns!",
-                      subtitulo="Melhor % de treinamentos concluídos.",
-                      imagens_kv=imagens_kv,
-                      imagens_tom=imagens_tom,
-                      col_num="realizaram",
-                      col_den="total_ativos",
-                  )}
-                  {subsecao_titulo("Top 10 revendas com maior % de treinamentos realizados")}
+                  {subsecao_titulo("Por revenda")}
                   {tabelas_usar['trein_base_rev'] if tabelas_usar.get('trein_base_rev') else '<p><em>Sem dados.</em></p>'}
 
                   <p style="font-size:12px; color:#666666; font-style:italic; margin-top:8px; font-family:Arial, Helvetica, sans-serif;">
@@ -3592,7 +3532,6 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                   )}
                   {subsecao_titulo("Por regional")}
                   {tabelas_usar['aceite_reg']}
-                  {_img_html("grafico_aceites" if "aceites" in graficos else None, "Gráfico Aceites")}
                   {_pontos_atencao_secao_html(
                       insights.get("aceites", {}).get("alerta_titulo", ""),
                       insights.get("aceites", {}).get("alerta_subtitulo", ""),
@@ -3600,20 +3539,7 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                       imagens_kv=imagens_kv,
                       imagens_tom=imagens_tom,
                   )}
-                  {_destaques_meta_html(
-                      aceite_rev,
-                      meta=META_ACEITES,
-                      col_pct="pct_aceite",
-                      col_regional="regional",
-                      col_revenda="revenda",
-                      titulo="Parabéns!",
-                      subtitulo="Melhor % de aceite mensal.",
-                      imagens_kv=imagens_kv,
-                      imagens_tom=imagens_tom,
-                      col_num="aceitaram",
-                      col_den="total_ativos",
-                  )}
-                  {subsecao_titulo("Top 10 revendas com maior % de aceite")}
+                  {subsecao_titulo("Por revenda")}
                   {tabelas_usar['aceite_rev'] if tabelas_usar.get('aceite_rev') else '<p><em>Sem dados de aceites por revenda.</em></p>'}
 
                   <p style="margin-top:28px; font-size:16px; color:#155724; background-color:#d4edda; padding:14px 16px; border-radius:10px; border:1px solid #00a651; line-height:1.5; font-family:Arial, Helvetica, sans-serif;">
@@ -4478,8 +4404,8 @@ def main():
             snapshot_anterior,
         )
 
-        # Gráficos (apenas para email consolidado)
-        graficos = gerar_graficos(cad_reg, trein_reg, aceite_reg)
+        # Gráficos desativados conforme solicitação da Rhus (29/07/2026)
+        graficos = {}
 
         # Salvar Excel consolidado
         excel_path = OUTPUT_DIR / f"base_detalhada_relatorio_semanal_programa_+TOP_{date.today():%d%m%Y}.xlsx"
