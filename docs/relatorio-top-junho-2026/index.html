@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relatório Geral Programa + TOP</title>
+  <link rel="stylesheet" href="assets/css/onepage.css?v=3" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="top-header">
+      <div class="brand">
+        <div class="brand-logo">
+          <span class="brand-plus">+</span>
+          <span class="brand-text">TOP</span>
+        </div>
+        <div class="header-title">
+          <h1>Relatório Geral Programa + TOP <span class="period" id="titulo-periodo">-</span></h1>
+        </div>
+      </div>
+      <div class="period-badge">
+        <span class="dot"></span>
+        <span>Período</span>
+        <span class="value" id="badge-periodo">-</span>
+      </div>
+    </header>
+
+    <!-- Resumo / KPIs -->
+    <section class="section">
+      <div class="section-header">
+        <h2>📊 Resumo Executivo</h2>
+        <div class="section-actions">
+          <button class="btn btn-primary" id="btn-exportar-csv">📥 Exportar CSV</button>
+        </div>
+      </div>
+
+      <div class="kpis" id="kpis-container">
+        <!-- Populado via JS -->
+      </div>
+
+      <div class="scorecards" id="scorecards-container">
+        <!-- Populado via JS -->
+      </div>
+    </section>
+
+    <!-- Alertas -->
+    <section class="section" id="secao-alertas">
+      <div class="section-header">
+        <h2>🚨 Principais Alertas</h2>
+      </div>
+      <div class="rules-callout">
+        <div class="rules-icon">ℹ️</div>
+        <div class="rules-content" id="alertas-container">
+          <!-- Populado via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Gráficos -->
+    <section class="section">
+      <div class="section-header">
+        <h2>📈 Análise Visual</h2>
+      </div>
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h4>Top 10 Revendas · Investimento Mês</h4>
+          <div class="chart-bars" id="chart-investimento">
+            <!-- Populado via JS -->
+          </div>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-bar" style="background: var(--accent);"></span>Investimento Mês</span>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h4>Top 10 Revendas · Não Investimento</h4>
+          <div class="chart-bars" id="chart-nao-investimento">
+            <!-- Populado via JS -->
+          </div>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-bar" style="background: var(--danger);"></span>Não Investimento</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tabela -->
+    <section class="section">
+      <div class="section-header">
+        <h2>🏆 Ranking por Revenda</h2>
+        <div class="section-actions">
+          <span class="legend-item"><span class="legend-bar" style="background: var(--primary);"></span>Meta atingida</span>
+          <span class="legend-item"><span class="legend-bar" style="background: var(--warning);"></span>Entre 50% e a meta</span>
+          <span class="legend-item"><span class="legend-bar" style="background: var(--danger);"></span>Abaixo de 50%</span>
+        </div>
+      </div>
+
+      <div class="filters">
+        <div class="filter-group">
+          <label>Buscar revenda</label>
+          <input type="text" id="filtro-revenda" placeholder="Nome da revenda..." />
+        </div>
+        <div class="filter-group">
+          <label>Regional</label>
+          <select id="filtro-regional">
+            <option value="">Todas</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Ranking</label>
+          <select id="filtro-ranking">
+            <option value="">Todos</option>
+            <option value="3">3 pontos</option>
+            <option value="2">2 pontos</option>
+            <option value="1">1 ponto</option>
+            <option value="0">0 pontos</option>
+          </select>
+        </div>
+        <button class="btn btn-secondary" id="btn-limpar">✕ Limpar filtros</button>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="ranking-table" id="tabela-revendas">
+          <thead>
+            <tr>
+              <th data-sort="Ranking">Rank</th>
+              <th data-sort="Revenda">Revenda</th>
+              <th data-sort="Regional">Regional</th>
+              <th class="numeric" data-sort="Cadastro (%)">Cadastro %</th>
+              <th class="numeric" data-sort="Treinamento (%)">Treinamento %</th>
+              <th class="numeric" data-sort="Aceite (%)">Aceite %</th>
+              <th class="numeric" data-sort="Investimento Mês (R$)">Investimento Mês</th>
+              <th class="numeric" data-sort="Não Investimento (R$)">Não Investimento</th>
+              <th class="numeric" data-sort="Vendas">Vendas</th>
+              <th class="numeric" data-sort="Var LM (%)">Var LM %</th>
+              <th class="numeric" data-sort="Var YOY (%)">Var YOY %</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-body">
+            <!-- Populado via JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Regras -->
+    <section class="section">
+      <div class="section-header">
+        <h2>📋 Regras e Métricas</h2>
+      </div>
+      <div class="rules-callout">
+        <div class="rules-icon">📖</div>
+        <div class="rules-content">
+          <p><strong>% Cadastro:</strong> Ativos no cadastro / Total na hierarquia ativa. Meta ≥ 85%.</p>
+          <p><strong>% Treinamento:</strong> Ativos que concluíram os 2 cursos obrigatórios / Base ativa. Meta ≥ 70%.</p>
+          <p><strong>% Aceite:</strong> Ativos com aceite mensal / Base ativa. Meta ≥ 70%.</p>
+          <p><strong>Investimento Mês:</strong> Total de pontuação da revenda na planilha Campanha +TOP (1 ponto = R$ 1,00).</p>
+          <p><strong>Não Investimento:</strong> Potencial Full − Investimento Mês. Potencial Full = total de CPFs na hierarquia ativa × média de Pontos Vendas por CPF ativo apto.</p>
+          <p><strong>Vendas:</strong> Qtd Peças vendidas no mês (coluna da planilha Campanha +TOP).</p>
+          <p><strong>Var LM / Var YOY:</strong> Variação percentual do mês atual vs mês anterior / mesmo mês do ano anterior.</p>
+          <p><strong>Ranking:</strong> 0 a 3 pontos. 1 ponto para cada meta atingida (Cadastro ≥85%, Treinamento ≥70%, Aceite ≥70%).</p>
+          <p><strong>Exemplos de Ranking:</strong> 98% cadastro, 87% treinamento, 95% aceite = 3 pontos | 90% cadastro, 50% treinamento, 95% aceite = 2 pontos | 45% cadastro, 8% treinamento, 76% aceite = 1 ponto | 45% cadastro, 8% treinamento, 60% aceite = 0 pontos.</p>
+          <p><strong>Farol:</strong> Verde = meta atingida · Amarelo = entre 50% e a meta · Vermelho = abaixo de 50%.</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      Programa +TOP · Whirlpool · Gerado em <span id="data-geracao">-</span>
+    </footer>
+  </div>
+
+  <script src="assets/js/onepage.js?v=3"></script>
+</body>
+</html>
