@@ -4324,7 +4324,7 @@ def main():
     parser.add_argument(
         "--tema-kpi",
         choices=list(TEMAS_KPI.keys()) + ["farol"],
-        default="preto",
+        default="farol",
         help=f"Cor dos cards de KPI no topo do e-mail. Opções: {', '.join(list(TEMAS_KPI.keys()) + ['farol'])}",
     )
     args = parser.parse_args()
