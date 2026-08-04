@@ -129,6 +129,42 @@ META_CADASTRO = 85.0
 META_TREINAMENTOS = 70.0
 META_ACEITES = 70.0
 
+# Faixas do farol (semáforo) por indicador (%)
+# Verde >= limite_verde; Amarelo >= limite_amarelo; Vermelho abaixo de limite_amarelo
+FAROL_CADASTRO_VERDE = 85.0
+FAROL_CADASTRO_AMARELO = 50.0
+FAROL_TREINAMENTOS_VERDE = 70.0
+FAROL_TREINAMENTOS_AMARELO = 30.0
+FAROL_ACEITES_VERDE = 70.0
+FAROL_ACEITES_AMARELO = 30.0
+
+# Temas visuais para os cards de KPI no topo do e-mail.
+# Cada tema define cor de borda, texto, número e fundo do card.
+TEMAS_KPI = {
+    "preto": {
+        "borda": "#000000",
+        "texto": "#000000",
+        "fundo": "#f8f9fa",  # branco gelo
+    },
+    "cinza": {
+        "borda": "#6c757d",
+        "texto": "#6c757d",
+        "fundo": "#f8f9fa",  # branco gelo
+    },
+    "cinza-escuro": {
+        "borda": "#343a40",
+        "texto": "#343a40",
+        "fundo": "#e9ecef",  # cinza claro
+    },
+}
+
+# Cores do card de KPI quando o tema é "farol" (verde/amarelo/vermelho conforme faixa).
+FAROL_KPI_CORES = {
+    "verde": {"fundo": "#d4edda", "borda": "#28a745", "texto": "#155724"},
+    "amarelo": {"fundo": "#fff3cd", "borda": "#ffc107", "texto": "#856404"},
+    "vermelho": {"fundo": "#f8d7da", "borda": "#dc3545", "texto": "#721c24"},
+}
+
 # Mapeamento de nomes de revenda para exibição (evita siglas)
 NOME_REVENDA_EXIBICAO = {
     "CDA": "Casas da Água",
@@ -790,17 +826,37 @@ def identificar_destaque(df, coluna_metrica, coluna_nome, maior_melhor=True, min
     }
 
 
-def farol_html(valor, meta, tamanho=16):
-    """Retorna emoji de farol de acordo com o valor vs meta.
-    Semáforo: verde (atingiu meta), amarelo (entre 70% e a meta),
-    vermelho (abaixo de 70% da meta - critico).
+def farol_html(valor, meta=None, tamanho=16, limite_amarelo=None, limite_verde=None):
+    """Retorna emoji de farol de acordo com as faixas fixas de cada indicador.
+    Se limite_verde/limite_amarelo forem informados, usa faixas fixas:
+      - verde: valor >= limite_verde
+      - amarelo: limite_amarelo <= valor < limite_verde
+      - vermelho: valor < limite_amarelo
+    Caso contrário, mantém comportamento proporcional à meta (legacy):
+      - verde: atingiu meta
+      - amarelo: entre 70% da meta e a meta
+      - vermelho: abaixo de 70% da meta
     """
+    emoji_verde = f'<span style="font-size:{tamanho}px; font-family:Arial, Helvetica, sans-serif;">🟢</span>'
+    emoji_amarelo = f'<span style="font-size:{tamanho}px; font-family:Arial, Helvetica, sans-serif;">🟡</span>'
+    emoji_vermelho = f'<span style="font-size:{tamanho}px; font-family:Arial, Helvetica, sans-serif;">🔴</span>'
+
+    if limite_verde is not None and limite_amarelo is not None:
+        if valor >= limite_verde:
+            return emoji_verde
+        elif valor >= limite_amarelo:
+            return emoji_amarelo
+        else:
+            return emoji_vermelho
+
+    if meta is None:
+        return ""
     if valor >= meta:
-        return f'<span style="font-size:{tamanho}px; font-family:Arial, Helvetica, sans-serif;">🟢</span>'
+        return emoji_verde
     elif valor >= meta * 0.7:
-        return f'<span style="font-size:{tamanho}px; font-family:Arial, Helvetica, sans-serif;">🟡</span>'
+        return emoji_amarelo
     else:
-        return f'<span style="font-size:{tamanho}px; font-family:Arial, Helvetica, sans-serif;">🔴</span>'
+        return emoji_vermelho
 
 
 def html_destaque(titulo, nome, regional, valor, sufixo="%", meta=None):
@@ -823,7 +879,8 @@ def formatar_inteiro(val):
 
 
 def estilizar_tabela_html(df, destaque_coluna=None, destaque_menor_que_media=None,
-                          formato_inteiro=True, semaforo_coluna=None, meta_semaforo=None):
+                          formato_inteiro=True, semaforo_coluna=None, meta_semaforo=None,
+                          limite_amarelo_semaforo=None, limite_verde_semaforo=None):
     """
     Gera tabela HTML estilizada a partir de DataFrame.
     Suporta semaforo (verde/laranja/amarelo) para colunas percentuais,
@@ -853,21 +910,35 @@ def estilizar_tabela_html(df, destaque_coluna=None, destaque_menor_que_media=Non
             # Semaforo para colunas percentuais (verde / amarelo / vermelho)
             bg = "background-color: #ffffff; color: #333333;"
             farol_celula = ""
-            if semaforo_coluna and col == semaforo_coluna and is_num and meta_semaforo is not None:
+            if semaforo_coluna and col == semaforo_coluna and is_num:
                 v = float(val)
-                if v >= meta_semaforo:
-                    bg = 'background-color: #d4edda; color: #155724;'  # verde
-                    farol_celula = '🟢 '
-                elif v >= meta_semaforo * 0.7:
-                    bg = 'background-color: #fff3cd; color: #856404;'  # amarelo
-                    farol_celula = '🟡 '
-                else:
-                    bg = 'background-color: #f8d7da; color: #721c24;'  # vermelho
-                    farol_celula = '🔴 '
+                # Prioriza faixas fixas quando informadas
+                if limite_verde_semaforo is not None and limite_amarelo_semaforo is not None:
+                    if v >= limite_verde_semaforo:
+                        bg = 'background-color: #d4edda; color: #155724;'  # verde
+                        farol_celula = '🟢 '
+                    elif v >= limite_amarelo_semaforo:
+                        bg = 'background-color: #fff3cd; color: #856404;'  # amarelo
+                        farol_celula = '🟡 '
+                    else:
+                        bg = 'background-color: #f8d7da; color: #721c24;'  # vermelho
+                        farol_celula = '🔴 '
+                elif meta_semaforo is not None:
+                    if v >= meta_semaforo:
+                        bg = 'background-color: #d4edda; color: #155724;'  # verde
+                        farol_celula = '🟢 '
+                    elif v >= meta_semaforo * 0.7:
+                        bg = 'background-color: #fff3cd; color: #856404;'  # amarelo
+                        farol_celula = '🟡 '
+                    else:
+                        bg = 'background-color: #f8d7da; color: #721c24;'  # vermelho
+                        farol_celula = '🔴 '
 
-            # Destaca celulas abaixo da media, se solicitado (sobrepoe semaforo)
+            # Destaca celulas abaixo da media, se solicitado.
+            # Quando a coluna ja tem semaforo, as faixas do farol prevalecem;
+            # o destaque por media apenas reforca o fundo quando ainda nao houve semaforo.
             if destaque_coluna and col == destaque_coluna and destaque_menor_que_media is not None and is_num:
-                if float(val) < destaque_menor_que_media:
+                if float(val) < destaque_menor_que_media and not farol_celula:
                     bg = 'background-color: #f8d7da; color: #721c24;'
                     farol_celula = '🔴 '
 
@@ -2134,13 +2205,14 @@ def calcular_variacao_quantidade_snapshot(df_atual, snapshot_anterior, chave_sna
 # ---------------------------------------------------------------------------
 # GRÁFICOS
 # ---------------------------------------------------------------------------
-def gerar_grafico_barras(df, x_col, y_col, titulo, cor="#ef4e22", meta=None):
+def gerar_grafico_barras(df, x_col, y_col, titulo, cor="#ef4e22", meta=None,
+                         limite_amarelo=None, limite_verde=None):
     """
     Gera gráfico de barras horizontal ordenado do maior para o menor.
-    As barras usam as cores do semáforo quando meta é informada:
-      - verde: atingiu ou superou a meta
-      - amarelo: entre 70% da meta e a meta
-      - vermelho: abaixo de 70% da meta
+    As barras usam as cores do semáforo quando meta ou faixas fixas forem informadas:
+      - verde: atingiu ou superou a meta / limite_verde
+      - amarelo: entre 70% da meta e a meta, ou entre limite_amarelo e limite_verde
+      - vermelho: abaixo de 70% da meta / abaixo de limite_amarelo
     """
     if df.empty or y_col not in df.columns or x_col not in df.columns:
         logger.warning(f"Dados insuficientes para gerar gráfico: {titulo}")
@@ -2160,7 +2232,14 @@ def gerar_grafico_barras(df, x_col, y_col, titulo, cor="#ef4e22", meta=None):
     for i, (val, bar) in enumerate(zip(df[y_col], barras)):
         try:
             v = float(val)
-            if meta is not None:
+            if limite_verde is not None and limite_amarelo is not None:
+                if v >= limite_verde:
+                    bar.set_color("#2e7d32")  # verde
+                elif v >= limite_amarelo:
+                    bar.set_color("#f9a825")  # amarelo
+                else:
+                    bar.set_color("#d9534f")  # vermelho
+            elif meta is not None:
                 if v >= meta:
                     bar.set_color("#2e7d32")  # verde
                 elif v >= meta * 0.7:
@@ -2196,7 +2275,8 @@ def gerar_graficos(cad_reg, trein_reg, aceite_reg):
             cad_reg,
             "regional_curta", "pct_ativos",
             f"Cadastros Ativos por Regional (média geral: {media_cad:.1f}%)",
-            meta=META_CADASTRO,
+            limite_amarelo=FAROL_CADASTRO_AMARELO,
+            limite_verde=FAROL_CADASTRO_VERDE,
         )
         if fig:
             graficos["cadastros"] = fig_to_base64(fig)
@@ -2207,7 +2287,8 @@ def gerar_graficos(cad_reg, trein_reg, aceite_reg):
             trein_reg,
             "regional_curta", "pct_realizaram",
             f"Treinamentos Obrigatórios Realizados por Regional (média geral: {media_trein:.1f}%)",
-            meta=META_TREINAMENTOS,
+            limite_amarelo=FAROL_TREINAMENTOS_AMARELO,
+            limite_verde=FAROL_TREINAMENTOS_VERDE,
         )
         if fig:
             graficos["treinamentos"] = fig_to_base64(fig)
@@ -2218,7 +2299,8 @@ def gerar_graficos(cad_reg, trein_reg, aceite_reg):
             aceite_reg,
             "regional", "pct_aceite",
             f"Aceite Mensal por Regional (média geral: {media_aceite:.1f}%)",
-            meta=META_ACEITES,
+            limite_amarelo=FAROL_ACEITES_AMARELO,
+            limite_verde=FAROL_ACEITES_VERDE,
         )
         if fig:
             graficos["aceites"] = fig_to_base64(fig)
@@ -2273,7 +2355,7 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
         total_base = int(cad_reg["total"].sum())
         pct_geral = round(total_ativos / total_base * 100, 1)
         media_reg = cad_reg["pct_ativos"].mean()
-        farol_geral = farol_html(pct_geral, META_CADASTRO)
+        farol_geral = farol_html(pct_geral, limite_amarelo=FAROL_CADASTRO_AMARELO, limite_verde=FAROL_CADASTRO_VERDE)
 
         resultado["cadastros"]["intro"] = (
             f"{farol_geral} Nosso objetivo para a cobertura de cadastros do Programa +TOP é de "
@@ -2329,7 +2411,7 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
     if trein_reg is not None and not trein_reg.empty:
         pct_trein_geral = round(trein_reg["realizaram"].sum() / trein_reg["total_ativos"].sum() * 100, 1)
         _, _, nome1, nome2, sku1, sku2 = dados["cursos_info"]
-        farol_trein = farol_html(pct_trein_geral, META_TREINAMENTOS)
+        farol_trein = farol_html(pct_trein_geral, limite_amarelo=FAROL_TREINAMENTOS_AMARELO, limite_verde=FAROL_TREINAMENTOS_VERDE)
         resultado["treinamentos"]["intro"] = (
             f"{farol_trein} Os dois conteúdos de {mes_nome} ficaram disponíveis para os vendedores ate o dia "
             f"{date.today().replace(day=30):%d/%m/%Y}.<br>"
@@ -2370,7 +2452,7 @@ def gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_re
     # --- Aceites ---
     if not aceite_reg.empty:
         media_aceite = round(aceite_reg["aceitaram"].sum() / aceite_reg["total_ativos"].sum() * 100, 1)
-        farol_aceite = farol_html(media_aceite, META_ACEITES)
+        farol_aceite = farol_html(media_aceite, limite_amarelo=FAROL_ACEITES_AMARELO, limite_verde=FAROL_ACEITES_VERDE)
         resultado["aceites"]["intro"] = (
             f"{farol_aceite} Sobre os aceites mensais de <strong>{mes_aceite_nome}</strong>.<br>"
             f"Nosso objetivo é de <strong>{META_ACEITES:.0f}%</strong>. "
@@ -2435,7 +2517,7 @@ def gerar_insights_regional(
         media = cad_reg["pct_ativos"].mean()
         posição = (cad_reg["pct_ativos"] > row["pct_ativos"]).sum() + 1
         total = len(cad_reg)
-        farol_reg = farol_html(row['pct_ativos'], META_CADASTRO)
+        farol_reg = farol_html(row['pct_ativos'], limite_amarelo=FAROL_CADASTRO_AMARELO, limite_verde=FAROL_CADASTRO_VERDE)
         resultado["cadastros"]["intro"] = (
             f"{farol_reg} A regional <strong>{regional_filtro}</strong> está com <strong>{row['pct_ativos']:.1f}%</strong> de CPFs ativos na plataforma.<br>"
             f"Ela ocupa a <strong>{posição}ª posição</strong> entre {total} regionais (media geral: {media:.1f}%).<br>"
@@ -2472,7 +2554,7 @@ def gerar_insights_regional(
         r = trein_reg_f.iloc[0]
         media_trein = trein_reg["pct_realizaram"].mean()
         _, _, nome1, nome2, sku1, sku2 = dados["cursos_info"]
-        farol_trein_reg = farol_html(r['pct_realizaram'], META_TREINAMENTOS)
+        farol_trein_reg = farol_html(r['pct_realizaram'], limite_amarelo=FAROL_TREINAMENTOS_AMARELO, limite_verde=FAROL_TREINAMENTOS_VERDE)
         resultado["treinamentos"]["intro"] = (
             f"{farol_trein_reg} Treinamentos de {mes_nome}: <strong>{r['pct_realizaram']:.1f}%</strong> da hierarquia da regional concluiu ambos os cursos.<br>"
             f"Média geral do programa: {media_trein:.1f}%. Objetivo: <strong>{META_TREINAMENTOS:.0f}%</strong>.<br>"
@@ -2489,7 +2571,7 @@ def gerar_insights_regional(
     if not aceite_reg_f.empty:
         r = aceite_reg_f.iloc[0]
         media_aceite = round(aceite_reg["aceitaram"].sum() / aceite_reg["total_ativos"].sum() * 100, 1)
-        farol_aceite_reg = farol_html(r['pct_aceite'], META_ACEITES)
+        farol_aceite_reg = farol_html(r['pct_aceite'], limite_amarelo=FAROL_ACEITES_AMARELO, limite_verde=FAROL_ACEITES_VERDE)
         resultado["aceites"]["intro"] = (
             f"{farol_aceite_reg} Aceite mensal de {mes_aceite_nome}: <strong>{r['pct_aceite']:.1f}%</strong> da hierarquia da regional deu aceite.<br>"
             f"Média geral do programa: {media_aceite:.1f}%. Objetivo: <strong>{META_ACEITES:.0f}%</strong>."
@@ -2817,14 +2899,16 @@ def preparar_tabelas(dados):
         "cad_reg": estilizar_tabela_html(
             _renomear_cadastro_reg(cad_reg),
             semaforo_coluna="% Ativos",
-            meta_semaforo=META_CADASTRO,
+            limite_amarelo_semaforo=FAROL_CADASTRO_AMARELO,
+            limite_verde_semaforo=FAROL_CADASTRO_VERDE,
         ),
         "cad_rev": estilizar_tabela_html(
             _renomear_cadastro_rev(cad_rev.head(10)),
             destaque_coluna="% Ativos",
             destaque_menor_que_media=cad_reg["pct_ativos"].mean(),
             semaforo_coluna="% Ativos",
-            meta_semaforo=META_CADASTRO,
+            limite_amarelo_semaforo=FAROL_CADASTRO_AMARELO,
+            limite_verde_semaforo=FAROL_CADASTRO_VERDE,
         ),
         "consolidado_reg": "",
         "consolidado_rev": "",
@@ -2835,7 +2919,8 @@ def preparar_tabelas(dados):
         "aceite_reg": estilizar_tabela_html(
             _renomear_aceite_reg(aceite_reg),
             semaforo_coluna="% Aceite",
-            meta_semaforo=META_ACEITES,
+            limite_amarelo_semaforo=FAROL_ACEITES_AMARELO,
+            limite_verde_semaforo=FAROL_ACEITES_VERDE,
         ),
         "aceite_rev": "",
     }
@@ -2847,12 +2932,14 @@ def preparar_tabelas(dados):
     tabelas["consolidado_reg"] = estilizar_tabela_html(
         cons_reg,
         semaforo_coluna="% Ativos",
-        meta_semaforo=META_CADASTRO,
+        limite_amarelo_semaforo=FAROL_CADASTRO_AMARELO,
+        limite_verde_semaforo=FAROL_CADASTRO_VERDE,
     )
     tabelas["consolidado_rev"] = estilizar_tabela_html(
         cons_rev.head(10),
         semaforo_coluna="% Ativos",
-        meta_semaforo=META_CADASTRO,
+        limite_amarelo_semaforo=FAROL_CADASTRO_AMARELO,
+        limite_verde_semaforo=FAROL_CADASTRO_VERDE,
     )
 
     # Tabelas de treinamentos com base da hierarquia
@@ -2861,12 +2948,14 @@ def preparar_tabelas(dados):
     tabelas["trein_base_reg"] = estilizar_tabela_html(
         trein_base_reg,
         semaforo_coluna="% Ambos",
-        meta_semaforo=META_TREINAMENTOS,
+        limite_amarelo_semaforo=FAROL_TREINAMENTOS_AMARELO,
+        limite_verde_semaforo=FAROL_TREINAMENTOS_VERDE,
     )
     tabelas["trein_base_rev"] = estilizar_tabela_html(
         trein_base_rev.head(10),
         semaforo_coluna="% Ambos",
-        meta_semaforo=META_TREINAMENTOS,
+        limite_amarelo_semaforo=FAROL_TREINAMENTOS_AMARELO,
+        limite_verde_semaforo=FAROL_TREINAMENTOS_VERDE,
     )
 
     # Tabelas de aceites com base da hierarquia
@@ -2875,31 +2964,36 @@ def preparar_tabelas(dados):
     tabelas["aceite_base_reg"] = estilizar_tabela_html(
         aceite_base_reg,
         semaforo_coluna="% Aceite",
-        meta_semaforo=META_ACEITES,
+        limite_amarelo_semaforo=FAROL_ACEITES_AMARELO,
+        limite_verde_semaforo=FAROL_ACEITES_VERDE,
     )
     tabelas["aceite_base_rev"] = estilizar_tabela_html(
         aceite_base_rev.head(10),
         semaforo_coluna="% Aceite",
-        meta_semaforo=META_ACEITES,
+        limite_amarelo_semaforo=FAROL_ACEITES_AMARELO,
+        limite_verde_semaforo=FAROL_ACEITES_VERDE,
     )
 
     if trein_reg is not None and not trein_reg.empty:
         tabelas["trein_reg"] = estilizar_tabela_html(
             _renomear_trein_reg(trein_reg),
             semaforo_coluna="% Realizado",
-            meta_semaforo=META_TREINAMENTOS,
+            limite_amarelo_semaforo=FAROL_TREINAMENTOS_AMARELO,
+            limite_verde_semaforo=FAROL_TREINAMENTOS_VERDE,
         )
         tabelas["trein_rev"] = estilizar_tabela_html(
             _renomear_trein_rev(trein_rev.head(10)),
             semaforo_coluna="% Realizado",
-            meta_semaforo=META_TREINAMENTOS,
+            limite_amarelo_semaforo=FAROL_TREINAMENTOS_AMARELO,
+            limite_verde_semaforo=FAROL_TREINAMENTOS_VERDE,
         )
 
     if aceite_rev is not None and not aceite_rev.empty:
         tabelas["aceite_rev"] = estilizar_tabela_html(
             _renomear_aceite_rev(aceite_rev.head(10)),
             semaforo_coluna="% Aceite",
-            meta_semaforo=META_ACEITES,
+            limite_amarelo_semaforo=FAROL_ACEITES_AMARELO,
+            limite_verde_semaforo=FAROL_ACEITES_VERDE,
         )
 
     if trein_por_curso is not None:
@@ -2909,13 +3003,15 @@ def preparar_tabelas(dados):
             tabelas["trein_combinado_reg"] = estilizar_tabela_html(
                 comb_reg,
                 semaforo_coluna="% Ambos",
-                meta_semaforo=META_TREINAMENTOS,
+                limite_amarelo_semaforo=FAROL_TREINAMENTOS_AMARELO,
+            limite_verde_semaforo=FAROL_TREINAMENTOS_VERDE,
             )
         if comb_rev is not None and not comb_rev.empty:
             tabelas["trein_combinado_rev"] = estilizar_tabela_html(
                 comb_rev.head(10),
                 semaforo_coluna="% Ambos",
-                meta_semaforo=META_TREINAMENTOS,
+                limite_amarelo_semaforo=FAROL_TREINAMENTOS_AMARELO,
+            limite_verde_semaforo=FAROL_TREINAMENTOS_VERDE,
             )
         # Mantem disponibilidade dos dados individuais, se necessario no futuro
         c1_reg = trein_por_curso.get("curso1_reg")
@@ -3127,12 +3223,27 @@ def carregar_imagens_tom():
     return imagens
 
 
-def _metric_box(titulo, valor, meta=None):
-    farol = farol_html(valor, meta, tamanho=38) if meta is not None else ""
+def _metric_box(titulo, valor, meta=None, limite_amarelo=None, limite_verde=None, tema="preto"):
+    farol = ""
+    if limite_verde is not None and limite_amarelo is not None:
+        farol = farol_html(valor, limite_amarelo=limite_amarelo, limite_verde=limite_verde, tamanho=38)
+    elif meta is not None:
+        farol = farol_html(valor, meta, tamanho=38)
+
+    if tema == "farol":
+        if limite_verde is not None and valor >= limite_verde:
+            cores = FAROL_KPI_CORES["verde"]
+        elif limite_amarelo is not None and valor >= limite_amarelo:
+            cores = FAROL_KPI_CORES["amarelo"]
+        else:
+            cores = FAROL_KPI_CORES["vermelho"]
+    else:
+        cores = TEMAS_KPI.get(tema, TEMAS_KPI["preto"])
+
     return f"""
-    <td width="33%" align="center" valign="middle" bgcolor="#ffffff" style="padding:20px 24px; color:#333333; font-size:16px; font-weight:bold; border-radius:10px; border:3px solid #ef4e22; font-family:Arial, Helvetica, sans-serif;">
-      <div style="font-size:16px; margin-bottom:6px; color:#ef4e22; font-family:Arial, Helvetica, sans-serif;">{titulo}</div>
-      <div style="font-size:42px; margin-bottom:8px; color:#ef4e22; line-height:1; white-space:nowrap; font-family:Arial, Helvetica, sans-serif;">
+    <td width="33%" align="center" valign="middle" bgcolor="{cores['fundo']}" style="padding:20px 24px; color:{cores['texto']}; font-size:16px; font-weight:bold; border-radius:10px; border:3px solid {cores['borda']}; font-family:Arial, Helvetica, sans-serif;">
+      <div style="font-size:16px; margin-bottom:6px; color:{cores['texto']}; font-family:Arial, Helvetica, sans-serif;">{titulo}</div>
+      <div style="font-size:42px; margin-bottom:8px; color:{cores['texto']}; line-height:1; white-space:nowrap; font-family:Arial, Helvetica, sans-serif;">
         {farol}&nbsp;<strong>{valor}%</strong>
       </div>
     </td>
@@ -3291,7 +3402,7 @@ def _destaques_cadastro_html(cad_rev, imagens_kv=None, imagens_tom=None):
     )
 
 
-def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=False, regional_filtro=None):
+def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=False, regional_filtro=None, tema_kpi="preto"):
     """Monta corpo do e-mail em HTML compativel com Gmail e Outlook."""
     hoje = date.today().strftime("%d/%m/%Y")
     titulo = f"Relatório Semanal Programa +TOP — {regional_filtro}" if regional_filtro else "Relatório Semanal Programa +TOP"
@@ -3347,13 +3458,14 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
         <td align="center" style="font-family:Arial, Helvetica, sans-serif;">
           <table cellpadding="0" cellspacing="8" border="0" style="font-family:Arial, Helvetica, sans-serif;">
             <tr>
-              {_metric_box('CADASTROS', pct_geral, META_CADASTRO)}
-              {_metric_box('TREINAMENTOS', pct_trein, META_TREINAMENTOS)}
-              {_metric_box('ACEITES', pct_aceite, META_ACEITES)}
+              {_metric_box('CADASTROS', pct_geral, limite_amarelo=FAROL_CADASTRO_AMARELO, limite_verde=FAROL_CADASTRO_VERDE, tema=tema_kpi)}
+              {_metric_box('TREINAMENTOS', pct_trein, limite_amarelo=FAROL_TREINAMENTOS_AMARELO, limite_verde=FAROL_TREINAMENTOS_VERDE, tema=tema_kpi)}
+              {_metric_box('ACEITES', pct_aceite, limite_amarelo=FAROL_ACEITES_AMARELO, limite_verde=FAROL_ACEITES_VERDE, tema=tema_kpi)}
             </tr>
           </table>
           <p style="font-size:11px; color:#666666; margin-top:6px; font-family:Arial, Helvetica, sans-serif;">
-            🟢 Atingiu a meta mínima &nbsp;|&nbsp; 🟡 Entre 70% e a meta &nbsp;|&nbsp; 🔴 Abaixo de 70% da meta
+            <strong>Cadastros:</strong> 🟢 ≥{FAROL_CADASTRO_VERDE:.0f}% &nbsp;|&nbsp; 🟡 {FAROL_CADASTRO_AMARELO:.0f}% a {FAROL_CADASTRO_VERDE - 0.1:.1f}% &nbsp;|&nbsp; 🔴 <{FAROL_CADASTRO_AMARELO:.0f}%<br>
+            <strong>Treinamentos / Aceites:</strong> 🟢 ≥{FAROL_TREINAMENTOS_VERDE:.0f}% &nbsp;|&nbsp; 🟡 {FAROL_TREINAMENTOS_AMARELO:.0f}% a {FAROL_TREINAMENTOS_VERDE - 0.1:.1f}% &nbsp;|&nbsp; 🔴 <{FAROL_TREINAMENTOS_AMARELO:.0f}%
           </p>
         </td>
       </tr>
@@ -3494,7 +3606,7 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                   {_pontos_atencao_secao_html(
                       insights.get("cadastros", {}).get("alerta_titulo", ""),
                       insights.get("cadastros", {}).get("alerta_subtitulo", ""),
-                      estilizar_tabela_html(insights.get("cadastros", {}).get("alerta_itens"), semaforo_coluna="% Ativos", meta_semaforo=META_CADASTRO) if insights.get("cadastros", {}).get("alerta_itens") is not None else "",
+                      estilizar_tabela_html(insights.get("cadastros", {}).get("alerta_itens"), semaforo_coluna="% Ativos", limite_amarelo_semaforo=FAROL_CADASTRO_AMARELO, limite_verde_semaforo=FAROL_CADASTRO_VERDE) if insights.get("cadastros", {}).get("alerta_itens") is not None else "",
                       imagens_kv=imagens_kv,
                       imagens_tom=imagens_tom,
                   )}
@@ -3513,12 +3625,10 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                   {_pontos_atencao_secao_html(
                       insights.get("treinamentos", {}).get("alerta_titulo", ""),
                       insights.get("treinamentos", {}).get("alerta_subtitulo", ""),
-                      estilizar_tabela_html(insights.get("treinamentos", {}).get("alerta_itens"), semaforo_coluna="% Realizado", meta_semaforo=META_TREINAMENTOS) if insights.get("treinamentos", {}).get("alerta_itens") is not None else "",
+                      estilizar_tabela_html(insights.get("treinamentos", {}).get("alerta_itens"), semaforo_coluna="% Realizado", limite_amarelo_semaforo=FAROL_TREINAMENTOS_AMARELO, limite_verde_semaforo=FAROL_TREINAMENTOS_VERDE) if insights.get("treinamentos", {}).get("alerta_itens") is not None else "",
                       imagens_kv=imagens_kv,
                       imagens_tom=imagens_tom,
                   )}
-                  {subsecao_titulo("Por revenda")}
-                  {tabelas_usar['trein_base_rev'] if tabelas_usar.get('trein_base_rev') else '<p><em>Sem dados.</em></p>'}
 
                   <p style="font-size:12px; color:#666666; font-style:italic; margin-top:8px; font-family:Arial, Helvetica, sans-serif;">
                     Dados de treinamentos são sempre D-1.
@@ -3535,14 +3645,12 @@ def montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=Fals
                   {_pontos_atencao_secao_html(
                       insights.get("aceites", {}).get("alerta_titulo", ""),
                       insights.get("aceites", {}).get("alerta_subtitulo", ""),
-                      estilizar_tabela_html(insights.get("aceites", {}).get("alerta_itens"), semaforo_coluna="% Aceite", meta_semaforo=META_ACEITES) if insights.get("aceites", {}).get("alerta_itens") is not None else "",
+                      estilizar_tabela_html(insights.get("aceites", {}).get("alerta_itens"), semaforo_coluna="% Aceite", limite_amarelo_semaforo=FAROL_ACEITES_AMARELO, limite_verde_semaforo=FAROL_ACEITES_VERDE) if insights.get("aceites", {}).get("alerta_itens") is not None else "",
                       imagens_kv=imagens_kv,
                       imagens_tom=imagens_tom,
                   )}
-                  {subsecao_titulo("Por revenda")}
-                  {tabelas_usar['aceite_rev'] if tabelas_usar.get('aceite_rev') else '<p><em>Sem dados de aceites por revenda.</em></p>'}
 
-                  <p style="margin-top:28px; font-size:16px; color:#155724; background-color:#d4edda; padding:14px 16px; border-radius:10px; border:1px solid #00a651; line-height:1.5; font-family:Arial, Helvetica, sans-serif;">
+                  <p style="margin-top:28px; font-size:16px; color:#856404; background-color:#fff3cd; padding:14px 16px; border-radius:10px; border:1px solid #ffc107; line-height:1.5; font-family:Arial, Helvetica, sans-serif;">
                     💪 <strong>Contamos com a atuação de cada regional para virarmos esse jogo e atingirmos nossas metas!</strong><br>
                     Vamos juntos fazer do +TOP um sucesso ainda maior!
                   </p>
@@ -4213,6 +4321,12 @@ def salvar_relatorio_excel_regional(dados, caminho, regional_filtro):
 def main():
     parser = argparse.ArgumentParser(description="Relatório Semanal Programa +TOP")
     parser.add_argument("--teste", action="store_true", help="Gera relatório local sem enviar e-mail")
+    parser.add_argument(
+        "--tema-kpi",
+        choices=list(TEMAS_KPI.keys()) + ["farol"],
+        default="preto",
+        help=f"Cor dos cards de KPI no topo do e-mail. Opções: {', '.join(list(TEMAS_KPI.keys()) + ['farol'])}",
+    )
     args = parser.parse_args()
 
     logger.info("=" * 60)
@@ -4420,7 +4534,7 @@ def main():
         insights = gerar_insights(cad_reg, cad_rev, trein_reg, trein_rev, aceite_reg, aceite_rev, evolucao, dados)
 
         # Montar e-mail consolidado
-        html, imagens_kv, imagens_tom = montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=args.teste)
+        html, imagens_kv, imagens_tom = montar_email_html(dados, graficos, tabelas, insights, link_drive, teste=args.teste, tema_kpi=args.tema_kpi)
 
         # Salvar cópia HTML
         html_path = OUTPUT_DIR / f"relatorio_top_{date.today():%Y%m%d}.html"
