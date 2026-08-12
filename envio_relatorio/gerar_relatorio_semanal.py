@@ -138,6 +138,10 @@ FAROL_TREINAMENTOS_AMARELO = 30.0
 FAROL_ACEITES_VERDE = 70.0
 FAROL_ACEITES_AMARELO = 30.0
 
+# Data de corte para treinamentos: só considerar conclusões a partir desta data
+# (inclusive). Treinamentos concluídos antes são ignorados no e-mail e no Excel.
+DATA_CORTE_TREINAMENTOS = pd.Timestamp("2026-08-10")
+
 # Temas visuais para os cards de KPI no topo do e-mail.
 # Cada tema define cor de borda, texto, número e fundo do card.
 TEMAS_KPI = {
@@ -1140,6 +1144,29 @@ def carregar_bases():
     df_trein = pd.read_excel(trein_path, sheet_name=xl_trein.sheet_names[0])
     df_trein["cpf_limp"] = df_trein["CPF"].apply(limpar_cpf)
     df_trein["Conclusão"] = pd.to_datetime(df_trein["Conclusão"], errors="coerce")
+    # Normaliza Estado para comparação sem acentos/case
+    df_trein["Estado"] = (
+        df_trein["Estado"]
+        .astype(str)
+        .str.lower()
+        .str.replace("í", "i", regex=False)
+        .str.strip()
+    )
+
+    # Aplica corte de data: mantém apenas treinamentos concluídos a partir de
+    # DATA_CORTE_TREINAMENTOS (inclusive). Isso afeta e-mail e Excel de exportação.
+    registros_antes = len(df_trein)
+    df_trein = df_trein[
+        df_trein["Conclusão"].isna() | (df_trein["Conclusão"] >= DATA_CORTE_TREINAMENTOS)
+    ].copy()
+    registros_removidos = registros_antes - len(df_trein)
+    if registros_removidos > 0:
+        logger.info(
+            f"Treinamentos: {registros_removidos:,} registro(s) concluído(s) antes de "
+            f"{DATA_CORTE_TREINAMENTOS.strftime('%d/%m/%Y')} removido(s) por data de corte."
+        )
+    logger.info(f"Treinamentos: {len(df_trein):,} registros")
+
     df_trein = df_trein.merge(
         df_cad[["cpf_limp", "status", "regional_curta", "revenda"]].drop_duplicates("cpf_limp"),
         on="cpf_limp",
